@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+    <title>{% block title %}{{ admin_view.name or "Yönetim Paneli" }}{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Inter"', 'sans-serif'] },
+                    colors: {
+                        admin: {
+                            bg: '#f3f4f6',      // Arkaplan
+                            sidebar: '#1e293b', // Sidebar
+                            active: '#3b82f6'   // Aktif Link
+                        }
+                    }
+                }
+            },
+            daisyui: {
+                themes: ["light"], // Sadece light tema kullanalım temiz dursun
+            },
+        }
+    </script>
+
+    <style>
+        /* FLASK-ADMIN BOOTSTRAP UYUMLULUK KATMANI */
+        /* Flask-Admin 'form-control', 'table' gibi sınıflar üretir. 
+           Bunları DaisyUI ile uyumlu hale getiriyoruz. */
+
+        body { background-color: #f9fafb; }
+
+        /* Tablo Tasarımı */
+        .table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table th { 
+            background-color: #f3f4f6; 
+            text-align: left; 
+            padding: 1rem; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-weight: 700;
+            color: #4b5563;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .table td { 
+            padding: 1rem; 
+            border-bottom: 1px solid #f3f4f6; 
+            background: white;
+            font-size: 0.875rem;
+        }
+        .table tr:hover td { background-color: #f9fafb; }
+
+        /* Form Elemanları */
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            background-color: #fff;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            outline: 2px solid #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        /* Grid Sistemi (Bootstrap Row/Col simülasyonu) */
+        .row { display: flex; flex-wrap: wrap; margin: -0.5rem; }
+        .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, 
+        .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+            padding: 0.5rem;
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            .col-md-6 { width: 50%; }
+            .col-md-4 { width: 33.333%; }
+            .col-md-12 { width: 100%; }
+        }
+
+        /* Butonlar */
+        .btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            padding: 0.5rem 1rem; 
+            font-weight: 600; 
+            border-radius: 0.5rem; 
+            font-size: 0.875rem; 
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none !important;
+        }
+        .btn-primary { background-color: #2563eb; color: white; border: 1px solid #2563eb; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-default { background-color: white; border: 1px solid #d1d5db; color: #374151; }
+        .btn-danger { color: #ef4444; background: white; border: 1px solid #fecaca; }
+        .btn-danger:hover { background: #fee2e2; }
+
+        /* Liste Aksiyonları */
+        .action-row a { margin-right: 10px; }
+        
+        /* Select2 Düzeltmesi */
+        .select2-container .select2-selection--single { height: 42px !important; padding: 6px; border-color: #d1d5db; border-radius: 0.5rem; }
+    </style>
+
+    {% block head_css %}{% endblock %}
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="drawer lg:drawer-open">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+    
+    <div class="drawer-content flex flex-col bg-gray-50 min-h-screen">
+        
+        <div class="w-full navbar bg-base-100 shadow-sm sticky top-0 z-30 px-6 h-16">
+            <div class="flex-none lg:hidden">
+                <label for="my-drawer-2" aria-label="open sidebar" class="btn btn-square btn-ghost">
+                    <i class="fa fa-bars text-xl"></i>
+                </label>
+            </div>
+            <div class="flex-1">
+                <h1 class="text-xl font-bold text-gray-800">{{ admin_view.name }}</h1>
+            </div>
+            <div class="flex-none gap-2">
+                <a href="/" class="btn btn-sm btn-ghost font-normal" target="_blank">
+                    <i class="fa fa-external-link-alt mr-1"></i> Siteye Git
+                </a>
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder">
+                        <div class="bg-neutral text-neutral-content rounded-full w-10">
+                            <span class="text-xs">ADM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-10 max-w-7xl mx-auto w-full">
+            
+            {% block page_body %}
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-6 space-y-2">
+                            {% for category, message in messages %}
+                                <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm bg-white border border-gray-200">
+                                    <i class="fa fa-info-circle text-primary"></i>
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        {% block body %}{% endblock %}
+                    </div>
+                </div>
+
+            {% endblock %}
+        </div>
+    </div> 
+    
+    <div class="drawer-side z-40">
+        <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
+        <ul class="menu p-4 w-72 min-h-full bg-[#1e293b] text-gray-300 gap-1">
+            
+            <li class="mb-6 mt-2 px-2">
+                <div class="flex items-center gap-3 text-white hover:bg-transparent cursor-default">
+                    <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white shadow-lg shadow-blue-900/50">
+                        <i class="fa fa-fire text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-black text-lg tracking-tight leading-none">EKOSAN</div>
+                        <div class="text-[10px] text-gray-400 font-medium tracking-widest uppercase">Yönetim Paneli</div>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="/admin" class="group {% if admin_view.endpoint == 'admin.index' %}active bg-primary/20 text-white font-bold{% endif %}">
+                    <i class="fa fa-home w-6 text-center group-hover:text-white transition-colors"></i> Genel Bakış
+                </a>
+            </li>
+
+            <div class="divider my-2 h-[1px] bg-white/10"></div>
+            <div class="px-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">YÖNETİM</div>
+
+            {% for item in admin_view.admin.menu() %}
+                {% if item.name != 'Genel Bakış' and item.name != 'Home' %}
+                    
+                    {% if item.is_category() %}
+                        <li>
+                            <details {% for child in item.get_children() %}{% if child.is_active(admin_view) %}open{% endif %}{% endfor %}>
+                                <summary class="group">
+                                    <i class="fa fa-layer-group w-6 text-center"></i> {{ item.name }}
+                                </summary>
+                                <ul>
+                                    {% for child in item.get_children() %}
+                                        <li>
+                                            <a href="{{ child.get_url() }}" class="{% if child.is_active(admin_view) %}active text-white font-semibold{% endif %}">
+                                                {{ child.name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </details>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="{{ item.get_url() }}" class="group {% if item.is_active(admin_view) %}active bg-primary text-white font-bold shadow-md shadow-blue-900/20{% endif %}">
+                                {% if 'Ürün' in item.name %}<i class="fa fa-box w-6 text-center"></i>
+                                {% elif 'Kategori' in item.name %}<i class="fa fa-tags w-6 text-center"></i>
+                                {% elif 'Talep' in item.name %}<i class="fa fa-envelope w-6 text-center"></i>
+                                {% elif 'Medya' in item.name %}<i class="fa fa-images w-6 text-center"></i>
+                                {% elif 'Ayar' in item.name %}<i class="fa fa-cog w-6 text-center"></i>
+                                {% elif 'Menü' in item.name %}<i class="fa fa-bars w-6 text-center"></i>
+                                {% elif 'Anasayfa' in item.name %}<i class="fa fa-desktop w-6 text-center"></i>
+                                {% else %}<i class="fa fa-folder w-6 text-center"></i>{% endif %}
+                                
+                                {{ item.name }}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                {% endif %}
+            {% endfor %}
+
+        </ul>
+    
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Tablolardaki boş mesajı güzelleştir
+        if($('.table td').text().trim() == 'There are no items in the table.') {
+            $('.table td').html('<div class="p-10 text-center text-gray-400 flex flex-col items-center"><i class="fa fa-inbox text-4xl mb-3 opacity-30"></i><span>Henüz kayıt bulunmuyor.</span></div>');
+        }
+    });
+</script>
+
+{% block tail_js %}{% endblock %}
+{% block tail %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+    
+    {# Hata/Bilgi Mesajları #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm bg-white border border-gray-200">
+                        <i class="fa fa-info-circle text-primary"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        
+        {# Gizli alanlar ve CSRF Token #}
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        {# BÖLÜM 1: GENEL BİLGİLER #}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                        <i class="fa fa-info"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Genel Footer Bilgileri</h3>
+                        <p class="text-xs text-gray-500">Logo altındaki açıklama ve telif hakkı yazısı</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <label class="label pt-0 font-semibold text-gray-700">Footer Açıklama Metni</label>
+                    {{ form.description(class="textarea textarea-bordered w-full h-24 focus:textarea-primary", placeholder="Firma hakkında kısa bilgi...") }}
+                    <label class="label text-xs text-gray-400">Logonun hemen altında yer alacak tanıtım yazısı.</label>
+                </div>
+                <div class="col-span-12">
+                    <label class="label font-semibold text-gray-700">Copyright (Telif) Metni</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-copyright"></i></span>
+                        {{ form.copyright(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# BÖLÜM 2: İLETİŞİM VE ADRESLER #}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                        <i class="fa fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">İletişim ve Adresler</h3>
+                        <p class="text-xs text-gray-500">Mağaza, depo ve iletişim kanalları</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12 md:col-span-4">
+                    <label class="label pt-0 font-semibold text-gray-700">Sabit Telefon</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-phone-alt"></i></span>
+                        {{ form.shop_tel(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-4">
+                    <label class="label pt-0 font-semibold text-gray-700">Cep Telefonu</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-mobile-alt"></i></span>
+                        {{ form.mobile_tel(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-4">
+                    <label class="label pt-0 font-semibold text-gray-700">E-Posta</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-envelope"></i></span>
+                        {{ form.email(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                    </div>
+                </div>
+
+                <div class="col-span-12 md:col-span-6">
+                    <label class="label font-semibold text-gray-700">Mağaza Adresi</label>
+                    {{ form.shop_address(class="textarea textarea-bordered w-full h-24 focus:textarea-primary") }}
+                </div>
+                <div class="col-span-12 md:col-span-6">
+                    <label class="label font-semibold text-gray-700">Depo/Fabrika Adresi</label>
+                    {{ form.storage_address(class="textarea textarea-bordered w-full h-24 focus:textarea-primary") }}
+                </div>
+            </div>
+        </div>
+
+        {# BÖLÜM 3: HIZLI LİNKLER (YAN YANA GRUPLANMIŞ) #}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                        <i class="fa fa-link"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Hızlı Linkler</h3>
+                        <p class="text-xs text-gray-500">Footer orta kısımda görünecek 5 adet bağlantı</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                {# Link Grupları İçin Döngü Mantığı Yerine Manuel Yapı (Daha Net Görünüm İçin) #}
+                
+                {# Link 1 #}
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">1. Link Başlığı</label>
+                        {{ form.link01_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">1. Link URL</label>
+                        {{ form.link01_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="https:// veya /hakkimizda") }}
+                    </div>
+                </div>
+
+                {# Link 2 #}
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">2. Link Başlığı</label>
+                        {{ form.link02_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">2. Link URL</label>
+                        {{ form.link02_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                    </div>
+                </div>
+
+                {# Link 3 #}
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">3. Link Başlığı</label>
+                        {{ form.link03_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">3. Link URL</label>
+                        {{ form.link03_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                    </div>
+                </div>
+
+                {# Link 4 #}
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">4. Link Başlığı</label>
+                        {{ form.link04_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">4. Link URL</label>
+                        {{ form.link04_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                    </div>
+                </div>
+
+                {# Link 5 #}
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">5. Link Başlığı</label>
+                        {{ form.link05_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">5. Link URL</label>
+                        {{ form.link05_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# BÖLÜM 4: YASAL & POLİTİKALAR #}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+                        <i class="fa fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Yasal Metinler & Politikalar</h3>
+                        <p class="text-xs text-gray-500">KVKK, Gizlilik ve Çerez bağlantıları</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                {# Gizlilik Politikası #}
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 md:col-span-4">
+                        {{ form.policy_text(class="input input-bordered input-sm w-full focus:input-primary", placeholder="Başlık (Örn: Gizlilik)") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        {{ form.policy_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="URL") }}
+                    </div>
+                </div>
+
+                {# KVKK Metni #}
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 md:col-span-4">
+                        {{ form.kvkk_text(class="input input-bordered input-sm w-full focus:input-primary", placeholder="Başlık (Örn: KVKK)") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        {{ form.kvkk_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="URL") }}
+                    </div>
+                </div>
+
+                {# Çerezler #}
+                <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="col-span-12 md:col-span-4">
+                        {{ form.cookies_text(class="input input-bordered input-sm w-full focus:input-primary", placeholder="Başlık (Örn: Çerezler)") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        {{ form.cookies_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="URL") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# KAYDET BUTONU #}
+        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:items-center md:gap-3">
+            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-blue-500/30">
+                <i class="fa fa-save mr-2"></i> Footer Ayarlarını Kaydet
+            </button>
+        </div>
+
+    </form>
+{% endblock %}

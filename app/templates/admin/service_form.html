@@ -1,0 +1,129 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            
+            <div class="flex-1 space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-teal-50/30 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
+                            <i class="fa fa-tools"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm">Hizmet Detayları</h3>
+                    </div>
+                    
+                    <div class="p-6 grid grid-cols-12 gap-6">
+                        <div class="col-span-12">
+                            <label class="label pt-0 font-semibold text-gray-700">Hizmet Başlığı</label>
+                            {{ form.title(class="input input-bordered w-full focus:input-primary", placeholder="Örn: Montaj ve Kurulum") }}
+                        </div>
+                        
+                        <div class="col-span-12">
+                            <label class="label pt-0 font-semibold text-gray-700">Açıklama</label>
+                            {{ form.description(class="textarea textarea-bordered w-full h-32 focus:textarea-primary") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-blue-50/30 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <i class="fa fa-link"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">İlgili Ürünler</h3>
+                            <p class="text-xs text-gray-500">Bu hizmetin hangi ürünlerde geçerli olduğunu seçin.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {{ form.products(class="w-full", style="width: 100%") }}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="w-full lg:w-80 space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                        <i class="fa fa-image text-gray-400"></i>
+                        <h3 class="font-bold text-gray-800 text-sm">Hizmet Görseli</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-40 bg-gray-100 rounded-lg mb-4 overflow-hidden relative flex items-center justify-center border border-dashed border-gray-300">
+                             
+                            {% if model is defined and model.image_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + model.image_path) }}" class="object-cover w-full h-full">
+                            {% else %}
+                                <i class="fa fa-image text-4xl text-gray-300"></i>
+                            {% endif %}
+                            
+                        </div>
+                        {{ form.image_path(class="file-input file-input-bordered file-input-sm w-full") }}
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6 space-y-4">
+                    <div>
+                        <label class="label pt-0 font-semibold text-gray-700">Sıralama</label>
+                        {{ form.order(class="input input-bordered w-full") }}
+                    </div>
+                    <div class="divider my-2"></div>
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-4">
+                            <span class="font-semibold text-gray-700">Aktif</span> 
+                            {{ form.is_active(class="toggle toggle-success") }}
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full shadow-lg shadow-blue-500/30">
+                    <i class="fa fa-save mr-2"></i> Kaydet
+                </button>
+                <a href="{{ return_url }}" class="btn btn-ghost w-full">İptal</a>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block tail %}
+    {{ super() }}
+    <style>
+        .select2-container .select2-selection--multiple {
+            min-height: 45px;
+            border-color: #d1d5db;
+            border-radius: 0.5rem;
+            padding: 4px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            color: #1e40af;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin-top: 4px;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+    
+    {# Bildirim Mesajları #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm text-sm">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        
+        {# CSRF ve Gizli Alanlar #}
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            
+            <div class="flex-1 space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <i class="fa fa-link"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm">Menü Bağlantısı</h3>
+                    </div>
+                    
+                    <div class="p-6 grid grid-cols-12 gap-6">
+                        <div class="col-span-12">
+                            <label class="label pt-0 font-semibold text-gray-700">Üst Menü (Varsa)</label>
+                            {{ form.parent(class="select select-bordered w-full", style="width: 100%") }}
+                            <div class="text-xs text-gray-400 mt-1">Eğer bu bir alt menü ise (Dropdown), ebeveyn menüyü seçin.</div>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label class="label font-semibold text-gray-700">Menü Adı (Label)</label>
+                            {{ form.label(class="input input-bordered w-full focus:input-primary", placeholder="Örn: Hakkımızda") }}
+                        </div>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label class="label font-semibold text-gray-700">Link (URL)</label>
+                            {{ form.url(class="input input-bordered w-full focus:input-primary", placeholder="Örn: /hakkimizda") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden relative">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                        <i class="fa fa-bullhorn text-6xl text-orange-500"></i>
+                    </div>
+
+                    <div class="px-6 py-4 border-b border-orange-100 bg-orange-50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center border border-orange-200">
+                            <i class="fa fa-mouse-pointer"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-orange-900 text-sm">Aksiyon Butonu (CTA)</h3>
+                            <p class="text-xs text-orange-700/70">Bu alanları doldurursanız menü linki bir butona dönüşür.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 grid grid-cols-12 gap-6">
+                        <div class="col-span-12 md:col-span-6">
+                            <label class="label pt-0 font-semibold text-gray-700">Buton Metni</label>
+                            {{ form.action_text(class="input input-bordered input-warning w-full", placeholder="Örn: Teklif Al") }}
+                        </div>
+                        <div class="col-span-12 md:col-span-6">
+                            <label class="label pt-0 font-semibold text-gray-700">Buton Linki</label>
+                            {{ form.action_url(class="input input-bordered input-warning w-full", placeholder="Örn: /teklif-al") }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="w-full lg:w-80 space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center">
+                            <i class="fa fa-sliders-h"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm">Görünüm Ayarları</h3>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        
+                        <div>
+                            <label class="label pt-0 font-semibold text-gray-700">Sıralama</label>
+                            {{ form.order(class="input input-bordered w-full") }}
+                            <div class="text-xs text-gray-400 mt-1">Küçük numaralar solda görünür.</div>
+                        </div>
+
+                        <div class="divider my-2"></div>
+
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <span class="label-text font-semibold text-gray-700">Yayında</span> 
+                                {{ form.is_active(class="toggle toggle-success") }}
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full shadow-lg shadow-blue-500/30">
+                    <i class="fa fa-save mr-2"></i> Kaydet
+                </button>
+                <a href="{{ return_url }}" class="btn btn-ghost w-full">İptal</a>
+
+            </div>
+        </div>
+
+    </form>
+{% endblock %}
+
+{% block tail %}
+    {{ super() }}
+    <style>
+        /* Select2 Uyumlu Stil */
+        .select2-container .select2-selection--single {
+            height: 3rem !important;
+            border-color: #d1d5db !important;
+            border-radius: 0.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 3rem !important;
+        }
+    </style>
+{% endblock %}

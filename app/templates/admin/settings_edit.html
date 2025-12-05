@@ -1,0 +1,82 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+    
+    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                <i class="fa fa-heading"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-800 text-sm">Header ve Üst Alan</h3>
+                <p class="text-xs text-gray-500">Logo, başlık ve menü yerleşimi ayarları</p>
+            </div>
+        </div>
+        <span class="badge badge-ghost text-xs font-medium">Görünüm Ayarları</span>
+    </div>
+
+    <div class="p-6">
+        <div class="grid grid-cols-12 gap-6">
+
+            <div class="col-span-12">
+                <label class="label pt-0">
+                    <span class="label-text font-semibold text-gray-700">Site Başlığı (Title)</span>
+                    <span class="label-text-alt text-gray-400">Tarayıcı sekmesinde görünür</span>
+                </label>
+                <div class="input-group">
+                    {{ form.site_title(class="input input-bordered w-full focus:input-primary transition-all", placeholder="Örn: Ekosan Yönetim Paneli") }}
+                </div>
+                {% if form.site_title.errors %}
+                    <span class="text-red-500 text-xs mt-1">{{ form.site_title.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="col-span-12 md:col-span-6">
+                <label class="label">
+                    <span class="label-text font-semibold text-gray-700">Site Logosu</span>
+                </label>
+                <div class="flex items-center gap-4 p-4 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="w-12 h-12 flex-none bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+                        {% if model.logo %}
+                            <img src="{{ model.logo }}" class="object-cover w-full h-full" alt="Logo">
+                        {% else %}
+                            <i class="fa fa-image text-gray-400"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        {{ form.logo(class="file-input file-input-bordered file-input-sm w-full max-w-xs") }}
+                        <div class="text-[10px] text-gray-400 mt-1">Önerilen: 200x50px PNG</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6">
+                <label class="label">
+                    <span class="label-text font-semibold text-gray-700">Favicon</span>
+                </label>
+                <div class="flex items-center gap-4 p-4 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="w-12 h-12 flex-none bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+                         {% if model.favicon %}
+                            <img src="{{ model.favicon }}" class="object-cover w-full h-full" alt="Favicon">
+                        {% else %}
+                            <i class="fa fa-star text-gray-400"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                         {{ form.favicon(class="file-input file-input-bordered file-input-sm w-full max-w-xs") }}
+                        <div class="text-[10px] text-gray-400 mt-1">Önerilen: 32x32px ICO/PNG</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12">
+                <label class="label">
+                    <span class="label-text font-semibold text-gray-700">Aktif Menü</span>
+                </label>
+                {{ form.menu_id(class="select select-bordered w-full font-medium", style="width: 100%") }}
+                <label class="label">
+                    <span class="label-text-alt text-gray-400">Sitede header bölümünde görünecek menüyü seçiniz.</span>
+                </label>
+            </div>
+
+        </div>
+    </div>
+</div>

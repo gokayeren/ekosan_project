@@ -1,0 +1,161 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+    
+    {# Hata Mesajları #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm bg-white border border-gray-200">
+                        <i class="fa fa-info-circle text-primary"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        
+        {# Gizli alanlar ve CSRF Token #}
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                        <i class="fa fa-heading"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Site Kimliği</h3>
+                        <p class="text-xs text-gray-500">Logo, başlık ve tarayıcı ikonu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <label class="label pt-0 font-semibold text-gray-700">Site Başlığı</label>
+                    {{ form.site_title(class="input input-bordered w-full focus:input-primary") }}
+                </div>
+                <div class="col-span-12 md:col-span-6">
+                    <label class="label font-semibold text-gray-700">Logo</label>
+                    <div class="flex items-center gap-4 p-4 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="w-16 h-16 flex-none bg-white border rounded-md flex items-center justify-center overflow-hidden p-1">
+                            {% if model is defined and model.logo_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + model.logo_path) }}" class="object-contain w-full h-full">
+                            {% else %}
+                                <i class="fa fa-image text-gray-300 text-2xl"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            {{ form.logo_path(class="file-input file-input-bordered file-input-sm w-full") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-6">
+                    <label class="label font-semibold text-gray-700">Favicon</label>
+                    <div class="flex items-center gap-4 p-4 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="w-16 h-16 flex-none bg-white border rounded-md flex items-center justify-center overflow-hidden p-1">
+                            {% if model is defined and model.favicon_path %}
+                                <img src="{{ url_for('static', filename='uploads/' + model.favicon_path) }}" class="object-contain w-full h-full">
+                            {% else %}
+                                <i class="fa fa-star text-gray-300 text-2xl"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            {{ form.favicon_path(class="file-input file-input-bordered file-input-sm w-full") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+                        <i class="fa fa-address-book"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">İletişim Bilgileri</h3>
+                        <p class="text-xs text-gray-500">Footer ve iletişim sayfasında görünecek bilgiler</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12 md:col-span-6">
+                    <label class="label pt-0 font-semibold text-gray-700">Telefon Numarası</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-phone"></i></span>
+                        {{ form.phone_number(class="input input-bordered w-full pl-10 focus:input-primary", placeholder="+90 ...") }}
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-6">
+                    <label class="label pt-0 font-semibold text-gray-700">E-Posta Adresi</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-envelope"></i></span>
+                        {{ form.email_address(class="input input-bordered w-full pl-10 focus:input-primary", placeholder="info@...") }}
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <label class="label font-semibold text-gray-700">Açık Adres</label>
+                    {{ form.address(class="textarea textarea-bordered w-full h-24 focus:textarea-primary", placeholder="Firma adresi...") }}
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                        <i class="fa fa-share-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Sosyal Medya</h3>
+                        <p class="text-xs text-gray-500">Sosyal medya hesap bağlantıları</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <label class="label pt-0 font-semibold text-gray-700">Facebook URL</label>
+                    <div class="relative">
+                        <div class="absolute left-0 top-0 h-full w-10 flex items-center justify-center bg-blue-600 text-white rounded-l-lg z-10">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        {{ form.facebook_url(class="input input-bordered w-full pl-12 focus:input-primary", placeholder="https://facebook.com/...") }}
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <label class="label font-semibold text-gray-700">Instagram URL</label>
+                    <div class="relative">
+                        <div class="absolute left-0 top-0 h-full w-10 flex items-center justify-center bg-pink-600 text-white rounded-l-lg z-10">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        {{ form.instagram_url(class="input input-bordered w-full pl-12 focus:input-primary", placeholder="https://instagram.com/...") }}
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <label class="label font-semibold text-gray-700">Youtube URL</label>
+                    <div class="relative">
+                        <div class="absolute left-0 top-0 h-full w-10 flex items-center justify-center bg-red-600 text-white rounded-l-lg z-10">
+                            <i class="fab fa-youtube"></i>
+                        </div>
+                        {{ form.youtube_url(class="input input-bordered w-full pl-12 focus:input-primary", placeholder="https://youtube.com/...") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:items-center md:gap-3">
+            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-blue-500/30">
+                <i class="fa fa-save mr-2"></i> Tüm Ayarları Kaydet
+            </button>
+        </div>
+
+    </form>
+{% endblock %}

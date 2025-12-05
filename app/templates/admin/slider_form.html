@@ -1,0 +1,217 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+    
+    {# Flash Mesajları #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {# Form Başlangıcı #}
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        
+        {# Güvenlik Tokenları ve Gizli Alanlar #}
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                    <i class="fa fa-layer-group"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Slider Grubu Ayarları</h3>
+                    <p class="text-xs text-gray-500">Bu slider grubunun genel ayarları.</p>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="label pt-0 font-semibold text-gray-700 text-xs">Slider Adı</label>
+                    {{ form.name(class="input input-bordered w-full", placeholder="Örn: Anasayfa Ana Slider") }}
+                </div>
+                <div>
+                    <label class="label pt-0 font-semibold text-gray-700 text-xs">Çağırma Anahtarı (ID)</label>
+                    {{ form.group_key(class="input input-bordered w-full font-mono text-blue-600", placeholder="Örn: home_hero") }}
+                    <span class="text-[10px] text-gray-400 mt-1 block">Kod içinde kullanılacak benzersiz anahtar (boşluksuz).</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center">
+                        <i class="fa fa-images"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Slayt İçerikleri</h3>
+                </div>
+                <div class="text-xs text-gray-400">Toplam: <span id="image-count" class="font-bold text-gray-600">{{ form.items|length }}</span></div>
+            </div>
+            
+            <div class="p-6 bg-gray-50/30">
+                <div id="items-container" class="space-y-4">
+                    {% for subform in form.items %}
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group hover:border-blue-300 transition-all item-card" id="item-{{ loop.index0 }}">
+                            
+                            {# Subform Token ve Hidden Fields #}
+                            {% if subform.csrf_token %}{{ subform.csrf_token }}{% endif %}
+                            {% for f in subform if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="w-full md:w-1/4 flex flex-col gap-3">
+                                    <div class="h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100 relative">
+                                        {% if subform.image_path.data and subform.image_path.data is string %}
+                                            <img src="{{ url_for('static', filename='uploads/' + subform.image_path.data) }}" class="object-cover w-full h-full">
+                                        {% else %}
+                                            <i class="fa fa-image text-gray-300 text-3xl"></i>
+                                            <span class="text-xs text-gray-400 absolute bottom-2">Görsel Yok</span>
+                                        {% endif %}
+                                    </div>
+                                    {{ subform.image_path(class="file-input file-input-bordered file-input-xs w-full") }}
+                                    
+                                    <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                        <span class="text-xs font-bold text-gray-500">Sıralama:</span>
+                                        {{ subform.order(class="input input-bordered input-xs w-16 text-center") }}
+                                    </div>
+                                </div>
+
+                                <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="col-span-2">
+                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Ana Başlık</label>
+                                        {{ subform.title(class="input input-bordered input-sm w-full", placeholder="Örn: YENİLENEBİLİR ENERJİ") }}
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Alt Başlık</label>
+                                        {{ subform.subtitle(class="input input-bordered input-sm w-full", placeholder="Örn: Geleceğin teknolojisi evinizde...") }}
+                                    </div>
+                                    <div>
+                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Buton İsmi</label>
+                                        {{ subform.btn_text(class="input input-bordered input-sm w-full", placeholder="Detaylı Bilgi") }}
+                                    </div>
+                                    <div>
+                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Buton Linki</label>
+                                        {{ subform.btn_link(class="input input-bordered input-sm w-full", placeholder="/hizmetler") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if subform.id.data %}
+                            <div class="absolute top-2 right-2">
+                                <label class="btn btn-circle btn-xs btn-ghost hover:bg-red-50 hover:text-red-500 tooltip tooltip-left" data-tip="Silmek için işaretle">
+                                    {{ subform.DELETE(class="hidden peer") }}
+                                    <i class="fa fa-trash peer-checked:text-red-600"></i>
+                                    <div class="hidden peer-checked:block absolute top-8 right-0 bg-red-100 text-red-600 text-[10px] p-1 rounded whitespace-nowrap">
+                                        Silinecek
+                                    </div>
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div onclick="addSliderItem()" class="mt-6 p-4 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-white hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group">
+                   <span class="text-gray-400 text-sm font-medium group-hover:text-blue-600 transition-colors flex items-center">
+                       <div class="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center mr-3 transition-colors">
+                            <i class="fa fa-plus text-gray-500 group-hover:text-blue-600"></i>
+                       </div>
+                       Yeni Slayt Ekle
+                   </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:justify-end gap-3">
+            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-blue-500/30 text-white">
+                <i class="fa fa-save mr-2"></i> Kaydet
+            </button>
+            <a href="{{ return_url }}" class="btn btn-ghost bg-gray-100">İptal</a>
+        </div>
+
+    </form>
+
+    <script>
+        // Form eleman index'ini Python listesinin uzunluğundan başlatıyoruz
+        let itemIndex = {{ form.items|length }};
+
+        function addSliderItem() {
+            const container = document.getElementById('items-container');
+            const countSpan = document.getElementById('image-count');
+
+            // Yeni eleman için HTML Şablonu
+            // NOT: name="items-${itemIndex}-alan_adi" yapısı Flask-Admin için zorunludur.
+            const newRowHtml = `
+                <div class="bg-white p-4 rounded-xl border border-blue-200 shadow-md relative group item-card fade-in mt-4">
+                    
+                    <input type="hidden" name="items-${itemIndex}-id" value="">
+                    
+                    <div class="absolute top-2 right-2 z-10">
+                        <button type="button" onclick="this.closest('.item-card').remove()" class="btn btn-circle btn-xs btn-ghost text-red-400 hover:bg-red-50 hover:text-red-600">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="w-full md:w-1/4 flex flex-col gap-3">
+                            <div class="h-32 bg-gray-50 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                                <span class="text-xs text-blue-500 font-medium flex flex-col items-center">
+                                    <i class="fa fa-cloud-upload-alt text-2xl mb-1"></i>
+                                    Görsel Seç
+                                </span>
+                            </div>
+                            <input type="file" name="items-${itemIndex}-image_path" class="file-input file-input-bordered file-input-xs w-full file-input-primary">
+                            
+                            <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                <span class="text-xs font-bold text-gray-500">Sıra:</span>
+                                <input type="number" name="items-${itemIndex}-order" value="${itemIndex + 1}" class="input input-bordered input-xs w-16 text-center">
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="label pt-0 text-xs font-semibold text-gray-500">Ana Başlık</label>
+                                <input type="text" name="items-${itemIndex}-title" class="input input-bordered input-sm w-full" placeholder="Başlık giriniz">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="label pt-0 text-xs font-semibold text-gray-500">Alt Başlık</label>
+                                <input type="text" name="items-${itemIndex}-subtitle" class="input input-bordered input-sm w-full" placeholder="Açıklama giriniz">
+                            </div>
+                            <div>
+                                <label class="label pt-0 text-xs font-semibold text-gray-500">Buton İsmi</label>
+                                <input type="text" name="items-${itemIndex}-btn_text" class="input input-bordered input-sm w-full" placeholder="Buton yazısı">
+                            </div>
+                            <div>
+                                <label class="label pt-0 text-xs font-semibold text-gray-500">Buton Linki</label>
+                                <input type="text" name="items-${itemIndex}-btn_link" class="input input-bordered input-sm w-full" placeholder="URL">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', newRowHtml);
+            itemIndex++;
+            
+            // Sayacı güncelle (opsiyonel)
+            if(countSpan) countSpan.innerText = document.querySelectorAll('.item-card').length;
+        }
+
+        // CSS Animasyonu
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        `;
+        document.head.appendChild(style);
+    </script>
+{% endblock %}

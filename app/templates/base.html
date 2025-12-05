@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_settings.site_title if site_settings and site_settings.site_title else 'Ekosan' }}{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/dixonandmoe/rellax@master/rellax.min.js"></script>
+
+    {% if site_settings and site_settings.favicon_path %}
+        <link rel="shortcut icon" href="{{ url_for('static', filename='uploads/' + site_settings.favicon_path) }}">
+    {% endif %}
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Inter"', 'sans-serif'] },
+                    colors: {
+                        'ekosan-dark': '#232e48',
+                        'ekosan-blue': '#1877F2',
+                    }
+                }
+            },
+            daisyui: { themes: ["light"] },
+        }
+    </script>
+
+    <style>
+        #main-header {
+            background-color: rgba(35, 46, 72, 0.20);
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-header.scrolled {
+            background-color: rgba(35, 46, 72, 0.60);
+            backdrop-filter: blur(12px);
+            padding-top: 0.7rem;
+            padding-bottom: 0.7rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-socials-wrapper {
+            max-width: 200px;
+            opacity: 1;
+            transform: translateX(0);
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+
+        #main-header.scrolled .header-socials-wrapper {
+            max-width: 0;
+            opacity: 0;
+            transform: translateX(20px);
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+
+        .navbar-center {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+
+        #main-header.scrolled .navbar-center {
+            transform: translateX(0px);
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #232e48; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1a2236; }
+
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-base-content bg-base-100 font-sans antialiased selection:bg-ekosan-blue selection:text-white relative">
+
+    <header id="main-header" class="fixed top-0 left-0 w-full z-50 text-white py-5">
+        <div class="navbar container mx-auto px-4 max-w-7xl min-h-[3rem] p-0 justify-between">
+            
+            <div class="navbar-start w-auto">
+                <a href="/" class="flex items-center gap-2 group select-none">
+                    {% if site_settings and site_settings.logo_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + site_settings.logo_path) }}" 
+                                class="h-8 md:h-10 w-auto object-contain opacity-100 transition-transform duration-300" 
+                                alt="{{ site_settings.site_title }}">
+                    {% else %}
+                        <div class="font-black tracking-tighter text-2xl flex flex-col leading-none text-white">
+                            <span>LOGO</span>
+                        </div>
+                    {% endif %}
+                </a>
+            </div>
+
+            <div class="navbar-center hidden lg:flex justify-end flex-1">
+                <ul class="menu menu-horizontal px-1 font-medium gap-1 text-[15px]">
+                    {% for item in menu_items %}
+                        {% if not item.action_text %}
+                            {% if item.children|length > 0 %}
+                                <li class="group relative z-50">
+                                    <details>
+                                        <summary class="nav-link rounded-lg hover:bg-white/10 transition-colors py-2">{{ item.label }}</summary>
+                                        <ul class="p-2 min-w-[220px] bg-white text-gray-800 rounded-xl shadow-xl mt-4 border border-gray-100 animate-fade-in-up origin-top-left">
+                                            {% for child in item.children %}
+                                            <li><a href="{{ child.url }}" class="hover:text-ekosan-blue hover:bg-blue-50 text-sm font-medium py-2">{{ child.label }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </details>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a href="{{ item.url }}" 
+                                    class="text-sm py-0.5 px-1 mx-3 rounded-none hover:bg-transparent hover:border-b-2 hover:border-orange-500
+                                    {{ 'border-b-2 border-orange-500' if request.path == item.url else 'border-b-2 border-transparent' }}">
+                                    {{ item.label }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="navbar-end w-auto flex items-center gap-3">
+                
+                {% if site_settings %}
+                    <div class="header-socials-wrapper flex items-center gap-2 hidden md:flex border-r border-white/20 pr-4 mr-2">
+                        {% if site_settings.facebook_url %}
+                            <a href="{{ site_settings.facebook_url }}" target="_blank" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#1877F2] hover:text-white transition-all duration-300 text-white">
+                                <i class="fab fa-facebook-f text-xs"></i>
+                            </a>
+                        {% endif %}
+                        {% if site_settings.instagram_url %}
+                            <a href="{{ site_settings.instagram_url }}" target="_blank" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#E4405F] hover:text-white transition-all duration-300 text-white">
+                                <i class="fab fa-instagram text-xs"></i>
+                            </a>
+                        {% endif %}
+                        {% if site_settings.youtube_url %}
+                            <a href="{{ site_settings.youtube_url }}" target="_blank" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#FF0000] hover:text-white transition-all duration-300 text-white">
+                                <i class="fab fa-youtube text-xs"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% for item in menu_items %}
+                    {% if item.action_text %}
+                        <a href="{{ item.action_url or item.url }}" 
+                            class="btn bg-white/10 hover:bg-white text-white hover:text-ekosan-dark border-white/20 hover:border-white rounded-full px-6 text-sm font-bold hidden md:inline-flex backdrop-blur-md transition-all hover:scale-105 shadow-lg">
+                            {{ item.action_text }}
+                            <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="dropdown dropdown-end lg:hidden">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle text-white hover:bg-white/10">
+                        <i class="fa fa-bars text-xl"></i>
+                    </div>
+                    
+                    <ul tabindex="0" class="menu dropdown-content mt-4 z-[100] p-2 shadow-2xl bg-white text-gray-800 rounded-lg w-60 border border-gray-100">
+                        {% for item in menu_items %}
+                            {% if not item.action_text %}
+                                {% if item.children|length > 0 %}
+                                    <li>
+                                        <details>
+                                            <summary class="font-bold py-3 text-base text-xs">{{ item.label }}</summary>
+                                            <ul>
+                                                {% for child in item.children %}
+                                                <li><a href="{{ child.url }}" class="text-xs py-2 text-gray-600 hover:text-ekosan-blue">{{ child.label }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </details>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <a href="{{ item.url }}" 
+                                        class="text-sm py-2 text-base block px-2 rounded-none
+                                        {{ 'font-bold text-orange-500 border-l-2 border-orange-500' if request.path == item.url else 'text-gray-600 border-l-2 border-transparent' }}">
+                                        {{ item.label }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="divider my-2"></div>
+                        <div class="flex flex-col gap-3">
+                            {% if site_settings and site_settings.phone_number %}
+                                <a href="tel:{{ site_settings.phone_number }}" class="flex items-center gap-3 p-2 bg-gray-50 rounded-none hover:bg-orange-50 transition-colors">
+                                    <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                                        <i class="fa fa-phone text-sm"></i>
+                                    </div>
+                                    <span class="font-semibold text-sm">{{ site_settings.phone_number }}</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast toast-top toast-center z-[100] mt-24">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-xl border-none text-white text-sm font-medium
+                            {% if category == 'success' %}bg-green-600{% elif category == 'error' %}bg-red-600{% else %}bg-ekosan-blue{% endif %}">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if site_settings and site_settings.mobile_tel %}
+    <a href="https://wa.me/{{ site_settings.mobile_tel|replace(' ','')|replace('+','') }}" target="_blank" 
+       class="fixed bottom-6 left-6 z-[90] w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg shadow-green-500/30 flex items-center justify-center hover:scale-110 hover:rotate-12 transition-all duration-300 group">
+        <i class="fab fa-whatsapp text-3xl"></i>
+        <span class="absolute left-16 bg-white text-gray-800 px-3 py-1 rounded-lg text-xs font-bold shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            WhatsApp
+        </span>
+    </a>
+    {% endif %}
+
+    <button id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+            class="fixed bottom-20 right-6 z-[90] w-12 h-12 bg-ekosan-dark text-white rounded-full shadow-lg shadow-gray-900/30 flex items-center justify-center translate-y-24 opacity-0 transition-all duration-500 hover:bg-ekosan-blue hover:-translate-y-1">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <footer class="bg-ekosan-dark text-slate-300 pb-8">
+        
+        <div class="relative mt-24">
+            <div class="absolute bg-gray-50 pt-24 top-0 left-0 w-full overflow-hidden leading-[0] transform -translate-y-full">
+                <svg class="relative block w-full h-[30px] md:h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M0,120 L0,0 Q600,120 1200,0 L1200,120 Z" class="fill-ekosan-dark"></path>
+                </svg>
+            </div>
+
+            <div class="pb-8 pt-4 relative group bg-ekosan-dark text-white">
+                <div class="container mx-auto px-4 max-w-7xl">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-white/10 pb-8">
+                        
+                        <a href="/" class="inline-block hover:opacity-80 transition-opacity">
+                            {% if site_settings and site_settings.logo_path %}
+                            <img src="{{ url_for('static', filename='uploads/' + site_settings.logo_path) }}" class="h-10 w-auto brightness-0 invert opacity-90" alt="Logo">
+                            {% else %}
+                            <span class="font-black text-3xl text-white tracking-tight">EKOSAN</span>
+                            {% endif %}
+                        </a>
+
+                        {% if site_settings %}
+                        <div class="flex gap-4">
+                            {% if site_settings.facebook_url %}
+                            <a href="{{ site_settings.facebook_url }}" target="_blank" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#1877F2] hover:text-white transition-all duration-300 text-slate-300">
+                                <i class="fab fa-facebook-f text-sm"></i>
+                            </a>
+                            {% endif %}
+                            {% if site_settings.instagram_url %}
+                            <a href="{{ site_settings.instagram_url }}" target="_blank" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#E4405F] hover:text-white transition-all duration-300 text-slate-300">
+                                <i class="fab fa-instagram text-sm"></i>
+                            </a>
+                            {% endif %}
+                            {% if site_settings.youtube_url %}
+                            <a href="{{ site_settings.youtube_url }}" target="_blank" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-[#FF0000] hover:text-white transition-all duration-300 text-slate-300">
+                                <i class="fab fa-youtube text-sm"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-6 max-w-7xl">
+            {% if footer_settings %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 mb-12 pt-6">
+                
+                <div class="lg:col-span-5 flex flex-col gap-6">
+                    {% if footer_settings.description %}
+                    <p class="text-slate-400 text-sm leading-8 font-light pr-0 lg:pr-12">
+                        {{ footer_settings.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <div class="lg:col-span-3">
+                    <h6 class="font-bold text-white text-sm tracking-widest uppercase mb-6 border-l-2 border-ekosan-blue pl-3">HIZLI LİNKLER</h6>
+                    <ul class="flex flex-col gap-3 text-sm text-slate-400">
+                        {% for i in range(1, 6) %}
+                            {% set link_text = footer_settings['link0' ~ i ~ '_text'] %}
+                            {% set link_url = footer_settings['link0' ~ i ~ '_url'] %}
+                            {% if link_text %}
+                            <li>
+                                <a href="{{ link_url or '#' }}" class="hover:text-white hover:translate-x-2 transition-all duration-300 flex items-center gap-2 group">
+                                    <i class="fa fa-angle-right text-xs text-ekosan-blue opacity-0 group-hover:opacity-100 transition-opacity"></i> 
+                                    {{ link_text }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="lg:col-span-4">
+                    <h6 class="font-bold text-white text-sm tracking-widest uppercase mb-6 border-l-2 border-ekosan-blue pl-3">İLETİŞİM</h6>
+                    <ul class="flex flex-col gap-5 text-sm text-slate-400">
+                        
+                        {% if footer_settings.shop_address %}
+                        <li class="flex items-start gap-4 group">
+                            <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-ekosan-blue transition-colors">
+                                <i class="fa fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <span class="block text-white text-xs font-bold mb-1 uppercase opacity-70">Mağaza</span>
+                                <span class="leading-relaxed">{{ footer_settings.shop_address }}</span>
+                            </div>
+                        </li>
+                        {% endif %}
+
+                        {% if footer_settings.storage_address %}
+                        <li class="flex items-start gap-4 group">
+                            <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-ekosan-blue transition-colors">
+                                <i class="fa fa-warehouse text-white"></i>
+                            </div>
+                            <div>
+                                <span class="block text-white text-xs font-bold mb-1 uppercase opacity-70">Depo</span>
+                                <span class="leading-relaxed">{{ footer_settings.storage_address }}</span>
+                            </div>
+                        </li>
+                        {% endif %}
+
+                        <div class="h-px bg-white/10 my-2"></div>
+
+                        {% if footer_settings.shop_tel or footer_settings.mobile_tel %}
+                        <li class="flex flex-col gap-3">
+                            {% if footer_settings.shop_tel %}
+                            <div class="flex items-center gap-3">
+                                <i class="fa fa-phone text-ekosan-blue text-xs"></i>
+                                <span class="text-xs font-bold uppercase text-white/50 w-16">Sabit:</span>
+                                <a href="tel:{{ footer_settings.shop_tel }}" class="hover:text-white transition-colors">{{ footer_settings.shop_tel }}</a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if footer_settings.mobile_tel %}
+                            <div class="flex items-center gap-3">
+                                <i class="fa fa-mobile-alt text-ekosan-blue text-xs"></i>
+                                <span class="text-xs font-bold uppercase text-white/50 w-16">Mobil:</span>
+                                <a href="tel:{{ footer_settings.mobile_tel }}" class="hover:text-white transition-colors">{{ footer_settings.mobile_tel }}</a>
+                            </div>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+
+                        {% if footer_settings.email %}
+                        <li class="flex items-center gap-3 mt-1">
+                            <div class="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-xs">
+                                <i class="fa fa-envelope text-white"></i>
+                            </div>
+                            <a href="mailto:{{ footer_settings.email }}" class="hover:text-white transition-colors">{{ footer_settings.email }}</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-white/10 pt-8 pb-2 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-slate-500">
+                
+                <p class="font-medium tracking-wide">
+                    {{ footer_settings.copyright or 'Copyright © 2026 Ekosan Mühendislik.' }}
+                </p>
+
+                <div class="flex items-center gap-6">
+                    {% if footer_settings.policy_text %}
+                    <a href="{{ footer_settings.policy_url or '#' }}" class="hover:text-white transition-colors relative group">
+                        {{ footer_settings.policy_text }}
+                        <span class="absolute -bottom-1 left-0 w-0 h-px bg-ekosan-blue transition-all group-hover:w-full"></span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if footer_settings.kvkk_text %}
+                    <a href="{{ footer_settings.kvkk_url or '#' }}" class="hover:text-white transition-colors relative group">
+                        {{ footer_settings.kvkk_text }}
+                        <span class="absolute -bottom-1 left-0 w-0 h-px bg-ekosan-blue transition-all group-hover:w-full"></span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if footer_settings.cookies_text %}
+                    <a href="{{ footer_settings.cookies_url or '#' }}" class="hover:text-white transition-colors relative group">
+                        {{ footer_settings.cookies_text }}
+                        <span class="absolute -bottom-1 left-0 w-0 h-px bg-ekosan-blue transition-all group-hover:w-full"></span>
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endif %}
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            if (window.innerWidth >= 1024) {
+                const cards = document.querySelectorAll('.parallax-card-wrapper');
+                const items = Array.from(cards).map(card => ({
+                    element: card,
+                    currentY: 0,
+                    speed: parseFloat(card.getAttribute('data-speed') || 0)
+                }));
+
+                function animate() {
+                    const viewportCenter = window.innerHeight / 2;
+                    items.forEach(item => {
+                        const rect = item.element.getBoundingClientRect();
+                        const itemCenter = rect.top + (rect.height / 2);
+                        const targetY = (itemCenter - viewportCenter) * item.speed;
+                        item.currentY += (targetY - item.currentY) * 0.08;
+                        item.element.style.transform = `translate3d(0, ${item.currentY}px, 0)`;
+                    });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+
+            const header = document.getElementById('main-header');
+            const backToTopBtn = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', () => {
+                const scrolled = window.scrollY > 50;
+
+                if (scrolled) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+
+                if (window.scrollY > 400) {
+                    backToTopBtn.classList.remove('translate-y-24', 'opacity-0');
+                    backToTopBtn.classList.add('translate-y-0', 'opacity-100');
+                } else {
+                    backToTopBtn.classList.add('translate-y-24', 'opacity-0');
+                    backToTopBtn.classList.remove('translate-y-0', 'opacity-100');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

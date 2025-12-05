@@ -1,0 +1,99 @@
+{% extends 'admin/model/list.html' %}
+
+{% block body %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
+            <div>
+                <h3 class="font-bold text-gray-800 text-lg">Navigasyon Yapısı</h3>
+                <p class="text-xs text-gray-500">Sitenin üst menüsünü buradan yönetebilirsiniz.</p>
+            </div>
+            {% if admin_view.can_create %}
+            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm btn-primary">
+                <i class="fa fa-plus mr-1"></i> Yeni Menü Ekle
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="overflow-x-auto">
+            {% block model_list_table %}
+            <table class="table w-full">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-600 uppercase text-xs">
+                        <th class="w-16 text-center">Sıra</th>
+                        <th>Menü Başlığı</th>
+                        <th>URL / Link</th>
+                        <th>Menü Tipi</th>
+                        <th>Durum</th>
+                        <th class="w-24 text-right">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                {% for row in data %}
+                    <tr class="hover:bg-gray-50 border-b border-gray-50">
+                        <td class="font-mono text-center font-bold text-gray-400">{{ row.order }}</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                {% if row.parent %}
+                                    <i class="fa fa-level-up-alt rotate-90 text-gray-300 ml-2"></i>
+                                    <span class="font-medium text-gray-600">{{ row.label }}</span>
+                                {% else %}
+                                    <span class="font-bold text-gray-800">{{ row.label }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-gray-500 font-mono text-xs max-w-xs truncate">
+                            {{ row.url }}
+                        </td>
+                        <td>
+                            {% if row.action_text %}
+                                <span class="badge badge-warning gap-1 font-bold text-xs">
+                                    <i class="fa fa-mouse-pointer text-[10px]"></i> Buton
+                                </span>
+                            {% elif row.children|length > 0 %}
+                                <span class="badge badge-ghost gap-1 text-xs">
+                                    <i class="fa fa-list text-[10px]"></i> Dropdown
+                                </span>
+                            {% else %}
+                                <span class="badge badge-outline text-xs border-gray-200 text-gray-400">Link</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.is_active %}
+                                <div class="badge badge-xs badge-success gap-1 pl-1 pr-2 h-5">Aktif</div>
+                            {% else %}
+                                <div class="badge badge-xs badge-error gap-1 pl-1 pr-2 h-5">Pasif</div>
+                            {% endif %}
+                        </td>
+                        <td class="flex justify-end gap-1">
+                            <a href="{{ url_for('.edit_view', id=row.id) }}" class="btn btn-square btn-sm btn-ghost text-blue-600 hover:bg-blue-50">
+                                <i class="fa fa-pencil-alt"></i>
+                            </a>
+                            {% if admin_view.can_delete %}
+                            <form class="icon" method="POST" action="{{ url_for('.delete_view') }}">
+                                {{ delete_form.id(value=row.id) }}
+                                {{ delete_form.url(value=return_url) }}
+                                {{ delete_form.csrf_token }}
+                                <button onclick="return confirm('Bu menüyü silmek istediğinize emin misiniz?');" class="btn btn-square btn-sm btn-ghost text-red-500 hover:bg-red-50">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-12">
+                            <div class="flex flex-col items-center justify-center text-gray-400">
+                                <i class="fa fa-sitemap text-4xl mb-3 opacity-20"></i>
+                                <span>Henüz hiç menü eklenmemiş.</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

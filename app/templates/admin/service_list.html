@@ -1,0 +1,81 @@
+{% extends 'admin/model/list.html' %}
+
+{% block body %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
+            <div>
+                <h3 class="font-bold text-gray-800 text-lg">Hizmetler</h3>
+                <p class="text-xs text-gray-500">Sunduğunuz hizmetleri ve ilişkili ürünleri yönetin.</p>
+            </div>
+            {% if admin_view.can_create %}
+            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm btn-primary">
+                <i class="fa fa-plus mr-1"></i> Yeni Hizmet Ekle
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="overflow-x-auto">
+            {% block model_list_table %}
+            <table class="table w-full">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-600 uppercase text-xs">
+                        <th class="w-16 text-center">Sıra</th>
+                        <th class="w-20">Görsel</th>
+                        <th>Başlık</th>
+                        <th>İlişkili Ürün Sayısı</th>
+                        <th>Durum</th>
+                        <th class="w-24 text-right">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                {% for row in data %}
+                    <tr class="hover:bg-gray-50 border-b border-gray-50">
+                        <td class="font-mono text-center text-gray-400">{{ row.order }}</td>
+                        <td>
+                            {% if row.image_path %}
+                            <div class="avatar">
+                                <div class="w-10 rounded">
+                                    <img src="{{ url_for('static', filename='uploads/' + row.image_path) }}" />
+                                </div>
+                            </div>
+                            {% else %}
+                                <i class="fa fa-image text-gray-300 text-xl"></i>
+                            {% endif %}
+                        </td>
+                        <td class="font-bold text-gray-700">{{ row.title }}</td>
+                        <td>
+                            <span class="badge badge-ghost">{{ row.products|length }} Ürün</span>
+                        </td>
+                        <td>
+                            {% if row.is_active %}
+                                <span class="badge badge-success badge-xs gap-1">Aktif</span>
+                            {% else %}
+                                <span class="badge badge-error badge-xs gap-1">Pasif</span>
+                            {% endif %}
+                        </td>
+                        <td class="flex justify-end gap-1">
+                            <a href="{{ url_for('.edit_view', id=row.id) }}" class="btn btn-square btn-sm btn-ghost text-blue-600">
+                                <i class="fa fa-pencil-alt"></i>
+                            </a>
+                            {% if admin_view.can_delete %}
+                            <form class="icon" method="POST" action="{{ url_for('.delete_view') }}">
+                                {{ delete_form.id(value=row.id) }}
+                                {{ delete_form.url(value=return_url) }}
+                                {{ delete_form.csrf_token }}
+                                <button onclick="return confirm('Silmek istediğine emin misin?');" class="btn btn-square btn-sm btn-ghost text-red-500">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6" class="text-center py-8 text-gray-400">Kayıt bulunamadı.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

@@ -6,4 +6,27 @@ services:
     container_name: ekosan_app
     ports:
       - "5000:5000"
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - SECRET_KEY=b7f43a2d1e8c9b0a5f6d7e8c9b0a1b2c3d4e5f6
+      - DATABASE_URL=postgresql://ekosan_admin_user:Ekosan.621313.!!@db:5432/ekosandb
+      - UPLOAD_PATH=/app/static/uploads
+    depends_on:
+      - db
     restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: ekosan_db
+    environment:
+      POSTGRES_USER: ekosan_admin_user
+      POSTGRES_PASSWORD: Ekosan.621313.!!
+      POSTGRES_DB: ekosandb
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pg_data:

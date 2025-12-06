@@ -235,7 +235,7 @@ def create_app(config_class=Config):
     admin.init_app(app)
 
     admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar"))
-    admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları")) # Footer Eklendi
+    admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
     admin.add_view(HomeConfigView(HomeConfig, db.session, name="Anasayfa İçerik"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Medya"))
@@ -262,5 +262,25 @@ def create_app(config_class=Config):
             footer_settings=footer, 
             get_slider=get_slider
         )
+
+    with app.app_context():
+
+        if not HomeConfig.query.first():
+            print(">> Veritabanı boş: Varsayılan HomeConfig oluşturuluyor...")
+            default_home = HomeConfig()
+            db.session.add(default_home)
+            db.session.commit()
+
+        if not SiteSetting.query.first():
+            print(">> Veritabanı boş: Varsayılan Site Ayarları oluşturuluyor...")
+            default_settings = SiteSetting(site_title="Ekosan Web Sitesi")
+            db.session.add(default_settings)
+            db.session.commit()
+
+        if not Footer.query.first():
+             print(">> Veritabanı boş: Varsayılan Footer oluşturuluyor...")
+             default_footer = Footer()
+             db.session.add(default_footer)
+             db.session.commit()
 
     return app

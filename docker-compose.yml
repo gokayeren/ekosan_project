@@ -4,8 +4,6 @@ services:
   app:
     build: .
     container_name: ekosan_app_v2
-    ports:
-      - "5005:5000"
     environment:
       - FLASK_APP=run.py
       - FLASK_ENV=production
@@ -15,6 +13,9 @@ services:
       - UPLOAD_PATH=/app/static/uploads
     depends_on:
       - db
+    networks:
+      - default
+      - proxy_net
     restart: always
 
   db:
@@ -26,7 +27,13 @@ services:
       POSTGRES_DB: ekosandb
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - default
     restart: always
 
 volumes:
   pg_data:
+
+networks:
+  proxy_net:
+    external: true

@@ -18,7 +18,7 @@ admin = Admin(
 )
 admin.base_template = 'admin/master.html'
 
-from app.models import SiteSetting, MenuItem, HomeConfig, SliderGroup, SliderItem, Service, Footer
+from app.models import SiteSetting, MenuItem, HomeConfig, Corporate, SliderGroup, SliderItem, Service, Footer
 
 class SettingsView(ModelView):
     can_delete = False
@@ -173,6 +173,40 @@ class HomeConfigView(ModelView):
             return redirect(url)
         return super(HomeConfigView, self).index_view()
     
+class CorporateView(ModelView):
+    can_delete = False
+
+    def can_create(self):
+        return self.model.query.count() == 0
+
+    edit_template = 'admin/corporate_config.html'
+    create_template = 'admin/corporate_config.html'
+
+    form_columns = (
+        'hero_slider',
+        'presentation_slider',
+        'presentation_title',
+        'howeare',
+        'whatwedo',
+        'whyus',
+        'card01_title',
+        'card01_subtitle',
+        'card02_title',
+        'card02_subtitle',
+        'card03_title',
+        'card03_subtitle',
+        'card04_title',
+        'card04_subtitle'
+    )
+
+    @expose('/')
+    def index_view(self):
+        first_config = self.model.query.first()
+        if first_config:
+            url = url_for('.edit_view', id=first_config.id)
+            return redirect(url)
+        return super(CorporateView, self).index_view()
+    
 class SliderItemInline(InlineFormAdmin):
     form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'order')
     form_label = 'Slayt Görseli'
@@ -238,6 +272,7 @@ def create_app(config_class=Config):
     admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
     admin.add_view(HomeConfigView(HomeConfig, db.session, name="Anasayfa İçerik"))
+    admin.add_view(CorporateView(Corporate, db.session, name="Kurumsal İçerik"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Medya"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
 
@@ -269,6 +304,12 @@ def create_app(config_class=Config):
             print(">> Veritabanı boş: Varsayılan HomeConfig oluşturuluyor...")
             default_home = HomeConfig()
             db.session.add(default_home)
+            db.session.commit()
+
+        if not Corporate.query.first():
+            print(">> Veritabanı boş: Varsayılan Corporate oluşturuluyor...")
+            default_corporate = Corporate()
+            db.session.add(default_corporate)
             db.session.commit()
 
         if not SiteSetting.query.first():

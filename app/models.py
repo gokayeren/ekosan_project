@@ -143,6 +143,26 @@ class SliderItem(db.Model):
     def __str__(self):
         return self.title or "Slider Item"
 
+class Corporate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hero_slider = db.Column(db.String(50), nullable=True)
+    presentation_slider = db.Column(db.String(50), nullable=True)
+    presentation_title = db.Column(db.String(200), default="20 Yıldan Fazla Süredir Bölgemizde Hizmet Veriyoruz.")
+    howeare = db.Column(db.Text, default="Ekosan Isı 20 yılı aşkın sektör deneyimiyle Zonguldak, Ereğli, Alaplı ve Akçakoca bölgelerinde kombi, klima, ısı pompası ve güneş enerjisinden elektrik üretimi (GES) alanlarında profesyonel çözümler sunan öncü bir firmadır.")
+    whatwedo = db.Column(db.Text, default="Bölgenin en güvenilir ısıtma soğutma firmlarından biri olarak, enerji verimliliğini artıran modern sistemleri uzman kadromuzla kuruyor, bakımını yapıyor ve uzun yıllar sorunsuz çalışmasını sağlıyoruz.")
+    whyus = db.Column(db.Text, default="2*+ yıllık uzmanlık. Bölgenin deneyimli Isıtma Soğutma Firması. Binlerce başarılı kurulum. Hızlı servis ve yerinde çözüm. Enerji tasarrufu odaklı mühendislik.")
+    card01_title = db.Column(db.String(200), default="Isı Pompası Sistemleri")
+    card01_subtitle = db.Column(db.Text, default="Enerji verimli ısı pompası projelendirme Alaplı ve Akçakoca ısı pompası kurulum. En verimli ısı pompası modelleri.")
+    card02_title = db.Column(db.String(200), default="Kombi Sistemleri")
+    card02_subtitle = db.Column(db.Text, default="Kombi montaj, bakım ve arıza tespiti. Zonguldak kombi servisi çözümleri. Uygun fiyatlı kombi bakım hizmetleri.")
+    card03_title = db.Column(db.String(200), default="Klima Çözümleri")
+    card03_subtitle = db.Column(db.Text, default="Profesyonel klima montajı. Ereğli klima servisi. Klima gaz dolumu ve periyodik bakım.")
+    card04_title = db.Column(db.String(200), default="Güneş Enerjisinden Elektrik")
+    card04_subtitle = db.Column(db.Text, default="Güneş paneli kurulumu. Akçakoca GES porjelendirme. Güneşten elektrik üretimi maliyet analizi.")
+
+    def __str__(self):
+        return "Kurumsal Sabit Ayarları"
+
 class Product(db.Model, SEOMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)

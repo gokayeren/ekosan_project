@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block title %}Ekosan - Kurumsal{% endblock %}
+
+{% block content %}
+
+{% set hero_slider_key = corporate.hero_slider %}
+{% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
+
+<div class="relative w-full h-[300px] lg:h-[400px] bg-neutral-900 overflow-hidden font-sans group">
+
+    <div class="swiper myHeroSwiper h-full w-full pointer-events-none"> <div class="swiper-wrapper">
+            
+            {% if hero_items %}
+                {% for item in hero_items %}
+                <div class="swiper-slide relative w-full h-full">
+                    
+                    <div class="absolute inset-0 z-0">
+                        {% if item.image_path %}
+                            <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                 class="w-full h-full object-cover animate-hero-slow" 
+                                 alt="{{ item.title }}" />
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1920&q=80&fit=crop" 
+                                 class="w-full h-full object-cover animate-hero-slow" 
+                                 alt="Varsayılan Görsel" />
+                        {% endif %}
+                    </div>
+
+                    <div class="absolute inset-0 z-10 hero-pattern-bold pointer-events-none opacity-20"></div>
+                    <div class="absolute inset-0 z-10 bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none"></div>
+                    <div class="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+
+                    <div class="relative z-20 container mx-auto px-6 max-w-7xl h-full flex flex-col justify-center">
+                        <div class="w-full max-w-3xl space-y-8 mt-8">
+                            
+                            <div class="text-left">
+                                {% if item.title %}
+                                    <h1 class="text-2xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 drop-shadow-lg tracking-tight slider-title opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-300">
+                                        {{ item.title }}
+                                    </h1>
+                                {% endif %}
+                                
+                                {% if item.subtitle %}
+                                    <p class="text-gray-200 text-base md:text-xl font-light leading-relaxed drop-shadow-md max-w-xl slider-subtitle opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-500">
+                                        {{ item.subtitle }}
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-4 slider-btn opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-700 pointer-events-auto">
+                                {% if item.btn_text %}
+                                    <a href="{{ item.btn_link or '#' }}" 
+                                       class="btn btn-md bg-orange-600 hover:bg-orange-500 text-white border-none font-bold shadow-xl shadow-blue-900/20 rounded-md px-6 py-3 transition-transform hover:scale-105">
+                                       {{ item.btn_text }}
+                                    </a>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="swiper-slide relative w-full h-full">
+                    <div class="absolute inset-0 z-0">
+                         <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1920&q=80&fit=crop" class="w-full h-full object-cover" />
+                    </div>
+                    <div class="absolute inset-0 z-10 bg-black/50"></div>
+                    <div class="relative z-20 container mx-auto px-6 h-full flex items-center">
+                        <h1 class="text-white text-4xl font-bold">Admin Panelinden Slider Seçiniz...</h1>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+        
+        </div>
+</div>
+
+<section class="flex justify-center py-12 border-b border-gray-100 relative overflow-hidden">
+
+    <div class="container px-4">
+        <div class="flex flex-col justify-center gap-2">
+            <h2 class="text-center text-lg font-black text-gray-900 leading-tight tracking-tight">
+                {{ corporate.presentation_title }}
+            </h2>
+        </div>
+    </div>
+</section>
+
+<section class="pt-8 pb-16 mb:pb-20 bg-gray-50 relative overflow-hidden">
+    <div class="absolute inset-0 z-0 opacity-5 pointer-events-none"
+         style="background-image: url('{{ url_for('static', filename='img/pattern.svg') }}'); background-repeat: repeat; background-position: center;">
+    </div>
+    <div class="container mx-auto px-4 max-w-7xl relative z-10">
+
+        <div class="flex flex-col justify-center gap-4 mb-10">
+            <span class="text-start text-orange-600 font-bold tracking-[0.25em] text-sm uppercase">
+                {{ home_config.features_title }}
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for service in services %}
+            
+            {# Paralaks efekti minimumda (sabit duruyormuş gibi ama canlı) #}
+            {% set random_speed = (((loop.index * 17) % 20) - 10) / 400 %}
+
+            <div class="parallax-card-wrapper relative w-full h-[270px]" 
+                 data-speed="{{ random_speed }}">
+                
+                <a href="#" class="group relative block w-full h-full bg-orange-600 border-[1px] border-orange-600 rounded-md shadow-md shadow-gray-300 hover:shadow-xl hover:shadow-gray-900/20 overflow-hidden transition-all duration-300 hover:-translate-y-1">
+                    
+                    {% if service.image_path %}
+                    <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
+                         alt="{{ service.title }}"
+                         class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90"
+                         loading="lazy" />
+                    {% else %}
+                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80" 
+                         alt="Varsayılan Görsel"
+                         class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale opacity-80" />
+                    {% endif %}
+
+                    <div class="absolute inset-0 flex flex-col justify-end">
+                        
+                        <div class="flex items-start pointer-events-none">
+                            <span class="bg-orange-600 text-white text-sm font-bold px-4 py-1.5 rounded-r-lg shadow-md translate-y-2 z-20 relative">
+                                {{ service.title }}
+                            </span>
+                        </div>
+
+                        <div class="bg-gray-900/90 backdrop-blur-sm border-t border-white/10 p-4 pt-5 z-10 w-full">
+                            <p class="text-gray-300 text-xs leading-relaxed line-clamp-2 font-medium">
+                                {{ service.description|striptags }}
+                            </p>
+                            
+                            <div class="flex justify-end mt-2">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors flex items-center gap-2">
+                                    İncele <i class="fa fa-chevron-right text-orange-500"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </a>
+            </div>
+
+            {% else %}
+            <div class="col-span-full text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
+                <div class="text-gray-400 mb-2">
+                    <i class="fa fa-folder-open text-3xl"></i>
+                </div>
+                <p class="text-gray-500 text-base font-medium">Henüz eklenmiş bir hizmet bulunmamaktadır.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="parallax-section" class="relative w-full h-[400px] flex items-center overflow-hidden">
+    
+    <div id="parallax-bg" 
+         class="absolute top-0 left-0 w-full h-[150%] z-0 bg-center bg-cover bg-no-repeat transform-gpu will-change-transform"
+         style="background-image: url('{{ url_for('static', filename='uploads/' + home_config.parallax_image) }}');">
+        
+        <div class="absolute inset-0 bg-black/60"></div>
+    </div>
+
+    <div class="container relative z-10 mx-auto px-6 max-w-6xl text-white">
+        <div class="flex flex-col md:flex-row justify-start items-end gap-4">
+            <div class="text-left w-full md:w-1/2">
+                <span class="font-bold tracking-wider uppercase text-lg md:text-2xl block mb-4">
+                    {{ home_config.parallax_title }}
+                </span>
+                <h2 class="text-sm leading-[1.2rem]">
+                    {{ home_config.parallax_subtitle }}
+                </h2>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="relative bg-gray-50 overflow-hidden pt-16 md:pt-20">
+    <div class="absolute inset-0 z-0 opacity-5 pointer-events-none"
+         style="background-image: url('{{ url_for('static', filename='img/pattern.svg') }}'); background-repeat: repeat; background-position: center;">
+    </div>
+    <div class="absolute right-0 top-0 w-1/3 h-full bg-gray-50/50 skew-x-12 opacity-50 pointer-events-none"></div>
+
+    <div class="container mx-auto px-4 max-w-7xl relative z-10">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-10">
+            
+            <div class="w-full md:w-1/2 text-left">
+                <h2 class="text-3xl md:text-5xl text-gray-800 mb-6 leading-tight uppercase">
+                    <span class="font-black text-gray-900">{{ home_config.cta_title_bold }}</span>
+                    <span class="font-light text-gray-500">{{ home_config.cta_title_light }}</span>
+                </h2>
+                
+                <p class="text-lg text-gray-600 mb-4 max-w-lg leading-relaxed">
+                    {{ home_config.cta_intro_text }}
+                </p>
+
+                <p class="text-base text-gray-500 mb-8 max-w-lg font-light">
+                    {{ home_config.cta_description }}
+                </p>
+
+                <a href="/iletisim" class="inline-flex items-center bg-gray-900 text-white text-sm font-semibold py-3 px-8 rounded hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl group gap-2">
+                    {{ home_config.cta_btn_text }}
+                    <i class="fa fa-search-plus text-xl"></i>
+                </a>
+            </div>
+
+            <div class="w-full md:w-1/2 flex justify-center md:justify-end relative mt-10 md:mt-0">
+                <div class="absolute bottom-0 right-10 w-64 h-64 bg-gray-100 rounded-full blur-3xl opacity-60 -z-10"></div>
+                
+                {% if home_config.cta_image %}
+                <img src="{{ url_for('static', filename='uploads/' + home_config.cta_image) }}" 
+                     alt="Uzman Desteği" 
+                     class="relative z-10 max-h-[450px] object-contain drop-shadow-xl" 
+                     loading="lazy"
+                />
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?png&fit=crop&q=80&w=600" 
+                     class="relative z-10 max-h-[450px] object-contain drop-shadow-2xl" 
+                     style="mask-image: linear-gradient(to bottom, black 90%, transparent 100%);"
+                     alt="Destek Personeli"
+                     loading="lazy" />
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="bg-gray-50 border-t border-gray-100 py-10 relative group">
+    <div class="container mx-auto px-4 max-w-7xl">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+
+            <div class="w-full md:w-1/3 text-center md:text-left relative z-10">
+                <h4 class="font-bold text-gray-800 text-lg leading-snug md:border-r md:border-gray-200 md:pr-8">
+                    {{ home_config.slider_description }}
+                </h4>
+            </div>
+
+            <div class="w-full md:w-2/3 relative">
+                
+                {% set partner_slider_key = home_config.slider_select %}
+                {% set partners = get_slider(partner_slider_key) if partner_slider_key else [] %}
+
+                {% if partners %}
+                <div class="swiper partnerSwiper px-8 md:px-12">
+                    <div class="swiper-wrapper items-center select-none">
+                        {% for item in partners %}
+                        <div class="swiper-slide flex justify-center items-center h-16">
+                            <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                 alt="{{ item.title }}" 
+                                 class="max-h-10 md:max-h-12 w-auto object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-pointer"
+                                 title="{{ item.title }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="swiper-button-prev-partner absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 cursor-pointer transition-colors z-20">
+                    <i class="fa fa-caret-left text-xl"></i>
+                </div>
+                <div class="swiper-button-next-partner absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-900 cursor-pointer transition-colors z-20">
+                    <i class="fa fa-caret-right text-xl"></i>
+                </div>
+
+                {% else %}
+                <div class="text-center text-gray-400 text-sm py-4 border border-dashed border-gray-200 rounded">
+                    Admin panelinden bir slider grubu seçiniz.
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes slowPanZoom {
+        0% { transform: scale(1) translate(0, 0); }
+        100% { transform: scale(1.15) translate(-2%, -1%); }
+    }
+    .animate-hero-slow {
+        animation: slowPanZoom 40s linear infinite alternate;
+    }
+    .will-change-transform {
+        will-change: transform;
+        backface-visibility: hidden;
+    }
+</style>
+
+<script>
+    function scrollFixedCarousel(direction) {
+        const container = document.getElementById('fixedHeightCarousel');
+        if(container) {
+            let scrollAmount = container.clientWidth;
+            
+            if (window.innerWidth >= 1024) {
+                scrollAmount = container.clientWidth / 4;
+            } else if (window.innerWidth >= 768) {
+                scrollAmount = container.clientWidth / 2;
+            }
+
+            container.scrollBy({ 
+                left: direction * scrollAmount, 
+                behavior: 'smooth' 
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const section = document.getElementById('parallax-section');
+        const bg = document.getElementById('parallax-bg');
+        const speed = 0.3; 
+
+        let sectionTop = 0;
+        function setDimensions() {
+            if(section) {
+                sectionTop = section.getBoundingClientRect().top + window.scrollY;
+            }
+        }
+
+        function updateParallax() {
+            if (!section || !bg) return;
+
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+
+            if (scrollY + windowHeight > sectionTop && scrollY < sectionTop + section.offsetHeight) {
+                const distance = (scrollY - sectionTop) * speed;
+                bg.style.transform = `translate3d(0, ${distance}px, 0)`;
+            }
+        }
+        window.addEventListener('scroll', updateParallax, { passive: true });
+        window.addEventListener('resize', setDimensions);
+        setDimensions();
+        updateParallax();
+
+        // HERO SWIPER CONFIGURATION (MODERNIZE EDİLMİŞ)
+        var heroSwiper = new Swiper(".myHeroSwiper", {
+            spaceBetween: 0,
+            effect: "fade",
+            fadeEffect: { crossFade: true },
+            speed: 2500, // Hız 2.5 saniyeye çıkarıldı (Yavaş geçiş)
+            loop: true,
+            allowTouchMove: false, // Elle kaydırmayı tamamen kapattık
+            autoplay: {
+                delay: 7000, // Slayt bekleme süresi
+                disableOnInteraction: false,
+            },
+            // Navigation ve Pagination özellikleri silindi.
+            on: {
+                init: function() {
+                    let activeSlide = this.slides[this.activeIndex];
+                    animateSlideContent(activeSlide);
+                },
+                slideChangeTransitionStart: function () {
+                    let allSlides = this.slides;
+                    for (let i = 0; i < allSlides.length; i++) {
+                        resetSlideContent(allSlides[i]);
+                    }
+                },
+                slideChangeTransitionEnd: function () {
+                    let activeSlide = this.slides[this.activeIndex];
+                    animateSlideContent(activeSlide);
+                }
+            }
+        });
+
+        // ANIMASYON FONKSİYONLARI (SOLDAN SAĞA + BLUR)
+        function animateSlideContent(slide) {
+            let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
+            elements.forEach(el => {
+                // Eski: opacity-0 translate-y-4
+                // Yeni: opacity-100 translate-x-0 blur-0 (Aktif hal)
+                el.classList.remove('opacity-0', '-translate-x-12', 'blur-sm');
+                el.classList.add('opacity-100', 'translate-x-0', 'blur-0');
+            });
+        }
+
+        function resetSlideContent(slide) {
+            let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
+            elements.forEach(el => {
+                // Yeni: opacity-0 -translate-x-12 blur-sm (Pasif hal)
+                el.classList.remove('opacity-100', 'translate-x-0', 'blur-0');
+                el.classList.add('opacity-0', '-translate-x-12', 'blur-sm');
+            });
+        }
+
+        var partnerSwiper = new Swiper(".partnerSwiper", {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            loop: true,
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: ".swiper-button-next-partner",
+                prevEl: ".swiper-button-prev-partner",
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2,
+                    spaceBetween: 40,
+                },
+                768: {
+                    slidesPerView: 3,
+                    spaceBetween: 50,
+                },
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 60,
+                },
+            },
+        });
+    });
+</script>
+
+{% endblock %}

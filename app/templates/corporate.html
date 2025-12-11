@@ -7,7 +7,7 @@
 {% set hero_slider_key = corporate.hero_slider %}
 {% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
 
-<div class="relative w-full h-[300px] lg:h-[400px] bg-neutral-900 overflow-hidden font-sans group">
+<div class="relative w-full h-[200px] lg:h-[300px] bg-neutral-900 overflow-hidden font-sans group">
 
     <div class="swiper myHeroSwiper h-full w-full pointer-events-none"> <div class="swiper-wrapper">
             
@@ -31,29 +31,20 @@
                     <div class="absolute inset-0 z-10 bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none"></div>
                     <div class="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
 
-                    <div class="relative z-20 container mx-auto px-6 max-w-7xl h-full flex flex-col justify-center">
-                        <div class="w-full max-w-3xl space-y-8 mt-8">
+                    <div class="relative z-20 container mx-auto px-6 max-w-7xl h-full flex flex-col justify-center item-bottom">
+                        <div class="w-full max-w-3xl mt-20">
                             
                             <div class="text-left">
                                 {% if item.title %}
-                                    <h1 class="text-2xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 drop-shadow-lg tracking-tight slider-title opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-300">
+                                    <h1 class="text-2xl font-black text-white leading-[1.1] drop-shadow-lg tracking-tight slider-title opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-300">
                                         {{ item.title }}
                                     </h1>
                                 {% endif %}
                                 
                                 {% if item.subtitle %}
-                                    <p class="text-gray-200 text-base md:text-xl font-light leading-relaxed drop-shadow-md max-w-xl slider-subtitle opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-500">
+                                    <p class="text-gray-200 text-base text-md font-light leading-relaxed drop-shadow-md max-w-xl slider-subtitle opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-500">
                                         {{ item.subtitle }}
                                     </p>
-                                {% endif %}
-                            </div>
-
-                            <div class="flex flex-wrap items-center gap-4 slider-btn opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-700 pointer-events-auto">
-                                {% if item.btn_text %}
-                                    <a href="{{ item.btn_link or '#' }}" 
-                                       class="btn btn-md bg-orange-600 hover:bg-orange-500 text-white border-none font-bold shadow-xl shadow-blue-900/20 rounded-md px-6 py-3 transition-transform hover:scale-105">
-                                       {{ item.btn_text }}
-                                    </a>
                                 {% endif %}
                             </div>
 
@@ -69,14 +60,14 @@
                     </div>
                     <div class="absolute inset-0 z-10 bg-black/50"></div>
                     <div class="relative z-20 container mx-auto px-6 h-full flex items-center">
-                        <h1 class="text-white text-4xl font-bold">Admin Panelinden Slider Seçiniz...</h1>
+                        <h1 class="text-white text-4xl font-bold">Slider Ayarlanmamış..</h1>
                     </div>
                 </div>
             {% endif %}
 
         </div>
         
-        </div>
+    </div>
 </div>
 
 <section class="flex justify-center py-12 border-b border-gray-100 relative overflow-hidden">
@@ -90,95 +81,137 @@
     </div>
 </section>
 
-<section class="pt-8 pb-16 mb:pb-20 bg-gray-50 relative overflow-hidden">
-    <div class="absolute inset-0 z-0 opacity-5 pointer-events-none"
-         style="background-image: url('{{ url_for('static', filename='img/pattern.svg') }}'); background-repeat: repeat; background-position: center;">
-    </div>
-    <div class="container mx-auto px-4 max-w-7xl relative z-10">
+<section class="py-12 overflow-hidden">
+    <div class="container mx-auto px-4 max-w-7xl">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
 
-        <div class="flex flex-col justify-center gap-4 mb-10">
-            <span class="text-start text-orange-600 font-bold tracking-[0.25em] text-sm uppercase">
-                {{ home_config.features_title }}
-            </span>
-        </div>
+            <div class="md:col-span-6 lg:col-span-5 relative">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for service in services %}
-            
-            {# Paralaks efekti minimumda (sabit duruyormuş gibi ama canlı) #}
-            {% set random_speed = (((loop.index * 17) % 20) - 10) / 400 %}
+                {% set presentation_key = corporate.presentation_slider %}
+                {% set presentation_items = get_slider(presentation_key) if presentation_key else [] %}
 
-            <div class="parallax-card-wrapper relative w-full h-[270px]" 
-                 data-speed="{{ random_speed }}">
-                
-                <a href="#" class="group relative block w-full h-full bg-orange-600 border-[1px] border-orange-600 rounded-md shadow-md shadow-gray-300 hover:shadow-xl hover:shadow-gray-900/20 overflow-hidden transition-all duration-300 hover:-translate-y-1">
+                <div id="corporateSlider" class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-200 aspect-[4/3] group bg-gray-100">
+
+                    {% if presentation_items %}
+                        {% for item in presentation_items %}
+                            <div class="slider-slide absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out {{ 'opacity-100 z-10' if loop.first else 'opacity-0 z-0' }}"
+                                data-index="{{ loop.index0 }}">
+
+                                <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                    class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-[4000ms] group-hover:scale-105" 
+                                    alt="{{ item.title or 'Kurumsal Tanıtım' }}">
+
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
+                            </div>
+                        {% endfor %}
                     
-                    {% if service.image_path %}
-                    <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
-                         alt="{{ service.title }}"
-                         class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90"
-                         loading="lazy" />
                     {% else %}
-                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80" 
-                         alt="Varsayılan Görsel"
-                         class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale opacity-80" />
+                        <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-gray-50">
+                            <i class="fa fa-image text-gray-300 text-6xl"></i>
+                        </div>
                     {% endif %}
 
-                    <div class="absolute inset-0 flex flex-col justify-end">
-                        
-                        <div class="flex items-start pointer-events-none">
-                            <span class="bg-orange-600 text-white text-sm font-bold px-4 py-1.5 rounded-r-lg shadow-md translate-y-2 z-20 relative">
-                                {{ service.title }}
-                            </span>
-                        </div>
-
-                        <div class="bg-gray-900/90 backdrop-blur-sm border-t border-white/10 p-4 pt-5 z-10 w-full">
-                            <p class="text-gray-300 text-xs leading-relaxed line-clamp-2 font-medium">
-                                {{ service.description|striptags }}
-                            </p>
-                            
-                            <div class="flex justify-end mt-2">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors flex items-center gap-2">
-                                    İncele <i class="fa fa-chevron-right text-orange-500"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                    </div>
-                </a>
-            </div>
-
-            {% else %}
-            <div class="col-span-full text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
-                <div class="text-gray-400 mb-2">
-                    <i class="fa fa-folder-open text-3xl"></i>
                 </div>
-                <p class="text-gray-500 text-base font-medium">Henüz eklenmiş bir hizmet bulunmamaktadır.</p>
+
+                {% if presentation_items|length > 1 %}
+                    <div class="flex justify-center gap-2 mt-6">
+                        {% for item in presentation_items %}
+                            <button onclick="changeCorporateSlide({{ loop.index0 }})" 
+                                    class="slider-dot w-2 h-2 rounded-full transition-all duration-300 cursor-pointer {{ 'bg-blue-600 w-4' if loop.first else 'bg-gray-300 hover:bg-gray-400' }}"
+                                    aria-label="Slayt {{ loop.index }}">
+                            </button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
             </div>
-            {% endfor %}
+
+            <div class="md:col-span-6 lg:col-span-7 space-y-6 pl-0 lg:pl-8">
+
+                <div class="space-y-2">
+                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">
+                        BİZ KİMİZ ?
+                    </h3>
+                    <div class="text-gray-600 leading-relaxed text-sm">
+                        {{ corporate.howeare|safe }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">
+                        NELER YAPARIZ ?
+                    </h3>
+                    <div class="text-gray-600 leading-relaxed text-sm">
+                        {{ corporate.whatwedo|safe }}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">
+                        NEDEN BİZ ?
+                    </h3>
+                    <div class="text-gray-600 leading-relaxed text-sm">
+                        {{ corporate.whyus.replace('.', '.<br>')|safe }}
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </section>
 
-<section id="parallax-section" class="relative w-full h-[400px] flex items-center overflow-hidden">
-    
-    <div id="parallax-bg" 
-         class="absolute top-0 left-0 w-full h-[150%] z-0 bg-center bg-cover bg-no-repeat transform-gpu will-change-transform"
-         style="background-image: url('{{ url_for('static', filename='uploads/' + home_config.parallax_image) }}');">
-        
-        <div class="absolute inset-0 bg-black/60"></div>
-    </div>
+<section class="py-16">
+    <div class="container mx-auto px-4 max-w-7xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-    <div class="container relative z-10 mx-auto px-6 max-w-6xl text-white">
-        <div class="flex flex-col md:flex-row justify-start items-end gap-4">
-            <div class="text-left w-full md:w-1/2">
-                <span class="font-bold tracking-wider uppercase text-lg md:text-2xl block mb-4">
-                    {{ home_config.parallax_title }}
-                </span>
-                <h2 class="text-sm leading-[1.2rem]">
-                    {{ home_config.parallax_subtitle }}
-                </h2>
+            <div class="border-[1px] border-orange-600 rounded-md shadow-gray-300 hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col h-full">
+                <div class="mb-2 text-gray-800">
+                    <i class="fa fa-droplet text-lg"></i>
+                </div>
+                <h4 class="font-bold text-gray-900 text-md mb-2">
+                    {{ corporate.card01_title or 'Isı Pompası Sistemleri' }}
+                </h4>
+                <p class="text-sm text-gray-600 leading-normal">
+                    {{ corporate.card01_subtitle or 'Veri girilmemiş...' }}
+                </p>
             </div>
+
+            <div class="border-[1px] border-orange-600 rounded-md shadow-gray-300 hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col h-full">
+                <div class="mb-2 text-gray-800">
+                    <i class="fa fa-wrench text-lg"></i>
+                </div>
+                <h4 class="font-bold text-gray-900 text-md mb-2">
+                    {{ corporate.card02_title or 'Kombi Sistemleri' }}
+                </h4>
+                <p class="text-sm text-gray-600 leading-normal">
+                    {{ corporate.card02_subtitle or 'Veri girilmemiş...' }}
+                </p>
+            </div>
+
+            <div class="border-[1px] border-orange-600 rounded-md shadow-gray-300 hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col h-full">
+                <div class="mb-2 text-gray-800">
+                    <i class="fa fa-fan text-lg"></i>
+                </div>
+                <h4 class="font-bold text-gray-900 text-md mb-2">
+                    {{ corporate.card03_title or 'Klima Çözümleri' }}
+                </h4>
+                <p class="text-sm text-gray-600 leading-normal">
+                    {{ corporate.card03_subtitle or 'Veri girilmemiş...' }}
+                </p>
+            </div>
+
+            <div class="border-[1px] border-orange-600 rounded-md shadow-gray-300 hover:shadow-xl transition-shadow duration-300 p-4 flex flex-col h-full">
+                <div class="mb-2 text-gray-800">
+                    <i class="fa fa-solar-panel text-lg"></i>
+                </div>
+                <h4 class="font-bold text-gray-900 text-md mb-2">
+                    {{ corporate.card04_title or 'Güneş Enerjisi (GES)' }}
+                </h4>
+                <p class="text-sm text-gray-600 leading-normal">
+                    {{ corporate.card04_subtitle or 'Veri girilmemiş...' }}
+                </p>
+            </div>
+
         </div>
     </div>
 </section>
@@ -343,19 +376,17 @@
         setDimensions();
         updateParallax();
 
-        // HERO SWIPER CONFIGURATION (MODERNIZE EDİLMİŞ)
         var heroSwiper = new Swiper(".myHeroSwiper", {
             spaceBetween: 0,
             effect: "fade",
             fadeEffect: { crossFade: true },
-            speed: 2500, // Hız 2.5 saniyeye çıkarıldı (Yavaş geçiş)
+            speed: 2500, 
             loop: true,
-            allowTouchMove: false, // Elle kaydırmayı tamamen kapattık
+            allowTouchMove: false,
             autoplay: {
-                delay: 7000, // Slayt bekleme süresi
+                delay: 7000,
                 disableOnInteraction: false,
             },
-            // Navigation ve Pagination özellikleri silindi.
             on: {
                 init: function() {
                     let activeSlide = this.slides[this.activeIndex];
@@ -374,12 +405,9 @@
             }
         });
 
-        // ANIMASYON FONKSİYONLARI (SOLDAN SAĞA + BLUR)
         function animateSlideContent(slide) {
             let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
             elements.forEach(el => {
-                // Eski: opacity-0 translate-y-4
-                // Yeni: opacity-100 translate-x-0 blur-0 (Aktif hal)
                 el.classList.remove('opacity-0', '-translate-x-12', 'blur-sm');
                 el.classList.add('opacity-100', 'translate-x-0', 'blur-0');
             });
@@ -388,7 +416,6 @@
         function resetSlideContent(slide) {
             let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
             elements.forEach(el => {
-                // Yeni: opacity-0 -translate-x-12 blur-sm (Pasif hal)
                 el.classList.remove('opacity-100', 'translate-x-0', 'blur-0');
                 el.classList.add('opacity-0', '-translate-x-12', 'blur-sm');
             });
@@ -421,6 +448,54 @@
                 },
             },
         });
+
+        const corporateContainer = document.getElementById('corporateSlider');
+        if(corporateContainer) {
+            let currentSlideIndex = 0;
+            const slides = corporateContainer.querySelectorAll('.slider-slide');
+            const dots = document.querySelectorAll('.slider-dot');
+            let slideInterval;
+
+            window.changeCorporateSlide = function(index) {
+                if (index >= slides.length) index = 0;
+                if (index < 0) index = slides.length - 1;
+                
+                currentSlideIndex = index;
+
+                slides.forEach(slide => {
+                    slide.classList.remove('opacity-100', 'z-10');
+                    slide.classList.add('opacity-0', 'z-0');
+                });
+
+                if(slides[index]) {
+                    slides[index].classList.remove('opacity-0', 'z-0');
+                    slides[index].classList.add('opacity-100', 'z-10');
+                }
+
+                dots.forEach(dot => {
+                    dot.classList.remove('bg-blue-600', 'w-4');
+                    dot.classList.add('bg-gray-300');
+                });
+                
+                if(dots[index]) {
+                    dots[index].classList.remove('bg-gray-300');
+                    dots[index].classList.add('bg-blue-600', 'w-4');
+                }
+            }
+
+            function startAutoSlide() {
+                if(slides.length > 1) {
+                    slideInterval = setInterval(() => {
+                        changeCorporateSlide(currentSlideIndex + 1);
+                    }, 5000); 
+                }
+            }
+
+            startAutoSlide();
+            
+            corporateContainer.addEventListener('mouseenter', () => clearInterval(slideInterval));
+            corporateContainer.addEventListener('mouseleave', startAutoSlide);
+        }
     });
 </script>
 

@@ -162,6 +162,18 @@ class Corporate(db.Model):
 
     def __str__(self):
         return "Kurumsal Sabit Ayarları"
+    
+class References(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hero_slider = db.Column(db.String(50), nullable=True)
+    presentation_title = db.Column(db.String(200), default="Isıtma, Soğutma, Güneşten Elektrik, Ekolojik Villa, Akıllı Ev Bizim İşimiz")
+    corporate_slider = db.Column(db.String(50), nullable=True)
+    personal_slider = db.Column(db.String(50), nullable=True)
+    parallax_image = db.Column(db.String(200), default='default_parallax.png')
+    parallax_title = db.Column(db.Text, default="Binlerce Mutlu Müşterimiz Arasına Katılmak için Bizimle İletişime Geçebilirsiniz.")
+
+    def __str__(self):
+        return "Referanslarımız Sabit Ayarları"
 
 class Product(db.Model, SEOMixin):
     id = db.Column(db.Integer, primary_key=True)

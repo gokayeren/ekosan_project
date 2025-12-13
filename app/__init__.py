@@ -18,7 +18,7 @@ admin = Admin(
 )
 admin.base_template = 'admin/master.html'
 
-from app.models import SiteSetting, MenuItem, HomeConfig, Corporate, SliderGroup, SliderItem, Service, Footer
+from app.models import SiteSetting, MenuItem, HomeConfig, Corporate, References, SliderGroup, SliderItem, Service, Footer
 
 class SettingsView(ModelView):
     can_delete = False
@@ -207,6 +207,41 @@ class CorporateView(ModelView):
             return redirect(url)
         return super(CorporateView, self).index_view()
     
+class ReferencesView(ModelView):
+    can_delete = False
+
+    def can_create(self):
+        return self.model.query.count() == 0
+
+    edit_template = 'admin/references_config.html'
+    create_template = 'admin/references_config.html'
+
+    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    form_extra_fields = {
+        'parallax_image': ImageUploadField('Parallax Görseli', base_path=path, url_relative_path='uploads/')
+    }
+
+
+    form_columns = (
+        'hero_slider',
+        'presentation_title',
+        'corporate_slider',
+        'personal_slider',
+        'parallax_image',
+        'parallax_title'
+    )
+
+    @expose('/')
+    def index_view(self):
+        first_config = self.model.query.first()
+        if first_config:
+            url = url_for('.edit_view', id=first_config.id)
+            return redirect(url)
+        return super(ReferencesView, self).index_view()
+    
 class SliderItemInline(InlineFormAdmin):
     form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'order')
     form_label = 'Slayt Görseli'
@@ -273,6 +308,7 @@ def create_app(config_class=Config):
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
     admin.add_view(HomeConfigView(HomeConfig, db.session, name="Anasayfa İçerik"))
     admin.add_view(CorporateView(Corporate, db.session, name="Kurumsal İçerik"))
+    admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Medya"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
 
@@ -310,6 +346,12 @@ def create_app(config_class=Config):
             print(">> Veritabanı boş: Varsayılan Corporate oluşturuluyor...")
             default_corporate = Corporate()
             db.session.add(default_corporate)
+            db.session.commit()
+
+        if not References.query.first():
+            print(">> Veritabanı boş: Varsayılan References oluşturuluyor...")
+            default_references = References()
+            db.session.add(default_references)
             db.session.commit()
 
         if not SiteSetting.query.first():

@@ -1,0 +1,99 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+
+        {% if form.csrf_token %}
+            {{ form.csrf_token }}
+        {% endif %}
+        {% for f in form if f.type == 'HiddenField' %}
+            {{ f() }}
+        {% endfor %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-indigo-50/30 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                    <i class="fa fa-images"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Slider Konfigürasyonu</h3>
+                    <p class="text-xs text-gray-500">Ana sayfa ve içerik slider ID tanımları.</p>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label class="label pt-0 font-semibold text-gray-700">Hero Slider ID (Ana Banner)</label>
+                    {{ form.hero_slider(class="input input-bordered w-full", placeholder="Örn: home_slider") }}
+                    <span class="text-[10px] text-gray-400 block mt-1">Sayfanın en üstündeki ana slider.</span>
+                </div>
+                <div>
+                    <label class="label pt-0 font-semibold text-gray-700">Kurumsal Referanslarımız</label>
+                    {{ form.corporate_slider(class="input input-bordered w-full", placeholder="Örn: corporate_slider") }}
+                    <span class="text-[10px] text-gray-400 block mt-1">Kurumsal Referanslarımız bölümü.</span>
+                </div>
+                <div>
+                    <label class="label pt-0 font-semibold text-gray-700">Bireysel Referanslarımız</label>
+                    {{ form.personal_slider(class="input input-bordered w-full", placeholder="Örn: personal_slider") }}
+                    <span class="text-[10px] text-gray-400 block mt-1">Bireysel Referanslarımız bölümü.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-orange-50/30 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                    <i class="fa fa-user-tie"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Parallax Alan</h3>
+                </div>
+            </div>
+            
+            <div class="p-6 grid grid-cols-12 gap-8">
+                <div class="col-span-12 lg:col-span-8 space-y-4">
+                    <div>
+                        <label class="label pt-0 font-semibold text-gray-700">Bölüm Başlığı</label>
+                        {{ form.parallax_title(class="input input-bordered w-full") }}
+                    </div>
+                </div>
+
+                <div class="col-span-12 lg:col-span-4">
+                    <label class="label pt-0 font-semibold text-gray-700">Parallax Resmi</label>
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors h-full flex flex-col justify-center">
+                        <div class="h-24 w-auto mx-auto bg-gray-100 rounded-lg overflow-hidden mb-3 flex items-center justify-center">
+                            {% if model is defined and model.parallax_image %}
+                                <img src="{{ url_for('static', filename='uploads/' + model.parallax_image) }}" class="object-contain h-full">
+                            {% else %}
+                                <i class="fa fa-user text-3xl text-gray-300"></i>
+                            {% endif %}
+                        </div>
+                        {{ form.parallax_image(class="file-input file-input-bordered file-input-sm w-full") }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# KAYDET BUTONU #}
+        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:justify-end">
+            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-indigo-500/30">
+                <i class="fa fa-save mr-2"></i> Kurumsal Ayarları Kaydet
+            </button>
+        </div>
+
+    </form>
+{% endblock %}

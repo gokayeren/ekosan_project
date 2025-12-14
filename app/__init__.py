@@ -8,6 +8,8 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from config import Config
+import json
+from markupsafe import Markup
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -18,7 +20,11 @@ admin = Admin(
 )
 admin.base_template = 'admin/master.html'
 
-from app.models import SiteSetting, MenuItem, HomeConfig, Corporate, References, SliderGroup, SliderItem, Service, Footer
+from app.models import (
+    SiteSetting, MenuItem, HomeConfig, Corporate, References, 
+    SliderGroup, SliderItem, Service, Footer, 
+    Contact, Form, FormField, FormSubmission # Yeni eklenenler
+)
 
 class SettingsView(ModelView):
     can_delete = False
@@ -242,6 +248,113 @@ class ReferencesView(ModelView):
             return redirect(url)
         return super(ReferencesView, self).index_view()
     
+class ContactView(ModelView):
+    can_delete = False
+
+    def can_create(self):
+        return self.model.query.count() == 0
+
+    edit_template = 'admin/contact_config.html'
+    create_template = 'admin/contact_config.html'
+
+    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    form_columns = (
+        'hero_slider',
+        'contact_form',
+        'contact_info_title',
+        'shop_id',
+        'shop_id_date',
+        'tax_id',
+        'phone',
+        'wa',
+        'email',
+        'workhours',
+        'location_shop',
+        'location_storage'
+    )
+
+    column_labels = {
+        'hero_slider': 'Üst Slider Seçimi',
+        'contact_form': 'İletişim Formu Seçimi',
+        'contact_info_title': 'Firma Resmi Unvanı',
+        'phone': 'Telefon',
+        'wa': 'WhatsApp',
+        'location_shop': 'Mağaza Adresi'
+    }
+
+    @expose('/')
+    def index_view(self):
+        first_config = self.model.query.first()
+        if first_config:
+            url = url_for('.edit_view', id=first_config.id)
+            return redirect(url)
+        return super(ContactView, self).index_view()
+
+class FormFieldInline(InlineFormAdmin):
+    form_label = 'Form Alanı'
+    form_columns = ('id', 'label', 'name', 'field_type', 'is_required', 'placeholder', 'options', 'order')
+
+    column_labels = {
+        'label': 'Etiket (Görünen İsim)',
+        'name': 'Sistem Adı (Türkçe karakter kullanma: örn: telefon)',
+        'field_type': 'Tip (text, email, tel, textarea, select)',
+        'options': 'Seçenekler (Sadece "select" türü için virgülle ayır)',
+        'is_required': 'Zorunlu mu?'
+    }
+
+class FormBuilderView(ModelView):
+    create_template = 'admin/form_builder.html'
+    edit_template = 'admin/form_builder.html'
+
+    column_list = ('title', 'form_key', 'recipient_email')
+    column_labels = {
+        'title': 'Form Başlığı', 
+        'form_key': 'Form Anahtarı (Benzersiz)', 
+        'recipient_email': 'Bildirim E-postası'
+    }
+    
+    form_columns = ('title', 'form_key', 'recipient_email', 'submit_btn_text', 'success_message')
+
+    inline_models = (FormFieldInline(FormField),)
+
+class FormSubmissionView(ModelView):
+    can_create = False
+    can_edit = False
+    can_delete = True
+
+    column_list = ('form', 'created_at', 'submission_data', 'ip_address')
+    column_default_sort = ('created_at', True)
+
+    column_labels = {
+        'form': 'Form Adı',
+        'created_at': 'Tarih',
+        'submission_data': 'Başvuru Detayları',
+        'ip_address': 'IP Adresi'
+    }
+
+    def _format_data(view, context, model, name):
+        if not model.submission_data:
+            return ""
+        
+        try:
+            data_dict = json.loads(model.submission_data)
+            html_content = '<ul style="list-style:none; padding:0; margin:0;">'
+            for key, value in data_dict.items():
+                readable_key = key.replace('_', ' ').capitalize()
+                html_content += f'<li><strong>{readable_key}:</strong> {value}</li>'
+            html_content += '</ul>'
+
+            return Markup(html_content)
+        except:
+            return model.submission_data
+
+    column_formatters = {
+        'submission_data': _format_data
+    }
+
 class SliderItemInline(InlineFormAdmin):
     form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'order')
     form_label = 'Slayt Görseli'
@@ -309,6 +422,9 @@ def create_app(config_class=Config):
     admin.add_view(HomeConfigView(HomeConfig, db.session, name="Anasayfa İçerik"))
     admin.add_view(CorporateView(Corporate, db.session, name="Kurumsal İçerik"))
     admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
+    admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
+    admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
+    admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Medya"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
 
@@ -326,12 +442,18 @@ def create_app(config_class=Config):
             if group:
                 return group.items
             return []
+        
+        from app.models import Form 
+        def get_form(key):
+            form_obj = Form.query.filter_by(form_key=key).first()
+            return form_obj
 
         return dict(
             site_settings=settings, 
             menu_items=menu, 
             footer_settings=footer, 
-            get_slider=get_slider
+            get_slider=get_slider,
+            get_form=get_form
         )
 
     with app.app_context():
@@ -352,6 +474,12 @@ def create_app(config_class=Config):
             print(">> Veritabanı boş: Varsayılan References oluşturuluyor...")
             default_references = References()
             db.session.add(default_references)
+            db.session.commit()
+
+        if not Contact.query.first():
+            print(">> Veritabanı boş: Varsayılan Contact oluşturuluyor...")
+            default_contact = Contact()
+            db.session.add(default_contact)
             db.session.commit()
 
         if not SiteSetting.query.first():

@@ -1,0 +1,253 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block head_css %}
+    {{ super() }}
+    <style>
+        /* --- Tasarım Ayarları --- */
+        .inline-field-list { display: flex; flex-direction: column; gap: 15px; }
+        
+        .inline-field {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 15px;
+            align-items: end;
+        }
+
+        /* Başlık Kısmı */
+        .inline-field legend {
+            grid-column: span 12;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            font-weight: 700; color: #374151; font-size: 0.95rem;
+            display: flex; justify-content: space-between;
+        }
+        .inline-field legend small { display: none; }
+
+        /* Silme Butonu */
+        .inline-remove-field {
+            color: #ef4444; background: #fee2e2;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; cursor: pointer; text-decoration: none;
+        }
+        .inline-remove-field:hover { background: #b91c1c; color: white; }
+
+        /* Input Düzeni (Masaüstü) */
+        .inline-field .form-group { grid-column: span 12; }
+        @media (min-width: 1024px) {
+            .inline-field .form-group:nth-of-type(2) { grid-column: span 3; } /* Label */
+            .inline-field .form-group:nth-of-type(3) { grid-column: span 3; } /* Name */
+            .inline-field .form-group:nth-of-type(4) { grid-column: span 2; } /* Type */
+            .inline-field .form-group:nth-of-type(5) { grid-column: span 1; } /* Required */
+            .inline-field .form-group:nth-of-type(6) { grid-column: span 3; } /* Placeholder */
+            .inline-field .form-group:nth-of-type(7) { grid-column: span 11; } /* Options */
+            .inline-field .form-group:nth-of-type(8) { grid-column: span 1; } /* Order */
+        }
+
+        /* Görsel Stil */
+        .inline-field label { display: block; font-size: 0.7rem; font-weight: 700; color: #6b7280; text-transform: uppercase; margin-bottom: 4px; }
+        .inline-field .form-control { display: block; width: 100%; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; }
+        .inline-field input[type="checkbox"] { width: 20px; height: 20px; margin-top: 5px; cursor: pointer; }
+        .inline-field input[type="hidden"] { display: none; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }}"><span>{{ message }}</span></div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-indigo-50/30 flex items-center gap-3">
+                <i class="fa fa-clipboard-list text-indigo-600"></i>
+                <h3 class="font-bold text-gray-800 text-sm">Form Genel Ayarları</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="font-bold text-gray-700">Form Başlığı</label>{{ form.title(class="input input-bordered w-full") }}</div>
+                    <div><label class="font-bold text-gray-700">Form ID</label>{{ form.form_key(class="input input-bordered w-full") }}</div>
+                </div>
+                <div class="col-span-2">
+                    <label class="font-bold text-gray-700">E-Posta (Bildirim Alıcısı)</label>
+                    
+                    <div class="flex gap-2">
+                        {# Input'a bir ID veriyoruz ki JS ile değerini okuyabilelim #}
+                        {{ form.recipient_email(class="input input-bordered w-full", id="target-email-input") }}
+                        
+                        <button type="button" id="btn-activate-mail" class="btn btn-warning text-white whitespace-nowrap" title="Bu mail adresini FormSubmit servisinde aktive et">
+                            <i class="fa fa-envelope-open-text mr-2"></i> Aktive Et
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fa fa-info-circle"></i> Eğer bu e-posta adresini ilk kez kullanıyorsanız, yandaki butona tıklayın ve açılan sayfada aktivasyonu gerçekleştirin.
+                    </p>
+                </div>
+                <div><label class="font-bold text-gray-700">Buton Yazısı</label>{{ form.submit_btn_text(class="input input-bordered w-full") }}</div>
+                <div><label class="font-bold text-gray-700">Başarı Mesajı</label>{{ form.success_message(class="textarea textarea-bordered w-full h-12") }}</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa fa-layer-group text-gray-600"></i>
+                    <h3 class="font-bold text-gray-800 text-sm">Form Alanları</h3>
+                </div>
+                <button type="button" id="manuel-add-btn" class="btn btn-sm btn-primary bg-indigo-600 text-white border-none">
+                    <i class="fa fa-plus mr-1"></i> Yeni Alan Ekle
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div id="fields-container" class="inline-field-list">
+                    {% for subfield in form.fields %}
+                        {{ subfield()|safe }}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-6 right-6 z-50"><button type="submit" class="btn btn-primary px-8 shadow-lg">KAYDET</button></div>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            
+            $('#manuel-add-btn').on('click', function(e) {
+                e.preventDefault();
+                
+                // 1. Yeni ID Hesapla (Mevcut kutu sayısı neyse o)
+                var newIndex = $('.inline-field').length;
+                console.log("Yeni kutu ekleniyor. ID:", newIndex);
+
+                // 2. HTML'i Elle Oluştur (Template bekleme yok, garanti çözüm)
+                // Dikkat: name="fields-ID-fieldname" formatı Flask için zorunludur.
+                var manuelHtml = `
+                <div class="inline-field">
+                    <input type="hidden" name="fields-${newIndex}-id" id="fields-${newIndex}-id" value="">
+                    <input type="hidden" name="fields-${newIndex}-csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    
+                    <legend>Yeni Alan <a href="javascript:void(0)" class="inline-remove-field"><i class="fa fa-times"></i></a></legend>
+
+                    <div class="form-group">
+                        <label>Etiket (Görünen İsim)</label>
+                        <input class="form-control" name="fields-${newIndex}-label" id="fields-${newIndex}-label" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sistem Adı (Türkçe Karakter Yok)</label>
+                        <input class="form-control" name="fields-${newIndex}-name" id="fields-${newIndex}-name" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tip</label>
+                        <input class="form-control" name="fields-${newIndex}-field_type" id="fields-${newIndex}-field_type" type="text" value="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Zorunlu?</label>
+                        <input name="fields-${newIndex}-is_required" id="fields-${newIndex}-is_required" type="checkbox" value="y" checked>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Placeholder</label>
+                        <input class="form-control" name="fields-${newIndex}-placeholder" id="fields-${newIndex}-placeholder" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Seçenekler (Sadece select için)</label>
+                        <textarea class="form-control" name="fields-${newIndex}-options" id="fields-${newIndex}-options"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sıra</label>
+                        <input class="form-control" name="fields-${newIndex}-order" id="fields-${newIndex}-order" type="number" value="0">
+                    </div>
+                </div>
+                `;
+
+                // 3. Yapıştır gitsin
+                $('#fields-container').append(manuelHtml);
+            });
+
+            $('#btn-activate-mail').on('click', function() {
+                // 1. Inputtaki mail adresini al
+                var email = $('#target-email-input').val();
+                var btn = $(this); // Butonu değişkene alalım (ikonu değiştirmek için)
+                
+                // 2. Kontroller
+                if (!email) {
+                    alert('Lütfen önce bir e-posta adresi giriniz.');
+                    return;
+                }
+                if (!email.includes('@')) {
+                    alert('Geçerli bir e-posta adresi giriniz.');
+                    return;
+                }
+
+                if(!confirm(email + ' adresine bir test maili gönderilecek. Bu işlemden sonra gelen maildeki "Activate" butonuna basmanız gerekecek. Devam edilsin mi?')) {
+                    return;
+                }
+
+                // Butonu yükleniyor moduna alalım
+                var originalText = btn.html();
+                btn.html('<i class="fa fa-spinner fa-spin"></i> Gönderiliyor...');
+                btn.prop('disabled', true);
+
+                // 3. FormSubmit'e AJAX ile POST isteği atıyoruz (Tarayıcı açmadan)
+                $.ajax({
+                    url: "https://formsubmit.co/" + email,
+                    method: "POST",
+                    dataType: "json", // Sayfa yenilenmesin diye JSON istiyoruz
+                    accepts: "application/json",
+                    data: {
+                        _subject: "Sistem Aktivasyon Testi",
+                        _captcha: "false",
+                        message: "Bu e-posta, iletişim formu altyapısını aktif etmek için gönderilmiştir. Lütfen gelen maildeki Activate butonuna basınız."
+                    },
+                    success: function(response) {
+                        alert('BAŞARILI! \n\nLütfen şimdi "' + email + '" adresinin gelen kutusunu (ve spam klasörünü) kontrol edin.\n\nFormSubmit.co\'dan gelen maildeki "Activate" butonuna tıkladığınızda işlem tamamlanacaktır.');
+                        btn.html(originalText);
+                        btn.prop('disabled', false);
+                    },
+                    error: function(xhr, status, error) {
+                        // FormSubmit bazen JSON isteklere rağmen hata dönebilir ama maili yine de atar.
+                        console.log("FormSubmit Yanıtı:", xhr.responseText);
+                        alert('İstek gönderildi. Lütfen mail kutunuzu kontrol edin.\n(Eğer mail gelmediyse e-posta adresini doğru yazdığınızdan emin olun).');
+                        btn.html(originalText);
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Silme işlemi
+            $(document).on('click', '.inline-remove-field', function() {
+                if(confirm('Silmek istiyor musun?')) {
+                    $(this).closest('.inline-field').remove();
+                }
+            });
+
+        });
+    </script>
+{% endblock %}

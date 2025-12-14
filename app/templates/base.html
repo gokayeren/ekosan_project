@@ -219,13 +219,23 @@
         </div>
     </header>
 
-    <main class="flex-grow w-full">
+    <main class="flex-grow w-full relative">
+        {# --- FLASH MESSAGE ALANI (GÜNCELLENDİ) --- #}
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div class="toast toast-top toast-center z-[100] mt-24">
+            <div id="flash-messages" class="toast toast-top toast-center z-[100] mt-24 transition-opacity duration-500 ease-out">
                 {% for category, message in messages %}
                 <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-xl border-none text-white text-sm font-medium
                             {% if category == 'success' %}bg-green-600{% elif category == 'error' %}bg-red-600{% else %}bg-ekosan-blue{% endif %}">
+                    
+                    {% if category == 'success' %}
+                        <i class="fa fa-check-circle"></i>
+                    {% elif category == 'error' %}
+                        <i class="fa fa-exclamation-triangle"></i>
+                    {% else %}
+                        <i class="fa fa-info-circle"></i>
+                    {% endif %}
+                    
                     <span>{{ message }}</span>
                 </div>
                 {% endfor %}
@@ -252,7 +262,6 @@
     </button>
 
     <footer class="bg-ekosan-dark text-slate-300 pb-8">
-        
         <div class="relative mt-24">
             <div class="absolute bg-gray-50 pt-24 top-0 left-0 w-full overflow-hidden leading-[0] transform -translate-y-full">
                 <svg class="relative block w-full h-[30px] md:h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
@@ -424,6 +433,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // --- YENİ: Otomatik Bildirim Kapatma Kodu ---
+            const flashContainer = document.getElementById('flash-messages');
+            if (flashContainer) {
+                setTimeout(function() {
+                    flashContainer.style.opacity = '0';
+                    setTimeout(function() {
+                        flashContainer.remove();
+                    }, 500); // Transition süresi kadar bekle
+                }, 4000); // 4 saniye bekle
+            }
+            // ------------------------------------------
 
             if (window.innerWidth >= 1024) {
                 const cards = document.querySelectorAll('.parallax-card-wrapper');

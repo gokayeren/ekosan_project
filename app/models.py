@@ -143,6 +143,48 @@ class SliderItem(db.Model):
     def __str__(self):
         return self.title or "Slider Item"
 
+class Form(db.Model):
+    __tablename__ = 'forms'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    form_key = db.Column(db.String(50), unique=True, nullable=False)
+    recipient_email = db.Column(db.String(150), nullable=True)
+    submit_btn_text = db.Column(db.String(50), default="Gönder")
+    success_message = db.Column(db.Text, default="Formunuz başarıyla iletildi. Teşekkür ederiz.")
+    fields = db.relationship('FormField', backref='form', lazy=True, cascade="all, delete-orphan", order_by="FormField.order")
+
+    def __str__(self):
+        return self.title
+
+class FormField(db.Model):
+    __tablename__ = 'form_fields'
+    id = db.Column(db.Integer, primary_key=True)
+    form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=False)
+    
+    label = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    field_type = db.Column(db.String(20), default='text')
+    placeholder = db.Column(db.String(100), nullable=True)
+    is_required = db.Column(db.Boolean, default=True)
+    options = db.Column(db.Text, nullable=True)
+    order = db.Column(db.Integer, default=0)
+
+    def __str__(self):
+        return self.label
+
+class FormSubmission(db.Model):
+    __tablename__ = 'form_submissions'
+    id = db.Column(db.Integer, primary_key=True)
+    form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    submission_data = db.Column(db.Text, nullable=False) 
+    ip_address = db.Column(db.String(50), nullable=True)
+
+    form = db.relationship('Form')
+
+    def __str__(self):
+        return f"{self.form.title} - {self.created_at.strftime('%d.%m.%Y')}"
+
 class Corporate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hero_slider = db.Column(db.String(50), nullable=True)
@@ -174,6 +216,25 @@ class References(db.Model):
 
     def __str__(self):
         return "Referanslarımız Sabit Ayarları"
+    
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hero_slider = db.Column(db.String(50), nullable=True)
+    contact_form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
+    contact_form = db.relationship('Form', foreign_keys=[contact_form_id])
+    contact_info_title = db.Column(db.String(200), default="Ekosan Isıtma ve Soğutma Sistemleri Mühendislik İnşaat Sanayi ve Ticaret Limited Şirketi")
+    shop_id = db.Column(db.String(200), default="5393")
+    shop_id_date = db.Column(db.String(200), default="03.05.2005")
+    tax_id = db.Column(db.String(200), default="336 238 12 86 ( E-Fatura )")
+    phone = db.Column(db.String(200), default="0(372) 312 48 38")
+    wa = db.Column(db.String(200), default="0 533 207 54 66")
+    email = db.Column(db.String(200), default="bilgi@ekosanmuhendislik.com")
+    workhours = db.Column(db.String(200), default="Pazartesi - Cumartesi 09:00 - 19:00")
+    location_shop = db.Column(db.String(200), default="Müftü Mag. Erdemir Cad. İstanbul Yol Ayrımı 118/C Kdz. Ereğli / Zonguldak")
+    location_storage = db.Column(db.String(200), default="Soğanlıyörük Köyü Güçbir Jeneratör Fabrikası Yanı Kdz. Ereğli / Zonguldak")
+
+    def __str__(self):
+        return "İletişim Sabit Ayarları"
 
 class Product(db.Model, SEOMixin):
     id = db.Column(db.Integer, primary_key=True)

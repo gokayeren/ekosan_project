@@ -4,7 +4,7 @@ from flask import render_template, request, redirect, url_for, flash, current_ap
 from app import db
 from app.main import main
 from app.models import (
-    HomeConfig, Corporate, References, Contact, 
+    HomeConfig, Corporate, References, Contact, Getoffer,
     Service, Form, FormSubmission
 )
 
@@ -65,7 +65,27 @@ def contact():
                            contact=contact_data,
                            services=services)
 
-@main.route('/iletisim-gonder', methods=['POST'])
+@main.route("/teklifal")
+def getoffer():
+    home_config = HomeConfig.query.first() or HomeConfig()
+
+    contact_data = Contact.query.first()
+    if not contact_data:
+        contact_data = Contact()
+
+    getoffer_data = Getoffer.query.first()
+    if not getoffer_data:
+        getoffer_data = Getoffer()
+
+    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
+
+    return render_template('contact.html',
+                           home_config=home_config,
+                           contact=contact_data,
+                           getoffer=getoffer_data,
+                           services=services)
+
+@main.route('/form-submit', methods=['POST'])
 def submit_contact_form():
     form_id = request.form.get('form_id')
 

@@ -235,6 +235,16 @@ class Contact(db.Model):
 
     def __str__(self):
         return "İletişim Sabit Ayarları"
+    
+class Getoffer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hero_slider = db.Column(db.String(50), nullable=True)
+    getoffer_form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
+    getoffer_form = db.relationship('Form', foreign_keys=[getoffer_form_id])
+    getoffer_title = db.Column(db.String(200), default="Ürün yada hizmetlerimiz hakkında bilgi almak ve ücretsiz keşif talebinde bulunmak için lütfen formu doldurunuz.")
+
+    def __str__(self):
+        return "Teklif Al Sabit Ayarları"
 
 class Product(db.Model, SEOMixin):
     id = db.Column(db.Integer, primary_key=True)

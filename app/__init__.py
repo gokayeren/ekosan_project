@@ -23,7 +23,7 @@ admin.base_template = 'admin/master.html'
 from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
-    Contact, Form, FormField, FormSubmission # Yeni eklenenler
+    Contact, Getoffer, Form, FormField, FormSubmission
 )
 
 class SettingsView(ModelView):
@@ -292,6 +292,35 @@ class ContactView(ModelView):
             url = url_for('.edit_view', id=first_config.id)
             return redirect(url)
         return super(ContactView, self).index_view()
+    
+class GetofferView(ModelView):
+    can_delete = False
+
+    def can_create(self):
+        return self.model.query.count() == 0
+
+    edit_template = 'admin/getoffer_config.html'
+    create_template = 'admin/getoffer_config.html'
+
+    form_columns = (
+        'hero_slider',
+        'getoffer_form',
+        'getoffer_title'
+    )
+
+    column_labels = {
+        'hero_slider': 'Üst Slider Seçimi',
+        'getoffer_form': 'İletişim Formu Seçimi',
+        'getoffer_title': 'Forma başlığı'
+    }
+
+    @expose('/')
+    def index_view(self):
+        first_config = self.model.query.first()
+        if first_config:
+            url = url_for('.edit_view', id=first_config.id)
+            return redirect(url)
+        return super(GetofferView, self).index_view()
 
 class FormFieldInline(InlineFormAdmin):
     form_label = 'Form Alanı'
@@ -423,6 +452,7 @@ def create_app(config_class=Config):
     admin.add_view(CorporateView(Corporate, db.session, name="Kurumsal İçerik"))
     admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
     admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
+    admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Medya"))
@@ -480,6 +510,12 @@ def create_app(config_class=Config):
             print(">> Veritabanı boş: Varsayılan Contact oluşturuluyor...")
             default_contact = Contact()
             db.session.add(default_contact)
+            db.session.commit()
+
+        if not Getoffer.query.first():
+            print(">> Veritabanı boş: Varsayılan Getoffer oluşturuluyor...")
+            default_getoffer = Getoffer()
+            db.session.add(default_getoffer)
             db.session.commit()
 
         if not SiteSetting.query.first():

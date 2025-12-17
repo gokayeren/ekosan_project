@@ -4,7 +4,7 @@
 
 {% block content %}
 
-{% set hero_slider_key = home_config.hero_slider %}
+{% set hero_slider_key = home_config.hero_slider.group_key if home_config.hero_slider else None %}
 {% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
 
 <div class="relative w-full h-[500px] lg:h-[650px] bg-neutral-900 overflow-hidden font-sans group">
@@ -69,7 +69,7 @@
                     </div>
                     <div class="absolute inset-0 z-10 bg-black/50"></div>
                     <div class="relative z-20 container mx-auto px-6 h-full flex items-center">
-                        <h1 class="text-white text-4xl font-bold">Admin Panelinden Slider Seçiniz...</h1>
+                        <h1 class="text-white text-4xl font-bold">Slider Seçiniz.</h1>
                     </div>
                 </div>
             {% endif %}

@@ -1,0 +1,159 @@
+{% extends 'admin/model/list.html' %}
+
+{% block body %}
+    <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
+        
+        <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-[#0f172a]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    {% if 'Başvuru' in admin_view.name %}
+                        <i class="fa fa-envelope-open-text"></i>
+                    {% elif 'Slider' in admin_view.name %}
+                        <i class="fa fa-images"></i>
+                    {% elif 'Hizmet' in admin_view.name %}
+                        <i class="fa fa-concierge-bell"></i>
+                    {% else %}
+                        <i class="fa fa-list"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-100 text-base">{{ admin_view.name }}</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        {% if 'Başvuru' in admin_view.name %}
+                            Web sitesinden gelen form yanıtlarını inceleyin.
+                        {% else %}
+                            {{ admin_view.name }} kayıtlarını buradan yönetebilirsiniz.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            {% if admin_view.can_create %}
+            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 px-5 h-10 rounded-lg shadow-lg shadow-blue-900/20 font-medium transition-all flex items-center gap-2">
+                <i class="fa fa-plus"></i> Yeni Ekle
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="overflow-x-auto">
+            {% block model_list_table %}
+            <table class="table w-full border-collapse">
+                <thead>
+                    <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                        {# Sütun Başlıklarını Dinamik Döndür #}
+                        {% for c, name in list_columns %}
+                            <th class="px-6 py-4 {% if c == 'id' or c == 'order' %}text-center w-20{% endif %}">
+                                {{ name }}
+                                {# Sıralama İkonu #}
+                                {% if admin_view.column_sortable_list %}
+                                    {% if c in admin_view.column_sortable_list %}
+                                    <a href="{{ sort_url(c) }}" title="Sırala" class="ml-1 text-slate-600 hover:text-blue-400">
+                                        <i class="fa fa-sort"></i>
+                                    </a>
+                                    {% endif %}
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                        
+                        {# İşlemler Sütunu (Eğer yetki varsa) #}
+                        {% if admin_view.can_edit or admin_view.can_delete %}
+                            <th class="px-6 py-4 text-right w-32">İşlemler</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                
+                <tbody class="divide-y divide-slate-800/50 text-sm">
+                {% for row in data %}
+                    <tr class="hover:bg-slate-800/30 transition-colors group">
+                        
+                        {# Sütun Değerlerini Dinamik Döndür #}
+                        {% for c, name in list_columns %}
+                            <td class="px-6 py-4 {% if c == 'id' or c == 'order' %}text-center{% endif %}">
+                                
+                                {# Özel Sütun Biçimlendirmeleri #}
+                                {% if c == 'id' or c == 'order' %}
+                                    <span class="font-bold text-slate-500 font-mono">{{ get_value(row, c) }}</span>
+                                
+                                {% elif c == 'is_active' %}
+                                    {% if get_value(row, c) == True %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-900/20 text-emerald-500 border border-emerald-900/30">Aktif</span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-900/20 text-red-500 border border-red-900/30">Pasif</span>
+                                    {% endif %}
+                                
+                                {% elif c == 'submission_data' %}
+                                    {# Form verileri HTML olarak geldiği için safe filtresi gerekebilir ama get_value genelde string döner #}
+                                    <div class="text-slate-300 text-xs leading-relaxed space-y-1">
+                                        {{ get_value(row, c) }} 
+                                    </div>
+
+                                {% elif c == 'created_at' %}
+                                    <div class="flex items-center gap-2 text-slate-400 font-mono text-xs">
+                                        <i class="fa fa-clock text-slate-600"></i>
+                                        {{ get_value(row, c) }}
+                                    </div>
+
+                                {% elif c == 'ip_address' %}
+                                    <span class="bg-[#111827] border border-slate-700 rounded px-2 py-1 text-[11px] font-mono text-blue-400">
+                                        {{ get_value(row, c) }}
+                                    </span>
+
+                                {% else %}
+                                    <div class="text-slate-300">
+                                        {{ get_value(row, c) }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+
+                        {# İşlemler #}
+                        {% if admin_view.can_edit or admin_view.can_delete %}
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-4">
+                                
+                                {% if admin_view.can_edit %}
+                                <a href="{{ url_for('.edit_view', id=row.id) }}" class="text-slate-500 hover:text-blue-400 transition-colors transform hover:scale-110" title="Düzenle / İncele">
+                                    <i class="fa fa-pencil-alt text-lg"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% if admin_view.can_delete %}
+                                <form class="inline-block m-0 p-0" method="POST" action="{{ url_for('.delete_view') }}">
+                                    {{ delete_form.id(value=row.id) }}
+                                    {{ delete_form.url(value=return_url) }}
+                                    {{ delete_form.csrf_token }}
+                                    <button onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?');" class="text-slate-500 hover:text-red-500 transition-colors transform hover:scale-110 bg-transparent border-0 cursor-pointer p-0" title="Sil">
+                                        <i class="fa fa-trash text-lg"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="{{ list_columns|length + 1 }}" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fa fa-folder-open text-3xl text-slate-600"></i>
+                                </div>
+                                <h3 class="text-slate-300 font-medium text-base">Kayıt Bulunamadı</h3>
+                                <p class="text-slate-500 text-sm mt-1 max-w-xs mx-auto">Bu alanda henüz gösterilecek bir veri yok.</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if num_pages > 1 %}
+            <div class="p-4 border-t border-slate-800 bg-[#0b1120] flex justify-center">
+                {{ lib.pager(page, num_pages, pager_url) }}
+            </div>
+            {% endif %}
+            
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

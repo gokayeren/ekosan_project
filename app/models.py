@@ -48,7 +48,7 @@ class MenuItem(db.Model):
     
 class Footer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.Text, default="Biz, yenilikçi ve sürdürülebilir güneş enerjisi çözümleri sunan bir firmayız. Güneş enerjisi sistemlerinden ve solar kamera çözümlerine kadar geniş bir yelpazede teknolojiler sunarak, müşterilerimizin enerji verimliliği sağlayan çevre dostu çözümlerle tanışmasını sağlıyoruz.")
+    description = db.Column(db.Text, default="Biz, yenilikçi ve sürdürülebilir güneş enerjisi çözümleri sunan bir firmayız.")
     link01_text = db.Column(db.String(50), default="Isı Pompası")
     link01_url = db.Column(db.String(200), nullable=True)
     link02_text = db.Column(db.String(50), default="Ekolojik Villa")
@@ -59,8 +59,8 @@ class Footer(db.Model):
     link04_url = db.Column(db.String(200), nullable=True)
     link05_text = db.Column(db.String(50), default="Keşif Formu")
     link05_url = db.Column(db.String(200), nullable=True)
-    shop_address = db.Column(db.String(200), default="Müftü Mah. Erdemir Cad. İstanbul Yol Ayrımı 118/C Kdz. Ereğli / ZONGULDAK")
-    storage_address = db.Column(db.String(200), default="Soğanlıyörük Köyü, Delihakkı Mevkii, Güçbir Jeneratör Fabrikası Yanı Kdz. Ereğli / ZONGULDAK")
+    shop_address = db.Column(db.Text, default="Müftü Mah. Erdemir Cad. İstanbul Yol Ayrımı 118/C Kdz. Ereğli / ZONGULDAK")
+    storage_address = db.Column(db.Text, default="Soğanlıyörük Köyü, Delihakkı Mevkii, Güçbir Jeneratör Fabrikası Yanı Kdz. Ereğli / ZONGULDAK")
     shop_tel = db.Column(db.String(50), default="03723124838")
     mobile_tel = db.Column(db.String(50), default="905334885033")
     email = db.Column(db.String(50), default="bilgi@ekosanmuhendislik.com")
@@ -74,50 +74,7 @@ class Footer(db.Model):
 
     def __str__(self):
         return "Footer Sabit Ayarları"
-    
-class HomeConfig(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    hero_slider = db.Column(db.String(50), nullable=True)
-    presentation_title = db.Column(db.String(200), default="Sektöründe Kendini İspatlamış En Verimli Enerji Çözümleri Ekosan Isı' da.")
-    presentation_subtitle = db.Column(db.Text, default="Ekosan Isı Olarak 20 Yıldır Bölgemize Hizmet Vermekten Onur Duyuyoruz.")
-    presentation_action_text = db.Column(db.String(50), nullable=True)
-    presentation_action_url = db.Column(db.String(200), nullable=True)
-    features_title = db.Column(db.String(200), default="Mühendislik ve Güvenin Buluşması.")
-    features_subtitle = db.Column(db.Text, default="Sadece bir ısıtma sistemi değil; yaşam kalitenizi artıran teknolojiler üretiyoruz.")
-    parallax_title = db.Column(db.String(200), default="Gelecek nesiller için yaşam alanları tasarlıyoruz.")
-    parallax_subtitle = db.Column(db.Text, default="1917 yılında bir ısıtma teknolojisi üreticisi olarak kurulan ve artık Carrier'ın bir parçası olarak verimli ısıtma, soğutma ve yenilenebilir enerji çözümleri alanında dünyanın önde gelen sağlayıcılarından biriyiz. Yerel partnerlerimizle birlikte, Gelecek nesiller için yaşam alanları tasarlamak her gün üstlendiğimiz bir sorumluluktur.")
-    parallax_image = db.Column(db.String(200), default='default_parallax.png')
-    cta_title_bold = db.Column(db.String(100), default="NASIL")
-    cta_title_light = db.Column(db.String(200), default="YARDIMCI OLABİLİRİZ?")
-    cta_intro_text = db.Column(db.Text, default="Ekosan Isı olarak ısıtma, soğutma, akıllı ve ekolojik ev konularında bölgemizde 20 yıldır faaliyet gösteriyoruz.")
-    cta_btn_text = db.Column(db.String(200), default="Ücretsiz Keşif")
-    cta_description = db.Column(db.Text, default="Yenilikçi ve verimli enerji çözümlerimiz için ücretsiz keşif ve fiyat talebinizi bırakabilirsiniz.")
-    cta_image = db.Column(db.String(200), default='default_expert.png')
-    slider_description = db.Column(db.Text, default="Isıtma, Soğutma ve Akıllı ev teknolojilerinde sektörün en iyileri ile birlikte çalışıyoruz.")
-    slider_select = db.Column(db.String(50), nullable=True)
 
-    def __str__(self):
-        return "Anasayfa Sabit Ayarları"
-    
-products_services = db.Table('products_services',
-    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True),
-    db.Column('service_id', db.Integer, db.ForeignKey('service.id'), primary_key=True)
-)
-    
-class Service(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    image_path = db.Column(db.String(200))
-    is_active = db.Column(db.Boolean, default=True)
-    order = db.Column(db.Integer, default=0)
-
-    products = db.relationship('Product', secondary=products_services, lazy='subquery',
-        backref=db.backref('services', lazy=True))
-
-    def __repr__(self):
-        return self.title
-    
 class SliderGroup(db.Model):
     __tablename__ = 'slider_groups'
     id = db.Column(db.Integer, primary_key=True)
@@ -126,13 +83,12 @@ class SliderGroup(db.Model):
     items = db.relationship('SliderItem', backref='group', lazy=True, cascade="all, delete-orphan", order_by="SliderItem.order")
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.group_key})"
 
 class SliderItem(db.Model):
     __tablename__ = 'slider_items'
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=False)
-    
     image_path = db.Column(db.String(255))
     title = db.Column(db.String(200))
     subtitle = db.Column(db.String(200))
@@ -154,13 +110,12 @@ class Form(db.Model):
     fields = db.relationship('FormField', backref='form', lazy=True, cascade="all, delete-orphan", order_by="FormField.order")
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.form_key})"
 
 class FormField(db.Model):
     __tablename__ = 'form_fields'
     id = db.Column(db.Integer, primary_key=True)
     form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=False)
-    
     label = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     field_type = db.Column(db.String(20), default='text')
@@ -179,50 +134,95 @@ class FormSubmission(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     submission_data = db.Column(db.Text, nullable=False) 
     ip_address = db.Column(db.String(50), nullable=True)
-
     form = db.relationship('Form')
 
     def __str__(self):
         return f"{self.form.title} - {self.created_at.strftime('%d.%m.%Y')}"
 
+class HomeConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    hero_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    hero_slider = db.relationship('SliderGroup', foreign_keys=[hero_slider_id])
+    
+    presentation_title = db.Column(db.String(200), default="Sektöründe Kendini İspatlamış En Verimli Enerji Çözümleri Ekosan Isı' da.")
+    presentation_subtitle = db.Column(db.Text, default="Ekosan Isı Olarak 20 Yıldır Bölgemize Hizmet Vermekten Onur Duyuyoruz.")
+    presentation_action_text = db.Column(db.String(50), nullable=True)
+    presentation_action_url = db.Column(db.String(200), nullable=True)
+    features_title = db.Column(db.String(200), default="Mühendislik ve Güvenin Buluşması.")
+    features_subtitle = db.Column(db.Text, default="Sadece bir ısıtma sistemi değil; yaşam kalitenizi artıran teknolojiler üretiyoruz.")
+    parallax_title = db.Column(db.String(200), default="Gelecek nesiller için yaşam alanları tasarlıyoruz.")
+    parallax_subtitle = db.Column(db.Text, default="1917 yılında bir ısıtma teknolojisi üreticisi olarak kurulan ve artık Carrier'ın bir parçası.")
+    parallax_image = db.Column(db.String(200), default='default_parallax.png')
+    cta_title_bold = db.Column(db.String(100), default="NASIL")
+    cta_title_light = db.Column(db.String(200), default="YARDIMCI OLABİLİRİZ?")
+    cta_intro_text = db.Column(db.Text, default="Ekosan Isı olarak ısıtma, soğutma, akıllı ve ekolojik ev konularında bölgemizde 20 yıldır faaliyet gösteriyoruz.")
+    cta_btn_text = db.Column(db.String(200), default="Ücretsiz Keşif")
+    cta_description = db.Column(db.Text, default="Yenilikçi ve verimli enerji çözümlerimiz için ücretsiz keşif ve fiyat talebinizi bırakabilirsiniz.")
+    cta_image = db.Column(db.String(200), default='default_expert.png')
+    slider_description = db.Column(db.Text, default="Isıtma, Soğutma ve Akıllı ev teknolojilerinde sektörün en iyileri ile birlikte çalışıyoruz.")
+    
+    slider_select_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    slider_select = db.relationship('SliderGroup', foreign_keys=[slider_select_id])
+
+    def __str__(self):
+        return "Anasayfa Sabit Ayarları"
+    
 class Corporate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hero_slider = db.Column(db.String(50), nullable=True)
-    presentation_slider = db.Column(db.String(50), nullable=True)
+    
+    hero_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    hero_slider = db.relationship('SliderGroup', foreign_keys=[hero_slider_id])
+
+    presentation_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    presentation_slider = db.relationship('SliderGroup', foreign_keys=[presentation_slider_id])
+    
     presentation_title = db.Column(db.String(200), default="20 Yıldan Fazla Süredir Bölgemizde Hizmet Veriyoruz.")
-    howeare = db.Column(db.Text, default="Ekosan Isı 20 yılı aşkın sektör deneyimiyle Zonguldak, Ereğli, Alaplı ve Akçakoca bölgelerinde kombi, klima, ısı pompası ve güneş enerjisinden elektrik üretimi (GES) alanlarında profesyonel çözümler sunan öncü bir firmadır.")
-    whatwedo = db.Column(db.Text, default="Bölgenin en güvenilir ısıtma soğutma firmlarından biri olarak, enerji verimliliğini artıran modern sistemleri uzman kadromuzla kuruyor, bakımını yapıyor ve uzun yıllar sorunsuz çalışmasını sağlıyoruz.")
-    whyus = db.Column(db.Text, default="2*+ yıllık uzmanlık. Bölgenin deneyimli Isıtma Soğutma Firması. Binlerce başarılı kurulum. Hızlı servis ve yerinde çözüm. Enerji tasarrufu odaklı mühendislik.")
+    howeare = db.Column(db.Text, default="Ekosan Isı 20 yılı aşkın sektör deneyimiyle Zonguldak...")
+    whatwedo = db.Column(db.Text, default="Bölgenin en güvenilir ısıtma soğutma firmlarından biri olarak...")
+    whyus = db.Column(db.Text, default="20+ yıllık uzmanlık...")
     card01_title = db.Column(db.String(200), default="Isı Pompası Sistemleri")
-    card01_subtitle = db.Column(db.Text, default="Enerji verimli ısı pompası projelendirme Alaplı ve Akçakoca ısı pompası kurulum. En verimli ısı pompası modelleri.")
+    card01_subtitle = db.Column(db.Text, default="Enerji verimli ısı pompası projelendirme...")
     card02_title = db.Column(db.String(200), default="Kombi Sistemleri")
-    card02_subtitle = db.Column(db.Text, default="Kombi montaj, bakım ve arıza tespiti. Zonguldak kombi servisi çözümleri. Uygun fiyatlı kombi bakım hizmetleri.")
+    card02_subtitle = db.Column(db.Text, default="Kombi montaj, bakım ve arıza tespiti...")
     card03_title = db.Column(db.String(200), default="Klima Çözümleri")
-    card03_subtitle = db.Column(db.Text, default="Profesyonel klima montajı. Ereğli klima servisi. Klima gaz dolumu ve periyodik bakım.")
+    card03_subtitle = db.Column(db.Text, default="Profesyonel klima montajı...")
     card04_title = db.Column(db.String(200), default="Güneş Enerjisinden Elektrik")
-    card04_subtitle = db.Column(db.Text, default="Güneş paneli kurulumu. Akçakoca GES porjelendirme. Güneşten elektrik üretimi maliyet analizi.")
+    card04_subtitle = db.Column(db.Text, default="Güneş paneli kurulumu...")
 
     def __str__(self):
         return "Kurumsal Sabit Ayarları"
     
 class References(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hero_slider = db.Column(db.String(50), nullable=True)
-    presentation_title = db.Column(db.String(200), default="Isıtma, Soğutma, Güneşten Elektrik, Ekolojik Villa, Akıllı Ev Bizim İşimiz")
-    corporate_slider = db.Column(db.String(50), nullable=True)
-    personal_slider = db.Column(db.String(50), nullable=True)
+    
+    hero_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    hero_slider = db.relationship('SliderGroup', foreign_keys=[hero_slider_id])
+    
+    presentation_title = db.Column(db.String(200), default="Isıtma, Soğutma, Güneşten Elektrik...")
+    
+    corporate_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    corporate_slider = db.relationship('SliderGroup', foreign_keys=[corporate_slider_id])
+    
+    personal_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    personal_slider = db.relationship('SliderGroup', foreign_keys=[personal_slider_id])
+    
     parallax_image = db.Column(db.String(200), default='default_parallax.png')
-    parallax_title = db.Column(db.Text, default="Binlerce Mutlu Müşterimiz Arasına Katılmak için Bizimle İletişime Geçebilirsiniz.")
+    parallax_title = db.Column(db.Text, default="Binlerce Mutlu Müşterimiz Arasına Katılmak için...")
 
     def __str__(self):
         return "Referanslarımız Sabit Ayarları"
     
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hero_slider = db.Column(db.String(50), nullable=True)
+    
+    hero_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    hero_slider = db.relationship('SliderGroup', foreign_keys=[hero_slider_id])
+    
     contact_form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
     contact_form = db.relationship('Form', foreign_keys=[contact_form_id])
-    contact_info_title = db.Column(db.String(200), default="Ekosan Isıtma ve Soğutma Sistemleri Mühendislik İnşaat Sanayi ve Ticaret Limited Şirketi")
+    
+    contact_info_title = db.Column(db.String(200), default="Ekosan Isıtma ve Soğutma...")
     shop_id = db.Column(db.String(200), default="5393")
     shop_id_date = db.Column(db.String(200), default="03.05.2005")
     tax_id = db.Column(db.String(200), default="336 238 12 86 ( E-Fatura )")
@@ -230,21 +230,44 @@ class Contact(db.Model):
     wa = db.Column(db.String(200), default="0 533 207 54 66")
     email = db.Column(db.String(200), default="bilgi@ekosanmuhendislik.com")
     workhours = db.Column(db.String(200), default="Pazartesi - Cumartesi 09:00 - 19:00")
-    location_shop = db.Column(db.String(200), default="Müftü Mag. Erdemir Cad. İstanbul Yol Ayrımı 118/C Kdz. Ereğli / Zonguldak")
-    location_storage = db.Column(db.String(200), default="Soğanlıyörük Köyü Güçbir Jeneratör Fabrikası Yanı Kdz. Ereğli / Zonguldak")
+    location_shop = db.Column(db.String(200), default="Müftü Mag. Erdemir Cad...")
+    location_storage = db.Column(db.String(200), default="Soğanlıyörük Köyü Güçbir...")
 
     def __str__(self):
         return "İletişim Sabit Ayarları"
     
 class Getoffer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hero_slider = db.Column(db.String(50), nullable=True)
+    
+    hero_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    hero_slider = db.relationship('SliderGroup', foreign_keys=[hero_slider_id])
+    
     getoffer_form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
     getoffer_form = db.relationship('Form', foreign_keys=[getoffer_form_id])
-    getoffer_title = db.Column(db.String(200), default="Ürün yada hizmetlerimiz hakkında bilgi almak ve ücretsiz keşif talebinde bulunmak için lütfen formu doldurunuz.")
+    
+    getoffer_title = db.Column(db.String(200), default="Ürün yada hizmetlerimiz hakkında bilgi almak...")
 
     def __str__(self):
         return "Teklif Al Sabit Ayarları"
+
+products_services = db.Table('products_services',
+    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True),
+    db.Column('service_id', db.Integer, db.ForeignKey('service.id'), primary_key=True)
+)
+    
+class Service(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    image_path = db.Column(db.String(200))
+    is_active = db.Column(db.Boolean, default=True)
+    order = db.Column(db.Integer, default=0)
+
+    products = db.relationship('Product', secondary=products_services, lazy='subquery',
+        backref=db.backref('services', lazy=True))
+
+    def __repr__(self):
+        return self.title
 
 class Product(db.Model, SEOMixin):
     id = db.Column(db.Integer, primary_key=True)

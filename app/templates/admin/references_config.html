@@ -3,12 +3,25 @@
 {% block content_title %}{% endblock %}
 
 {% block body %}
+    
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Referans İçerik Yönetimi</h2>
+            <p class="text-xs text-slate-500 mt-1">Referanslar sayfasındaki slider ve parallax alanlarını düzenleyin.</p>
+        </div>
+        <div>
+            <button type="submit" form="referencesForm" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 gap-2">
+                <i class="fa fa-save"></i> Kaydet
+            </button>
+        </div>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
+                         <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -16,8 +29,8 @@
         {% endif %}
     {% endwith %}
 
-    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
-
+    <form id="referencesForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+        
         {% if form.csrf_token %}
             {{ form.csrf_token }}
         {% endif %}
@@ -25,74 +38,71 @@
             {{ f() }}
         {% endfor %}
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-indigo-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                     <i class="fa fa-images"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Slider Konfigürasyonu</h3>
-                    <p class="text-xs text-gray-500">Ana sayfa ve içerik slider ID tanımları.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">Slider Konfigürasyonu</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Slider ID Tanımları</p>
                 </div>
             </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Hero Slider ID (Ana Banner)</label>
-                    {{ form.hero_slider(class="input input-bordered w-full", placeholder="Örn: home_slider") }}
-                    <span class="text-[10px] text-gray-400 block mt-1">Sayfanın en üstündeki ana slider.</span>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Hero Slider ID (Ana Banner)</label>
+                    {{ form.hero_slider(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors", placeholder="Örn: home_slider") }}
+                    <span class="text-[10px] text-slate-600 block mt-2">Sayfanın en üstündeki ana slider.</span>
                 </div>
+                
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Kurumsal Referanslarımız</label>
-                    {{ form.corporate_slider(class="input input-bordered w-full", placeholder="Örn: corporate_slider") }}
-                    <span class="text-[10px] text-gray-400 block mt-1">Kurumsal Referanslarımız bölümü.</span>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Kurumsal Referanslarımız</label>
+                    {{ form.corporate_slider(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors", placeholder="Örn: corporate_slider") }}
+                    <span class="text-[10px] text-slate-600 block mt-2">Kurumsal logoların döndüğü slider ID.</span>
                 </div>
+
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Bireysel Referanslarımız</label>
-                    {{ form.personal_slider(class="input input-bordered w-full", placeholder="Örn: personal_slider") }}
-                    <span class="text-[10px] text-gray-400 block mt-1">Bireysel Referanslarımız bölümü.</span>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Bireysel Referanslarımız</label>
+                    {{ form.personal_slider(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors", placeholder="Örn: personal_slider") }}
+                    <span class="text-[10px] text-slate-600 block mt-2">Bireysel referansların döndüğü slider ID.</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-orange-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
-                    <i class="fa fa-user-tie"></i>
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-orange-900/20 border border-orange-500/20 flex items-center justify-center text-orange-400">
+                    <i class="fa fa-layer-group"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Parallax Alan</h3>
+                    <h3 class="font-bold text-slate-200 text-sm">Parallax Alan</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Ara Görsel Bölümü</p>
                 </div>
             </div>
             
             <div class="p-6 grid grid-cols-12 gap-8">
                 <div class="col-span-12 lg:col-span-8 space-y-4">
                     <div>
-                        <label class="label pt-0 font-semibold text-gray-700">Bölüm Başlığı</label>
-                        {{ form.parallax_title(class="input input-bordered w-full") }}
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Bölüm Başlığı</label>
+                        {{ form.parallax_title(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-orange-500 transition-colors") }}
                     </div>
                 </div>
 
                 <div class="col-span-12 lg:col-span-4">
-                    <label class="label pt-0 font-semibold text-gray-700">Parallax Resmi</label>
-                    <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors h-full flex flex-col justify-center">
-                        <div class="h-24 w-auto mx-auto bg-gray-100 rounded-lg overflow-hidden mb-3 flex items-center justify-center">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Parallax Resmi</label>
+                    <div class="border border-dashed border-slate-700 rounded-lg p-4 text-center bg-[#020617]/50 hover:bg-[#020617] hover:border-slate-500 transition-all h-full flex flex-col justify-center group relative">
+                        <div class="h-24 w-auto mx-auto bg-[#0f172a] border border-slate-800 rounded overflow-hidden mb-3 flex items-center justify-center p-1">
                             {% if model is defined and model.parallax_image %}
-                                <img src="{{ url_for('static', filename='uploads/' + model.parallax_image) }}" class="object-contain h-full">
+                                <img src="{{ url_for('static', filename='uploads/' + model.parallax_image) }}" class="object-contain h-full w-full">
                             {% else %}
-                                <i class="fa fa-user text-3xl text-gray-300"></i>
+                                <i class="fa fa-image text-3xl text-slate-700 group-hover:text-slate-500 transition-colors"></i>
                             {% endif %}
                         </div>
-                        {{ form.parallax_image(class="file-input file-input-bordered file-input-sm w-full") }}
+                        <input type="file" name="parallax_image" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[10px] file:bg-slate-800 file:text-orange-400 hover:file:bg-slate-700 cursor-pointer"/>
                     </div>
                 </div>
             </div>
-        </div>
-
-        {# KAYDET BUTONU #}
-        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:justify-end">
-            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-indigo-500/30">
-                <i class="fa fa-save mr-2"></i> Kurumsal Ayarları Kaydet
-            </button>
         </div>
 
     </form>

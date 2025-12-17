@@ -4,13 +4,24 @@
 
 {% block body %}
     
-    {# Hata/Bilgi Mesajları #}
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Footer Ayarları</h2>
+            <p class="text-xs text-slate-500 mt-1">Site alt kısmı (footer) içerik ve bağlantı yapılandırması.</p>
+        </div>
+        <div>
+            <button type="submit" form="footerForm" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 gap-2 flex-nowrap uppercase">
+                <i class="fa fa-save"></i> Kaydet
+            </button>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for category, message in messages %}
-                    <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm bg-white border border-gray-200">
-                        <i class="fa fa-info-circle text-primary"></i>
+                    <div role="alert" class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
+                        <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -18,217 +29,196 @@
         {% endif %}
     {% endwith %}
 
-    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
-        
-        {# Gizli alanlar ve CSRF Token #}
+    <form id="footerForm" action="" method="POST" enctype="multipart/form-data" class="w-full">
+
         {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
         {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
 
-        {# BÖLÜM 1: GENEL BİLGİLER #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <div class="w-8 h-8 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                         <i class="fa fa-info"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm">Genel Footer Bilgileri</h3>
-                        <p class="text-xs text-gray-500">Logo altındaki açıklama ve telif hakkı yazısı</p>
+                        <h3 class="font-bold text-slate-200 text-sm">Genel Bilgiler</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Açıklama & Telif</p>
                     </div>
                 </div>
             </div>
             <div class="p-6 grid grid-cols-12 gap-6">
                 <div class="col-span-12">
-                    <label class="label pt-0 font-semibold text-gray-700">Footer Açıklama Metni</label>
-                    {{ form.description(class="textarea textarea-bordered w-full h-24 focus:textarea-primary", placeholder="Firma hakkında kısa bilgi...") }}
-                    <label class="label text-xs text-gray-400">Logonun hemen altında yer alacak tanıtım yazısı.</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Footer Açıklama</label>
+                    {{ form.description(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600 transition-colors h-24 resize-none", placeholder="Firma hakkında kısa bilgi...") }}
+                    <p class="text-[10px] text-slate-600 mt-2">Logonun hemen altında yer alacak tanıtım yazısı.</p>
                 </div>
                 <div class="col-span-12">
-                    <label class="label font-semibold text-gray-700">Copyright (Telif) Metni</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Copyright (Telif)</label>
                     <div class="relative">
-                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-copyright"></i></span>
-                        {{ form.copyright(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                        <span class="absolute left-3 top-2.5 text-slate-500"><i class="fa fa-copyright"></i></span>
+                        {{ form.copyright(class="w-full bg-[#020617] border border-slate-700 rounded pl-9 pr-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600 transition-colors") }}
                     </div>
                 </div>
             </div>
         </div>
 
-        {# BÖLÜM 2: İLETİŞİM VE ADRESLER #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                    <div class="w-8 h-8 rounded bg-orange-900/20 border border-orange-500/20 flex items-center justify-center text-orange-400">
                         <i class="fa fa-map-marker-alt"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm">İletişim ve Adresler</h3>
-                        <p class="text-xs text-gray-500">Mağaza, depo ve iletişim kanalları</p>
+                        <h3 class="font-bold text-slate-200 text-sm">İletişim & Adresler</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Konum Bilgileri</p>
                     </div>
                 </div>
             </div>
             <div class="p-6 grid grid-cols-12 gap-6">
                 <div class="col-span-12 md:col-span-4">
-                    <label class="label pt-0 font-semibold text-gray-700">Sabit Telefon</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Sabit Telefon</label>
                     <div class="relative">
-                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-phone-alt"></i></span>
-                        {{ form.shop_tel(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                        <span class="absolute left-3 top-2.5 text-slate-500"><i class="fa fa-phone-alt"></i></span>
+                        {{ form.shop_tel(class="w-full bg-[#020617] border border-slate-700 rounded pl-9 pr-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-slate-600 transition-colors") }}
                     </div>
                 </div>
                 <div class="col-span-12 md:col-span-4">
-                    <label class="label pt-0 font-semibold text-gray-700">Cep Telefonu</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Cep Telefonu</label>
                     <div class="relative">
-                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-mobile-alt"></i></span>
-                        {{ form.mobile_tel(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                        <span class="absolute left-3 top-2.5 text-slate-500"><i class="fa fa-mobile-alt"></i></span>
+                        {{ form.mobile_tel(class="w-full bg-[#020617] border border-slate-700 rounded pl-9 pr-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-slate-600 transition-colors") }}
                     </div>
                 </div>
                 <div class="col-span-12 md:col-span-4">
-                    <label class="label pt-0 font-semibold text-gray-700">E-Posta</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">E-Posta</label>
                     <div class="relative">
-                        <span class="absolute left-3 top-3 text-gray-400"><i class="fa fa-envelope"></i></span>
-                        {{ form.email(class="input input-bordered w-full pl-10 focus:input-primary") }}
+                        <span class="absolute left-3 top-2.5 text-slate-500"><i class="fa fa-envelope"></i></span>
+                        {{ form.email(class="w-full bg-[#020617] border border-slate-700 rounded pl-9 pr-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-slate-600 transition-colors") }}
                     </div>
                 </div>
 
                 <div class="col-span-12 md:col-span-6">
-                    <label class="label font-semibold text-gray-700">Mağaza Adresi</label>
-                    {{ form.shop_address(class="textarea textarea-bordered w-full h-24 focus:textarea-primary") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Mağaza Adresi</label>
+                    {{ form.shop_address(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-slate-600 transition-colors h-24 resize-none") }}
                 </div>
                 <div class="col-span-12 md:col-span-6">
-                    <label class="label font-semibold text-gray-700">Depo/Fabrika Adresi</label>
-                    {{ form.storage_address(class="textarea textarea-bordered w-full h-24 focus:textarea-primary") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Depo/Fabrika Adresi</label>
+                    {{ form.storage_address(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-slate-600 transition-colors h-24 resize-none") }}
                 </div>
             </div>
         </div>
 
-        {# BÖLÜM 3: HIZLI LİNKLER (YAN YANA GRUPLANMIŞ) #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                    <div class="w-8 h-8 rounded bg-blue-900/20 border border-blue-500/20 flex items-center justify-center text-blue-400">
                         <i class="fa fa-link"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm">Hızlı Linkler</h3>
-                        <p class="text-xs text-gray-500">Footer orta kısımda görünecek 5 adet bağlantı</p>
+                        <h3 class="font-bold text-slate-200 text-sm">Hızlı Linkler</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Footer Menüsü (Max 5)</p>
                     </div>
                 </div>
             </div>
             <div class="p-6 space-y-4">
-                {# Link Grupları İçin Döngü Mantığı Yerine Manuel Yapı (Daha Net Görünüm İçin) #}
-                
-                {# Link 1 #}
-                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-slate-800 last:border-0">
                     <div class="col-span-12 md:col-span-4">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">1. Link Başlığı</label>
-                        {{ form.link01_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">1. Link Başlığı</label>
+                        {{ form.link01_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">1. Link URL</label>
-                        {{ form.link01_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="https:// veya /hakkimizda") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">URL</label>
+                        {{ form.link01_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500 transition-colors", placeholder="https:// veya /hakkimizda") }}
                     </div>
                 </div>
 
-                {# Link 2 #}
-                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-slate-800 last:border-0">
                     <div class="col-span-12 md:col-span-4">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">2. Link Başlığı</label>
-                        {{ form.link02_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">2. Link Başlığı</label>
+                        {{ form.link02_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">2. Link URL</label>
-                        {{ form.link02_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">URL</label>
+                        {{ form.link02_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                 </div>
 
-                {# Link 3 #}
-                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-slate-800 last:border-0">
                     <div class="col-span-12 md:col-span-4">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">3. Link Başlığı</label>
-                        {{ form.link03_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">3. Link Başlığı</label>
+                        {{ form.link03_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">3. Link URL</label>
-                        {{ form.link03_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">URL</label>
+                        {{ form.link03_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                 </div>
 
-                {# Link 4 #}
-                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-slate-800 last:border-0">
                     <div class="col-span-12 md:col-span-4">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">4. Link Başlığı</label>
-                        {{ form.link04_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">4. Link Başlığı</label>
+                        {{ form.link04_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">4. Link URL</label>
-                        {{ form.link04_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">URL</label>
+                        {{ form.link04_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                 </div>
 
-                {# Link 5 #}
-                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-gray-100 last:border-0">
+                <div class="grid grid-cols-12 gap-4 items-end pb-4 border-b border-slate-800 last:border-0">
                     <div class="col-span-12 md:col-span-4">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">5. Link Başlığı</label>
-                        {{ form.link05_text(class="input input-bordered input-sm w-full focus:input-primary") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">5. Link Başlığı</label>
+                        {{ form.link05_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs uppercase">5. Link URL</label>
-                        {{ form.link05_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">URL</label>
+                        {{ form.link05_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500 transition-colors") }}
                     </div>
                 </div>
             </div>
         </div>
 
-        {# BÖLÜM 4: YASAL & POLİTİKALAR #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+                    <div class="w-8 h-8 rounded bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-400">
                         <i class="fa fa-shield-alt"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm">Yasal Metinler & Politikalar</h3>
-                        <p class="text-xs text-gray-500">KVKK, Gizlilik ve Çerez bağlantıları</p>
+                        <h3 class="font-bold text-slate-200 text-sm">Yasal & Politikalar</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">KVKK - Gizlilik - Çerez</p>
                     </div>
                 </div>
             </div>
             <div class="p-6 space-y-4">
-                {# Gizlilik Politikası #}
                 <div class="grid grid-cols-12 gap-4 items-center">
                     <div class="col-span-12 md:col-span-4">
-                        {{ form.policy_text(class="input input-bordered input-sm w-full focus:input-primary", placeholder="Başlık (Örn: Gizlilik)") }}
+                        {{ form.policy_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-red-500 transition-colors", placeholder="Başlık (Örn: Gizlilik)") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        {{ form.policy_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="URL") }}
+                        {{ form.policy_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-red-400 focus:outline-none focus:border-red-500 transition-colors", placeholder="URL") }}
                     </div>
                 </div>
 
-                {# KVKK Metni #}
                 <div class="grid grid-cols-12 gap-4 items-center">
                     <div class="col-span-12 md:col-span-4">
-                        {{ form.kvkk_text(class="input input-bordered input-sm w-full focus:input-primary", placeholder="Başlık (Örn: KVKK)") }}
+                        {{ form.kvkk_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-red-500 transition-colors", placeholder="Başlık (Örn: KVKK)") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        {{ form.kvkk_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="URL") }}
+                        {{ form.kvkk_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-red-400 focus:outline-none focus:border-red-500 transition-colors", placeholder="URL") }}
                     </div>
                 </div>
 
-                {# Çerezler #}
                 <div class="grid grid-cols-12 gap-4 items-center">
                     <div class="col-span-12 md:col-span-4">
-                        {{ form.cookies_text(class="input input-bordered input-sm w-full focus:input-primary", placeholder="Başlık (Örn: Çerezler)") }}
+                        {{ form.cookies_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-red-500 transition-colors", placeholder="Başlık (Örn: Çerezler)") }}
                     </div>
                     <div class="col-span-12 md:col-span-8">
-                        {{ form.cookies_url(class="input input-bordered input-sm w-full focus:input-primary font-mono text-xs", placeholder="URL") }}
+                        {{ form.cookies_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2 text-xs font-mono text-red-400 focus:outline-none focus:border-red-500 transition-colors", placeholder="URL") }}
                     </div>
                 </div>
             </div>
-        </div>
-
-        {# KAYDET BUTONU #}
-        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:items-center md:gap-3">
-            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-blue-500/30">
-                <i class="fa fa-save mr-2"></i> Footer Ayarlarını Kaydet
-            </button>
         </div>
 
     </form>

@@ -4,12 +4,24 @@
 
 {% block body %}
     
-    {# Bildirimler #}
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">İletişim Sayfası Yönetimi</h2>
+            <p class="text-xs text-slate-500 mt-1">İletişim bilgilerini, form ve harita yapılandırmasını düzenleyin.</p>
+        </div>
+        <div>
+            <button type="submit" form="contactForm" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 gap-2">
+                <i class="fa fa-save"></i> Kaydet
+            </button>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
+                         <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -17,7 +29,7 @@
         {% endif %}
     {% endwith %}
 
-    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+    <form id="contactForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
         
         {% if form.csrf_token %}
             {{ form.csrf_token }}
@@ -26,124 +38,119 @@
             {{ f() }}
         {% endfor %}
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-blue-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-blue-900/20 border border-blue-500/20 flex items-center justify-center text-blue-400">
                     <i class="fa fa-sliders-h"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Sayfa Üstü ve Form Yapılandırması</h3>
-                    <p class="text-xs text-gray-500">Sayfanın giriş slider'ı ve kullanılacak iletişim formu.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">Sayfa Yapılandırması</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Slider & Form Seçimi</p>
                 </div>
             </div>
             
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Hero Slider ID</label>
-                    <span class="text-xs text-gray-400 block mb-1">Sayfanın en üstündeki görsel slider.</span>
-                    {{ form.hero_slider(class="input input-bordered w-full", placeholder="contact_slider") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Hero Slider ID</label>
+                    {{ form.hero_slider(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 font-mono transition-colors", placeholder="contact_slider") }}
+                    <span class="text-[10px] text-slate-600 block mt-2">Sayfanın en üstündeki görsel slider ID'si.</span>
                 </div>
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">İletişim Formu Seçimi</label>
-                    <span class="text-xs text-gray-400 block mb-1">Form oluşturucudan hazırladığınız form.</span>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">İletişim Formu Seçimi</label>
                     <div class="select-wrapper w-full">
-                        {{ form.contact_form(class="select select-bordered w-full") }}
+                        {{ form.contact_form(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors appearance-none") }}
                     </div>
+                    <span class="text-[10px] text-slate-600 block mt-2">Form oluşturucudan hazırladığınız formu seçin.</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-purple-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-purple-900/20 border border-purple-500/20 flex items-center justify-center text-purple-400">
                     <i class="fa fa-file-invoice"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Firma Resmi Bilgileri</h3>
-                    <p class="text-xs text-gray-500">Faturalandırma ve resmi yazışma bilgileri.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">Firma Resmi Bilgileri</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Fatura & Sicil</p>
                 </div>
             </div>
 
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-6">
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Firma Tam Ünvanı</label>
-                    {{ form.contact_info_title(class="input input-bordered w-full") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Firma Tam Ünvanı</label>
+                    {{ form.contact_info_title(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm font-bold text-slate-200 focus:outline-none focus:border-purple-500 transition-colors") }}
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs">Sicil No</label>
-                        {{ form.shop_id(class="input input-bordered w-full") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Sicil No</label>
+                        {{ form.shop_id(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-purple-500 transition-colors") }}
                     </div>
                     <div>
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs">Sicil Tarihi</label>
-                        {{ form.shop_id_date(class="input input-bordered w-full") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Sicil Tarihi</label>
+                        {{ form.shop_id_date(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-purple-500 transition-colors") }}
                     </div>
                     <div>
-                        <label class="label pt-0 font-semibold text-gray-700 text-xs">Vergi Dairesi / No</label>
-                        {{ form.tax_id(class="input input-bordered w-full") }}
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Vergi Dairesi / No</label>
+                        {{ form.tax_id(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-purple-500 transition-colors") }}
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-green-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                     <i class="fa fa-phone-volume"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">İletişim Kanalları</h3>
-                    <p class="text-xs text-gray-500">Müşterilerin size ulaşacağı kanallar.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">İletişim Kanalları</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Telefon, E-Posta & Saatler</p>
                 </div>
             </div>
             
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700"><i class="fa fa-phone mr-1 text-gray-400"></i> Telefon</label>
-                    {{ form.phone(class="input input-bordered w-full") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide"><i class="fa fa-phone mr-1.5 opacity-70"></i> Telefon</label>
+                    {{ form.phone(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors") }}
                 </div>
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700"><i class="fab fa-whatsapp mr-1 text-gray-400"></i> WhatsApp</label>
-                    {{ form.wa(class="input input-bordered w-full") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide"><i class="fab fa-whatsapp mr-1.5 opacity-70"></i> WhatsApp</label>
+                    {{ form.wa(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors") }}
                 </div>
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700"><i class="fa fa-envelope mr-1 text-gray-400"></i> E-Posta</label>
-                    {{ form.email(class="input input-bordered w-full") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide"><i class="fa fa-envelope mr-1.5 opacity-70"></i> E-Posta</label>
+                    {{ form.email(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors") }}
                 </div>
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700"><i class="fa fa-clock mr-1 text-gray-400"></i> Çalışma Saatleri</label>
-                    {{ form.workhours(class="input input-bordered w-full") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide"><i class="fa fa-clock mr-1.5 opacity-70"></i> Çalışma Saatleri</label>
+                    {{ form.workhours(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors") }}
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-red-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-400">
                     <i class="fa fa-map-location-dot"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Konum Bilgileri</h3>
+                    <h3 class="font-bold text-slate-200 text-sm">Konum Bilgileri</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Adres Detayları</p>
                 </div>
             </div>
             
-            <div class="p-6 grid grid-cols-1 gap-4">
+            <div class="p-6 grid grid-cols-1 gap-6">
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Merkez / Mağaza Adresi</label>
-                    {{ form.location_shop(class="textarea textarea-bordered w-full h-20") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Merkez / Mağaza Adresi</label>
+                    {{ form.location_shop(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-red-500 transition-colors h-24 resize-none") }}
                 </div>
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Depo / Şube Adresi</label>
-                    {{ form.location_storage(class="textarea textarea-bordered w-full h-20") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Depo / Şube Adresi</label>
+                    {{ form.location_storage(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-red-500 transition-colors h-24 resize-none") }}
                 </div>
             </div>
-        </div>
-
-        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:justify-end">
-            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-blue-500/30">
-                <i class="fa fa-save mr-2"></i> İletişim Ayarlarını Kaydet
-            </button>
         </div>
 
     </form>

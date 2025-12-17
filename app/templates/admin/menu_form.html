@@ -4,12 +4,19 @@
 
 {% block body %}
     
-    {# Bildirim Mesajları #}
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Menü Bağlantısı</h2>
+            <p class="text-xs text-slate-500 mt-1">Navigasyon öğesini ve özelliklerini düzenleyin.</p>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm text-sm">
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
+                         <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -19,7 +26,6 @@
 
     <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
         
-        {# CSRF ve Gizli Alanlar #}
         {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
         {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
 
@@ -27,56 +33,62 @@
             
             <div class="flex-1 space-y-6">
                 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden shadow-sm">
+                    <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-blue-900/20 border border-blue-500/20 flex items-center justify-center text-blue-400">
                             <i class="fa fa-link"></i>
                         </div>
-                        <h3 class="font-bold text-gray-800 text-sm">Menü Bağlantısı</h3>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Menü Detayları</h3>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wide">Temel Bilgiler</p>
+                        </div>
                     </div>
                     
                     <div class="p-6 grid grid-cols-12 gap-6">
                         <div class="col-span-12">
-                            <label class="label pt-0 font-semibold text-gray-700">Üst Menü (Varsa)</label>
-                            {{ form.parent(class="select select-bordered w-full", style="width: 100%") }}
-                            <div class="text-xs text-gray-400 mt-1">Eğer bu bir alt menü ise (Dropdown), ebeveyn menüyü seçin.</div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Üst Menü (Parent)</label>
+                            {{ form.parent(class="w-full", style="width: 100%") }}
+                            <div class="text-[10px] text-slate-600 mt-2">Bu öğe bir "Dropdown" altındaysa, buradan ebeveyn menüyü seçin.</div>
                         </div>
 
                         <div class="col-span-12 md:col-span-6">
-                            <label class="label font-semibold text-gray-700">Menü Adı (Label)</label>
-                            {{ form.label(class="input input-bordered w-full focus:input-primary", placeholder="Örn: Hakkımızda") }}
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Menü Adı (Label)</label>
+                            {{ form.label(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600 transition-colors", placeholder="Örn: Hakkımızda") }}
                         </div>
 
                         <div class="col-span-12 md:col-span-6">
-                            <label class="label font-semibold text-gray-700">Link (URL)</label>
-                            {{ form.url(class="input input-bordered w-full focus:input-primary", placeholder="Örn: /hakkimizda") }}
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Link (URL)</label>
+                            {{ form.url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-blue-400 font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600 transition-colors", placeholder="Örn: /hakkimizda") }}
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden relative">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                        <i class="fa fa-bullhorn text-6xl text-orange-500"></i>
+                <div class="bg-[#0f172a] rounded-lg border border-amber-900/30 overflow-hidden relative shadow-sm group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                        <i class="fa fa-bullhorn text-6xl text-amber-500"></i>
                     </div>
 
-                    <div class="px-6 py-4 border-b border-orange-100 bg-orange-50 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center border border-orange-200">
+                    <div class="px-6 py-4 border-b border-amber-900/30 bg-amber-900/10 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-amber-900/40 border border-amber-500/20 flex items-center justify-center text-amber-500">
                             <i class="fa fa-mouse-pointer"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-orange-900 text-sm">Aksiyon Butonu (CTA)</h3>
-                            <p class="text-xs text-orange-700/70">Bu alanları doldurursanız menü linki bir butona dönüşür.</p>
+                            <h3 class="font-bold text-slate-200 text-sm">Aksiyon Butonu (CTA)</h3>
+                            <p class="text-[10px] text-amber-500/70 uppercase tracking-wide">Opsiyonel Buton Alanı</p>
                         </div>
                     </div>
                     
-                    <div class="p-6 grid grid-cols-12 gap-6">
+                    <div class="p-6 grid grid-cols-12 gap-6 relative z-10">
                         <div class="col-span-12 md:col-span-6">
-                            <label class="label pt-0 font-semibold text-gray-700">Buton Metni</label>
-                            {{ form.action_text(class="input input-bordered input-warning w-full", placeholder="Örn: Teklif Al") }}
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Buton Metni</label>
+                            {{ form.action_text(class="w-full bg-[#020617] border border-amber-900/50 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 placeholder-slate-600 transition-colors", placeholder="Örn: Teklif Al") }}
                         </div>
                         <div class="col-span-12 md:col-span-6">
-                            <label class="label pt-0 font-semibold text-gray-700">Buton Linki</label>
-                            {{ form.action_url(class="input input-bordered input-warning w-full", placeholder="Örn: /teklif-al") }}
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Buton Linki</label>
+                            {{ form.action_url(class="w-full bg-[#020617] border border-amber-900/50 rounded px-3 py-2.5 text-sm text-amber-500 font-mono focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 placeholder-slate-600 transition-colors", placeholder="Örn: /teklif-al") }}
+                        </div>
+                        <div class="col-span-12">
+                            <p class="text-[10px] text-slate-500 italic">* Bu alanlar doldurulursa, menü linki standart bir link yerine vurgulu bir butona dönüşür.</p>
                         </div>
                     </div>
                 </div>
@@ -85,38 +97,42 @@
 
             <div class="w-full lg:w-80 space-y-6">
                 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center">
+                <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden shadow-sm">
+                    <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-slate-800 text-slate-400 flex items-center justify-center">
                             <i class="fa fa-sliders-h"></i>
                         </div>
-                        <h3 class="font-bold text-gray-800 text-sm">Görünüm Ayarları</h3>
+                        <h3 class="font-bold text-slate-200 text-sm">Görünüm Ayarları</h3>
                     </div>
                     
-                    <div class="p-6 space-y-4">
+                    <div class="p-6 space-y-5">
                         
                         <div>
-                            <label class="label pt-0 font-semibold text-gray-700">Sıralama</label>
-                            {{ form.order(class="input input-bordered w-full") }}
-                            <div class="text-xs text-gray-400 mt-1">Küçük numaralar solda görünür.</div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Sıralama</label>
+                            {{ form.order(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors") }}
+                            <div class="text-[10px] text-slate-600 mt-1.5">Küçük numaralar (0, 1, 2) solda görünür.</div>
                         </div>
 
-                        <div class="divider my-2"></div>
+                        <div class="h-px bg-slate-800 my-2"></div>
 
                         <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-4">
-                                <span class="label-text font-semibold text-gray-700">Yayında</span> 
-                                {{ form.is_active(class="toggle toggle-success") }}
+                            <label class="label cursor-pointer justify-between p-0">
+                                <span class="label-text font-medium text-slate-300 text-sm">Yayında</span> 
+                                {{ form.is_active(class="toggle toggle-success toggle-sm") }}
                             </label>
                         </div>
 
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full shadow-lg shadow-blue-500/30">
-                    <i class="fa fa-save mr-2"></i> Kaydet
-                </button>
-                <a href="{{ return_url }}" class="btn btn-ghost w-full">İptal</a>
+                <div class="space-y-3">
+                    <button type="submit" class="btn w-full bg-blue-600 hover:bg-blue-500 text-white border-0 shadow-lg shadow-blue-900/20 gap-2">
+                        <i class="fa fa-save"></i> Kaydet
+                    </button>
+                    <a href="{{ return_url }}" class="btn w-full bg-transparent border border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
+                        İptal
+                    </a>
+                </div>
 
             </div>
         </div>
@@ -127,16 +143,37 @@
 {% block tail %}
     {{ super() }}
     <style>
-        /* Select2 Uyumlu Stil */
         .select2-container .select2-selection--single {
-            height: 3rem !important;
-            border-color: #d1d5db !important;
-            border-radius: 0.5rem !important;
+            height: 42px !important;
+            background-color: #020617 !important;
+            border-color: #334155 !important;
+            border-radius: 0.375rem !important;
             display: flex !important;
             align-items: center !important;
         }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #cbd5e1 !important;
+            padding-left: 12px !important;
+        }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 3rem !important;
+            height: 40px !important;
+            top: 1px !important;
+        }
+        .select2-dropdown {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        .select2-search__field {
+            background-color: #020617 !important;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
+        }
+        .select2-results__option {
+            color: #94a3b8 !important;
+        }
+        .select2-results__option--highlighted[aria-selected] {
+            background-color: #1e293b !important;
+            color: #fff !important;
         }
     </style>
 {% endblock %}

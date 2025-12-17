@@ -4,12 +4,36 @@
 
 {% block body %}
     
-    {# Flash Mesajları #}
+    {# --- ÜST BAŞLIK VE AKSİYONLAR (DARK MODE) --- #}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{{ return_url }}" class="btn btn-circle btn-sm btn-ghost bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white transition-all shadow-sm">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Slider Düzenle</h1>
+                <div class="text-xs text-slate-400 flex items-center gap-2 mt-1">
+                    <span class="opacity-75">Görünüm</span>
+                    <i class="fa fa-chevron-right text-[10px] opacity-40"></i>
+                    <span class="text-slate-300 font-medium">Slider Yönetimi</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button type="submit" form="sliderForm" class="btn btn-primary px-6 shadow-lg shadow-blue-900/20 gap-2 border-none text-white">
+                <i class="fa fa-save"></i>
+                Değişiklikleri Kaydet
+            </button>
+        </div>
+    </div>
+
+    {# --- FLASH MESAJLARI (DARK) --- #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="mb-6 space-y-2">
+            <div class="mb-8 space-y-3">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                    <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm border border-slate-700 bg-slate-800 text-slate-200">
+                        <i class="fa fa-info-circle"></i>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -17,221 +41,244 @@
         {% endif %}
     {% endwith %}
 
-    {# Form Başlangıcı #}
-    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+    {# --- ANA FORM --- #}
+    <form id="sliderForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-32">
         
-        {# Güvenlik Tokenları ve Gizli Alanlar #}
         {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
         {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
 
-        {# --- GENEL AYARLAR KARTI --- #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                    <i class="fa fa-layer-group"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Slider Grubu Ayarları</h3>
-                    <p class="text-xs text-gray-500">Bu slider grubunun genel ayarları.</p>
-                </div>
-            </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="label pt-0 font-semibold text-gray-700 text-xs">Slider Adı</label>
-                    {{ form.name(class="input input-bordered w-full", placeholder="Örn: Anasayfa Ana Slider") }}
-                </div>
-                <div>
-                    <label class="label pt-0 font-semibold text-gray-700 text-xs">Çağırma Anahtarı (ID)</label>
-                    {{ form.group_key(class="input input-bordered w-full font-mono text-blue-600", placeholder="Örn: home_hero") }}
-                    <span class="text-[10px] text-gray-400 mt-1 block">Kod içinde kullanılacak benzersiz anahtar (boşluksuz).</span>
-                </div>
-            </div>
-        </div>
-
-        {# --- SLAYT İÇERİKLERİ KARTI --- #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center">
-                        <i class="fa fa-images"></i>
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-sm">Slayt İçerikleri</h3>
-                </div>
-                <div class="text-xs text-gray-400">Toplam: <span id="image-count" class="font-bold text-gray-600">{{ form.items|length }}</span></div>
-            </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div class="p-6 bg-gray-50/30">
-                <div id="items-container" class="space-y-4">
-                    {% for subform in form.items %}
-                        {# Her satıra benzersiz bir ID veriyoruz #}
-                        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group hover:border-blue-300 transition-all item-card" id="item-card-{{ loop.index0 }}">
-                            
-                            {# Subform Token ve Hidden Fields #}
-                            {% if subform.csrf_token %}{{ subform.csrf_token }}{% endif %}
-                            {# DELETE hariç diğer hidden fieldları bas #}
-                            {% for f in subform if f.type == 'HiddenField' and not f.name.endswith('DELETE') %}{{ f() }}{% endfor %}
-
-                            {# WTForms'un otomatik oluşturduğu DELETE checkbox'ı (Eğer Varsa) #}
-                            {% if subform.DELETE %}
-                                <div class="hidden">
-                                    {{ subform.DELETE(class="delete-checkbox") }}
-                                </div>
-                            {% endif %}
-
-                            <div class="flex flex-col md:flex-row gap-6">
-                                <div class="w-full md:w-1/4 flex flex-col gap-3">
-                                    <div class="h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100 relative">
-                                        {% if subform.image_path.data and subform.image_path.data is string %}
-                                            <img src="{{ url_for('static', filename='uploads/' + subform.image_path.data) }}" class="object-cover w-full h-full">
-                                        {% else %}
-                                            <i class="fa fa-image text-gray-300 text-3xl"></i>
-                                            <span class="text-xs text-gray-400 absolute bottom-2">Görsel Yok</span>
-                                        {% endif %}
-                                    </div>
-                                    {{ subform.image_path(class="file-input file-input-bordered file-input-xs w-full") }}
-                                    
-                                    <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
-                                        <span class="text-xs font-bold text-gray-500">Sıralama:</span>
-                                        {{ subform.order(class="input input-bordered input-xs w-16 text-center") }}
-                                    </div>
-                                </div>
-
-                                <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="col-span-2">
-                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Ana Başlık</label>
-                                        {{ subform.title(class="input input-bordered input-sm w-full") }}
-                                    </div>
-                                    <div class="col-span-2">
-                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Alt Başlık</label>
-                                        {{ subform.subtitle(class="input input-bordered input-sm w-full") }}
-                                    </div>
-                                    <div>
-                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Buton İsmi</label>
-                                        {{ subform.btn_text(class="input input-bordered input-sm w-full") }}
-                                    </div>
-                                    <div>
-                                        <label class="label pt-0 text-xs font-semibold text-gray-500">Buton Linki</label>
-                                        {{ subform.btn_link(class="input input-bordered input-sm w-full") }}
-                                    </div>
-                                </div>
+            {# --- SOL KOLON: SLAYT İÇERİKLERİ (GENİŞ ALAN) --- #}
+            <div class="lg:col-span-2 space-y-6">
+                
+                {# KART ARKA PLANI: bg-slate-800 (KOYU) #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    
+                    {# KART BAŞLIĞI #}
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                                <i class="fa fa-images text-sm"></i>
                             </div>
-
-                            {# --- SİLME BUTONU --- #}
-                            <div class="absolute top-2 right-2">
-                                <button type="button" onclick="removeExistingItem('item-card-{{ loop.index0 }}')" 
-                                        class="btn btn-circle btn-xs btn-ghost text-red-400 hover:bg-red-50 hover:text-red-600 tooltip tooltip-left" 
-                                        data-tip="Bu slaytı sil">
-                                    <i class="fa fa-trash"></i>
-                                </button>
+                            <div>
+                                <h3 class="font-bold text-slate-200 text-sm">Slayt Görselleri</h3>
+                                <p class="text-[11px] text-slate-400">Slayt sırasını ve içeriklerini buradan yönetin.</p>
                             </div>
-
                         </div>
-                    {% endfor %}
+                        <span class="badge badge-ghost bg-slate-700 border border-slate-600 text-slate-300 font-mono text-xs">Adet: <span id="image-count" class="ml-1 text-white font-bold">{{ form.items|length }}</span></span>
+                    </div>
+
+                    {# KART İÇERİĞİ: bg-slate-900/30 (BİRAZ DAHA KOYU ZEMİN) #}
+                    <div class="p-6 bg-slate-900/30 min-h-[300px]">
+                        <div id="items-container" class="space-y-5">
+                            {% for subform in form.items %}
+                                {# ITEM KARTI: bg-slate-800 #}
+                                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm relative group hover:border-slate-500 transition-all item-card" id="item-card-{{ loop.index0 }}">
+                                    
+                                    {% if subform.csrf_token %}{{ subform.csrf_token }}{% endif %}
+                                    {% for f in subform if f.type == 'HiddenField' and not f.name.endswith('DELETE') %}{{ f() }}{% endfor %}
+
+                                    {% if subform.DELETE %}
+                                        <div class="hidden">
+                                            {{ subform.DELETE(class="delete-checkbox") }}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="flex flex-col sm:flex-row gap-6">
+                                        {# GÖRSEL ALANI #}
+                                        <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-3">
+                                            <div class="aspect-video bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden border border-slate-700 relative group-hover:shadow-lg transition-all">
+                                                {% if subform.image_path.data and subform.image_path.data is string %}
+                                                    <img src="{{ url_for('static', filename='uploads/' + subform.image_path.data) }}" class="object-cover w-full h-full">
+                                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
+                                                        <span class="text-white text-xs font-medium"><i class="fa fa-pen mr-1"></i> Değiştir</span>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="flex flex-col items-center text-slate-500">
+                                                        <i class="fa fa-image text-3xl mb-1 opacity-50"></i>
+                                                        <span class="text-[10px] font-medium">Görsel Yok</span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            {# FILE INPUT (DARK) #}
+                                            {{ subform.image_path(class="file-input file-input-bordered file-input-ghost file-input-xs w-full text-xs text-slate-400 bg-slate-900 border-slate-700") }}
+                                            
+                                            <div class="flex items-center gap-2 bg-slate-900 px-2 py-1.5 rounded-lg border border-slate-700">
+                                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sıra</span>
+                                                {{ subform.order(class="input input-ghost input-xs w-full text-center focus:bg-slate-800 focus:text-white p-0 h-auto font-mono text-sm text-slate-300") }}
+                                            </div>
+                                        </div>
+
+                                        {# TEXT INPUTS (DARK) #}
+                                        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div class="col-span-1 md:col-span-2 form-control">
+                                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Ana Başlık</label>
+                                                {{ subform.title(class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600", placeholder="Slayt başlığı...") }}
+                                            </div>
+                                            <div class="col-span-1 md:col-span-2 form-control">
+                                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Alt Başlık</label>
+                                                {{ subform.subtitle(class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600", placeholder="Kısa açıklama...") }}
+                                            </div>
+                                            <div class="form-control">
+                                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Buton Metni</label>
+                                                {{ subform.btn_text(class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600", placeholder="Örn: İncele") }}
+                                            </div>
+                                            <div class="form-control">
+                                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Buton Linki</label>
+                                                {{ subform.btn_link(class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600", placeholder="https://...") }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# SİLME BUTONU (DARK) #}
+                                    <button type="button" onclick="removeExistingItem('item-card-{{ loop.index0 }}')" 
+                                            class="absolute -top-3 -right-3 btn btn-circle btn-sm bg-slate-800 border border-slate-600 text-slate-400 hover:bg-red-900/30 hover:text-red-400 hover:border-red-800 shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
+                                            title="Slaytı Sil">
+                                        <i class="fa fa-trash text-xs"></i>
+                                    </button>
+
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {# YENİ EKLEME ALANI (DARK DASHED) #}
+                        <div onclick="addSliderItem()" class="mt-6 py-6 border-2 border-dashed border-slate-600 rounded-xl flex flex-col items-center justify-center bg-slate-800/50 hover:bg-slate-800 hover:border-slate-500 transition-all cursor-pointer group gap-2">
+                           <div class="w-10 h-10 rounded-full bg-slate-700 shadow-sm border border-slate-600 group-hover:border-slate-500 group-hover:text-white flex items-center justify-center transition-all text-slate-400">
+                                <i class="fa fa-plus text-sm"></i>
+                           </div>
+                           <span class="text-xs font-semibold text-slate-500 group-hover:text-slate-300 uppercase tracking-wide">Yeni Slayt Ekle</span>
+                        </div>
+                    </div>
                 </div>
 
-                {# YENİ EKLEME BUTONU #}
-                <div onclick="addSliderItem()" class="mt-6 p-4 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-white hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group">
-                   <span class="text-gray-400 text-sm font-medium group-hover:text-blue-600 transition-colors flex items-center">
-                       <div class="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center mr-3 transition-colors">
-                            <i class="fa fa-plus text-gray-500 group-hover:text-blue-600"></i>
-                       </div>
-                       Yeni Slayt Ekle
-                   </span>
+            </div>
+
+            {# --- SAĞ KOLON: GENEL AYARLAR (DAR ALAN) --- #}
+            <div class="space-y-6">
+                
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden sticky top-6">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-sliders-h"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-200 text-sm">Genel Ayarlar</h3>
+                    </div>
+                    <div class="p-6 space-y-5">
+                        <div class="form-control">
+                            <label class="label pt-0 font-bold text-slate-400 text-xs">Slider Adı</label>
+                            {{ form.name(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Örn: Anasayfa Hero") }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label pt-0 font-bold text-slate-400 text-xs flex justify-between">
+                                Çağırma Anahtarı (ID)
+                                <span class="tooltip tooltip-left" data-tip="Kod içinde kullanılacak benzersiz ID."><i class="fa fa-question-circle text-slate-500"></i></span>
+                            </label>
+                            <div class="relative">
+                                {{ form.group_key(class="input input-bordered w-full font-mono text-sm text-indigo-400 bg-slate-900 border-slate-700 focus:border-indigo-500/50 pl-8 placeholder:text-slate-600", placeholder="unique_key") }}
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 text-xs font-bold">#</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-1.5 ml-1">Boşluksuz ve İngilizce karakter kullanın.</span>
+                        </div>
+
+                        <div class="divider my-2 before:bg-slate-700 after:bg-slate-700"></div>
+
+                        <div class="text-xs text-slate-500 px-1 space-y-2">
+                            <p class="flex items-center"><i class="fa fa-check-circle text-emerald-500/80 mr-2"></i> Mobil uyumlu responsive</p>
+                            <p class="flex items-center"><i class="fa fa-check-circle text-emerald-500/80 mr-2"></i> SEO dostu alt etiketleri</p>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
-        {# SABİT ALT MENÜ (KAYDET) #}
-        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:justify-end gap-3">
-            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-blue-500/30 text-white">
-                <i class="fa fa-save mr-2"></i> Kaydet
-            </button>
-            <a href="{{ return_url }}" class="btn btn-ghost bg-gray-100">İptal</a>
+        {# SABİT ALT MENÜ (MOBİL) #}
+        <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+            <div class="flex justify-end gap-3 max-w-7xl mx-auto">
+                <a href="{{ return_url }}" class="btn btn-ghost text-slate-400">İptal</a>
+                <button type="submit" class="btn btn-primary px-8 border-none text-white">
+                    <i class="fa fa-save mr-2"></i> Kaydet
+                </button>
+            </div>
         </div>
 
     </form>
 
     <script>
-        // Form eleman index'ini başlat
         let itemIndex = {{ form.items|length }};
 
-        // --- 1. MEVCUT KAYITLARI SİLME ---
+        // --- 1. SİLME FONKSİYONLARI ---
         function removeExistingItem(cardId) {
             const card = document.getElementById(cardId);
             if (!card) return;
 
-            // 1. Yöntem: Gizli DELETE checkbox'ı ara
             const deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
-
             if (deleteCheckbox) {
-                // Checkbox varsa işaretle ve kartı gizle (Soft Delete)
                 deleteCheckbox.checked = true;
                 card.style.display = 'none';
-                console.log("Checkbox işaretlendi ve gizlendi (Soft Delete).");
             } else {
-                // 2. Yöntem: Checkbox YOKSA direkt elemanı DOM'dan sil (Hard Delete)
-                // HATA BURADA ÇÖZÜLÜYOR: Checkbox yoksa alert verme, sil gitsin.
                 card.remove();
-                console.log("Checkbox bulunamadı, DOM'dan silindi (Hard Delete).");
             }
-            
             updateCount();
         }
 
-        // --- 2. YENİ EKLENENİ SİLME ---
         function removeNewItem(button) {
-            button.closest('.item-card').remove();
-            updateCount();
+            const card = button.closest('.item-card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            setTimeout(() => { card.remove(); updateCount(); }, 300);
         }
 
-        // --- 3. YENİ SLAYT EKLEME ---
+        // --- 2. YENİ SLAYT EKLEME (JS HTML STRING DE DARK MODE OLARAK GÜNCELLENDİ) ---
         function addSliderItem() {
             const container = document.getElementById('items-container');
             const newCardId = `new-item-${itemIndex}`;
 
+            // JS ile eklenen kartın tasarımı da DARK MODE uyumlu
             const newRowHtml = `
-                <div class="bg-white p-4 rounded-xl border border-blue-200 shadow-md relative group item-card fade-in mt-4" id="${newCardId}">
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm relative group item-card fade-in mt-4 border-l-4 border-l-slate-500" id="${newCardId}">
                     
                     <input type="hidden" name="items-${itemIndex}-id" value="">
                     
-                    <div class="absolute top-2 right-2 z-10">
-                        <button type="button" onclick="removeNewItem(this)" class="btn btn-circle btn-xs btn-ghost text-red-400 hover:bg-red-50 hover:text-red-600">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
+                    <button type="button" onclick="removeNewItem(this)" class="absolute -top-3 -right-3 btn btn-circle btn-sm bg-slate-800 border border-slate-600 text-slate-400 hover:bg-red-900/30 hover:text-red-400 hover:border-red-800 shadow-md transition-all z-10">
+                        <i class="fa fa-times text-xs"></i>
+                    </button>
 
-                    <div class="flex flex-col md:flex-row gap-6">
-                        <div class="w-full md:w-1/4 flex flex-col gap-3">
-                            <div class="h-32 bg-gray-50 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
-                                <span class="text-xs text-blue-500 font-medium flex flex-col items-center">
-                                    <i class="fa fa-cloud-upload-alt text-2xl mb-1"></i>
-                                    Görsel Seç
-                                </span>
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-3">
+                            <div class="aspect-video bg-slate-900 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-700 text-slate-500 relative">
+                                <div class="flex flex-col items-center">
+                                    <i class="fa fa-cloud-upload-alt text-2xl mb-1 opacity-50"></i>
+                                    <span class="text-[10px] font-semibold">Görsel Seç</span>
+                                </div>
                             </div>
-                            <input type="file" name="items-${itemIndex}-image_path" class="file-input file-input-bordered file-input-xs w-full file-input-primary">
+                            <input type="file" name="items-${itemIndex}-image_path" class="file-input file-input-bordered file-input-ghost file-input-xs w-full text-xs text-slate-400 bg-slate-900 border-slate-700">
                             
-                            <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
-                                <span class="text-xs font-bold text-gray-500">Sıra:</span>
-                                <input type="number" name="items-${itemIndex}-order" value="${itemIndex + 1}" class="input input-bordered input-xs w-16 text-center">
+                            <div class="flex items-center gap-2 bg-slate-900 px-2 py-1.5 rounded-lg border border-slate-700">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sıra</span>
+                                <input type="number" name="items-${itemIndex}-order" value="${itemIndex + 1}" class="input input-ghost input-xs w-full text-center focus:bg-slate-800 focus:text-white p-0 h-auto font-mono text-sm text-slate-300">
                             </div>
                         </div>
 
-                        <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="col-span-2">
-                                <label class="label pt-0 text-xs font-semibold text-gray-500">Ana Başlık</label>
-                                <input type="text" name="items-${itemIndex}-title" class="input input-bordered input-sm w-full" placeholder="Başlık">
+                        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="col-span-1 md:col-span-2 form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Ana Başlık</label>
+                                <input type="text" name="items-${itemIndex}-title" class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600" placeholder="Slayt başlığı...">
                             </div>
-                            <div class="col-span-2">
-                                <label class="label pt-0 text-xs font-semibold text-gray-500">Alt Başlık</label>
-                                <input type="text" name="items-${itemIndex}-subtitle" class="input input-bordered input-sm w-full" placeholder="Açıklama">
+                            <div class="col-span-1 md:col-span-2 form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Alt Başlık</label>
+                                <input type="text" name="items-${itemIndex}-subtitle" class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600" placeholder="Kısa açıklama...">
                             </div>
-                            <div>
-                                <label class="label pt-0 text-xs font-semibold text-gray-500">Buton İsmi</label>
-                                <input type="text" name="items-${itemIndex}-btn_text" class="input input-bordered input-sm w-full" placeholder="Buton">
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Buton Metni</label>
+                                <input type="text" name="items-${itemIndex}-btn_text" class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600" placeholder="Örn: İncele">
                             </div>
-                            <div>
-                                <label class="label pt-0 text-xs font-semibold text-gray-500">Buton Linki</label>
-                                <input type="text" name="items-${itemIndex}-btn_link" class="input input-bordered input-sm w-full" placeholder="URL">
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Buton Linki</label>
+                                <input type="text" name="items-${itemIndex}-btn_link" class="input input-bordered input-sm w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600" placeholder="https://...">
                             </div>
                         </div>
                     </div>
@@ -239,18 +286,20 @@
             `;
 
             container.insertAdjacentHTML('beforeend', newRowHtml);
+            
+            const newElement = document.getElementById(newCardId);
+            newElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
             itemIndex++;
             updateCount();
         }
 
-        // Sayaç Güncelleme
         function updateCount() {
             const countSpan = document.getElementById('image-count');
             const visibleItems = Array.from(document.querySelectorAll('.item-card')).filter(el => el.style.display !== 'none');
             if(countSpan) countSpan.innerText = visibleItems.length;
         }
 
-        // CSS Animasyonu
         const style = document.createElement('style');
         style.innerHTML = `
             .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }

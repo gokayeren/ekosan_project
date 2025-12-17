@@ -4,12 +4,24 @@
 
 {% block body %}
     
-    {# Bildirimler (Sizin kodunuzdaki yapı aynen korundu) #}
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Kurumsal İçerik Yönetimi</h2>
+            <p class="text-xs text-slate-500 mt-1">Hakkımızda sayfası ve tanıtım metinlerini düzenleyin.</p>
+        </div>
+        <div>
+            <button type="submit" form="corporateForm" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 gap-2">
+                <i class="fa fa-save"></i> Kaydet
+            </button>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm">
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
+                         <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -17,7 +29,7 @@
         {% endif %}
     {% endwith %}
 
-    <form action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+    <form id="corporateForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
         
         {% if form.csrf_token %}
             {{ form.csrf_token }}
@@ -26,170 +38,151 @@
             {{ f() }}
         {% endfor %}
 
-        {# BÖLÜM 1: SLIDER AYARLARI #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-indigo-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                     <i class="fa fa-images"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Slider Konfigürasyonu</h3>
-                    <p class="text-xs text-gray-500">Ana sayfa ve tanıtım alanındaki slider ID tanımları.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">Slider Konfigürasyonu</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Banner ID Tanımları</p>
                 </div>
             </div>
             
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Hero Slider ID (Ana Banner)</label>
-                    {{ form.hero_slider(class="input input-bordered w-full", placeholder="Örn: home_slider") }}
-                    <span class="text-[10px] text-gray-400 block mt-1">Sayfanın en üstündeki ana slider.</span>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Hero Slider ID (Ana Banner)</label>
+                    {{ form.hero_slider(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors", placeholder="Örn: home_slider") }}
+                    <span class="text-[10px] text-slate-600 block mt-2">Sayfanın en üstündeki ana sliderın ID'si.</span>
                 </div>
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Presentation Slider ID</label>
-                    {{ form.presentation_slider(class="input input-bordered w-full", placeholder="Örn: corporate_slider") }}
-                    <span class="text-[10px] text-gray-400 block mt-1">Tanıtım bölümünde kullanılan görsel slider.</span>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Presentation Slider ID</label>
+                    {{ form.presentation_slider(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors", placeholder="Örn: corporate_slider") }}
+                    <span class="text-[10px] text-slate-600 block mt-2">Tanıtım bölümünde kullanılan sliderın ID'si.</span>
                 </div>
             </div>
         </div>
 
-        {# BÖLÜM 2: KURUMSAL İÇERİK #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-teal-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-teal-900/20 border border-teal-500/20 flex items-center justify-center text-teal-400">
                     <i class="fa fa-building"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Kurumsal İçerik Yönetimi</h3>
-                    <p class="text-xs text-gray-500">Firma tanıtım metinleri ve açıklamalar.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">Kurumsal Metinler</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Firma Tanıtım Yazıları</p>
                 </div>
             </div>
 
-            <div class="p-6 space-y-6">
+            <div class="p-6 space-y-8">
                 
-                {# Sunum Başlığı #}
                 <div>
-                    <label class="label pt-0 font-semibold text-gray-700">Tanıtım Bölümü Başlığı</label>
-                    {{ form.presentation_title(class="input input-bordered w-full font-bold", placeholder="Ana Başlık") }}
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Tanıtım Bölümü Başlığı</label>
+                    {{ form.presentation_title(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm font-bold text-slate-200 focus:outline-none focus:border-teal-500 transition-colors", placeholder="Ana Başlık") }}
                 </div>
 
-                <div class="divider"></div>
+                <div class="h-px bg-slate-800"></div>
 
-                {# Metin Alanları Grid #}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {# Biz Kimiz #}
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
-                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                            <h4 class="text-xs font-bold text-gray-700 uppercase">Biz Kimiz? (How We Are)</h4>
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                            <h4 class="text-[10px] font-bold text-slate-300 uppercase tracking-wide">Biz Kimiz?</h4>
                         </div>
-                        {{ form.howeare(class="textarea textarea-bordered w-full h-40 text-sm") }}
+                        {{ form.howeare(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors h-48 resize-none") }}
                     </div>
 
-                    {# Ne Yapıyoruz #}
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
-                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                            <h4 class="text-xs font-bold text-gray-700 uppercase">Ne Yapıyoruz? (What We Do)</h4>
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                            <h4 class="text-[10px] font-bold text-slate-300 uppercase tracking-wide">Ne Yapıyoruz?</h4>
                         </div>
-                        {{ form.whatwedo(class="textarea textarea-bordered w-full h-40 text-sm") }}
+                        {{ form.whatwedo(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors h-48 resize-none") }}
                     </div>
 
-                    {# Neden Biz #}
                     <div class="space-y-2">
-                        <div class="flex items-center gap-2 pb-1 border-b border-gray-100">
-                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                            <h4 class="text-xs font-bold text-gray-700 uppercase">Neden Biz? (Why Us)</h4>
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+                            <span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]"></span>
+                            <h4 class="text-[10px] font-bold text-slate-300 uppercase tracking-wide">Neden Biz?</h4>
                         </div>
-                        {{ form.whyus(class="textarea textarea-bordered w-full h-40 text-sm") }}
+                        {{ form.whyus(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-purple-500 transition-colors h-48 resize-none") }}
                     </div>
                 </div>
             </div>
         </div>
 
-        {# BÖLÜM 3: BİLGİ KARTLARI (01-04) #}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 bg-rose-50/30 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-rose-900/20 border border-rose-500/20 flex items-center justify-center text-rose-400">
                     <i class="fa fa-th-large"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Bilgi Kartları</h3>
-                    <p class="text-xs text-gray-500">Sayfada öne çıkan 4 adet özellik/istatistik kartı.</p>
+                    <h3 class="font-bold text-slate-200 text-sm">Bilgi Kartları</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Öne Çıkan 4 Özellik</p>
                 </div>
             </div>
             
-            <div class="p-6 bg-gray-50/50">
+            <div class="p-6 bg-[#0f172a]">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
-                    {# KART 1 #}
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group hover:border-rose-300 transition-colors">
-                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-gray-800 text-white rounded-lg flex items-center justify-center font-bold shadow-md text-sm">01</div>
-                        <div class="space-y-3">
+                    <div class="bg-[#020617] p-5 rounded-xl border border-slate-800 shadow-sm relative group hover:border-rose-500/50 transition-colors">
+                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-slate-800 text-rose-400 border border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs shadow-lg group-hover:bg-rose-900/20 group-hover:border-rose-500/30 transition-colors">01</div>
+                        <div class="space-y-4">
                             <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 1 Başlık</label>
-                                {{ form.card01_title(class="input input-bordered input-sm w-full font-bold") }}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 1 Başlık</label>
+                                {{ form.card01_title(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm font-bold text-slate-200 focus:outline-none focus:border-rose-500 transition-colors") }}
                             </div>
                             <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 1 Alt Başlık</label>
-                                {{ form.card01_subtitle(class="input input-bordered input-sm w-full") }}
-                            </div>
-                        </div>
-                    </div>
-
-                    {# KART 2 #}
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group hover:border-rose-300 transition-colors">
-                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-gray-800 text-white rounded-lg flex items-center justify-center font-bold shadow-md text-sm">02</div>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 2 Başlık</label>
-                                {{ form.card02_title(class="input input-bordered input-sm w-full font-bold") }}
-                            </div>
-                            <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 2 Alt Başlık</label>
-                                {{ form.card02_subtitle(class="input input-bordered input-sm w-full") }}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 1 Alt Başlık</label>
+                                {{ form.card01_subtitle(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm text-slate-400 focus:outline-none focus:border-rose-500 transition-colors") }}
                             </div>
                         </div>
                     </div>
 
-                    {# KART 3 #}
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group hover:border-rose-300 transition-colors">
-                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-gray-800 text-white rounded-lg flex items-center justify-center font-bold shadow-md text-sm">03</div>
-                        <div class="space-y-3">
+                    <div class="bg-[#020617] p-5 rounded-xl border border-slate-800 shadow-sm relative group hover:border-rose-500/50 transition-colors">
+                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-slate-800 text-rose-400 border border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs shadow-lg group-hover:bg-rose-900/20 group-hover:border-rose-500/30 transition-colors">02</div>
+                        <div class="space-y-4">
                             <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 3 Başlık</label>
-                                {{ form.card03_title(class="input input-bordered input-sm w-full font-bold") }}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 2 Başlık</label>
+                                {{ form.card02_title(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm font-bold text-slate-200 focus:outline-none focus:border-rose-500 transition-colors") }}
                             </div>
                             <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 3 Alt Başlık</label>
-                                {{ form.card03_subtitle(class="input input-bordered input-sm w-full") }}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 2 Alt Başlık</label>
+                                {{ form.card02_subtitle(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm text-slate-400 focus:outline-none focus:border-rose-500 transition-colors") }}
                             </div>
                         </div>
                     </div>
 
-                    {# KART 4 #}
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group hover:border-rose-300 transition-colors">
-                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-gray-800 text-white rounded-lg flex items-center justify-center font-bold shadow-md text-sm">04</div>
-                        <div class="space-y-3">
+                    <div class="bg-[#020617] p-5 rounded-xl border border-slate-800 shadow-sm relative group hover:border-rose-500/50 transition-colors">
+                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-slate-800 text-rose-400 border border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs shadow-lg group-hover:bg-rose-900/20 group-hover:border-rose-500/30 transition-colors">03</div>
+                        <div class="space-y-4">
                             <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 4 Başlık</label>
-                                {{ form.card04_title(class="input input-bordered input-sm w-full font-bold") }}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 3 Başlık</label>
+                                {{ form.card03_title(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm font-bold text-slate-200 focus:outline-none focus:border-rose-500 transition-colors") }}
                             </div>
                             <div>
-                                <label class="label pt-0 text-xs font-bold text-gray-400 uppercase">Kart 4 Alt Başlık</label>
-                                {{ form.card04_subtitle(class="input input-bordered input-sm w-full") }}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 3 Alt Başlık</label>
+                                {{ form.card03_subtitle(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm text-slate-400 focus:outline-none focus:border-rose-500 transition-colors") }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#020617] p-5 rounded-xl border border-slate-800 shadow-sm relative group hover:border-rose-500/50 transition-colors">
+                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-slate-800 text-rose-400 border border-slate-700 rounded-lg flex items-center justify-center font-bold text-xs shadow-lg group-hover:bg-rose-900/20 group-hover:border-rose-500/30 transition-colors">04</div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 4 Başlık</label>
+                                {{ form.card04_title(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm font-bold text-slate-200 focus:outline-none focus:border-rose-500 transition-colors") }}
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kart 4 Alt Başlık</label>
+                                {{ form.card04_subtitle(class="w-full bg-[#0f172a] border border-slate-700 rounded px-3 py-2 text-sm text-slate-400 focus:outline-none focus:border-rose-500 transition-colors") }}
                             </div>
                         </div>
                     </div>
 
                 </div>
             </div>
-        </div>
-
-        {# KAYDET BUTONU #}
-        <div class="fixed bottom-6 right-6 z-50 md:static md:flex md:justify-end">
-            <button type="submit" class="btn btn-primary px-8 shadow-lg shadow-indigo-500/30">
-                <i class="fa fa-save mr-2"></i> Kurumsal Ayarları Kaydet
-            </button>
         </div>
 
     </form>

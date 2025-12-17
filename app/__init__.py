@@ -126,6 +126,11 @@ class MenuView(ModelView):
         'is_active',
     )
 
+    batch_actions = None 
+
+    def is_action_allowed(self, name):
+        return False
+
     def on_model_change(self, form, model, is_created):
         if not model.url:
             model.url = "#"
@@ -203,7 +208,7 @@ class CorporateView(ModelView):
         'card03_subtitle',
         'card04_title',
         'card04_subtitle'
-    )
+  )  
 
     @expose('/')
     def index_view(self):
@@ -335,16 +340,17 @@ class FormFieldInline(InlineFormAdmin):
     }
 
 class FormBuilderView(ModelView):
+    list_template = 'admin/form_list.html'
     create_template = 'admin/form_builder.html'
     edit_template = 'admin/form_builder.html'
 
     column_list = ('title', 'form_key', 'recipient_email')
     column_labels = {
-        'title': 'Form Başlığı', 
-        'form_key': 'Form Anahtarı (Benzersiz)', 
+        'title': 'Form Başlığı',
+        'form_key': 'Form Anahtarı (Benzersiz)',
         'recipient_email': 'Bildirim E-postası'
     }
-    
+
     form_columns = ('title', 'form_key', 'recipient_email', 'submit_btn_text', 'success_message')
 
     inline_models = (FormFieldInline(FormField),)
@@ -353,6 +359,8 @@ class FormSubmissionView(ModelView):
     can_create = False
     can_edit = False
     can_delete = True
+
+    list_template = 'admin/custom_list.html'
 
     column_list = ('form', 'created_at', 'submission_data', 'ip_address')
     column_default_sort = ('created_at', True)
@@ -396,6 +404,7 @@ class SliderItemInline(InlineFormAdmin):
     }
 
 class SliderGroupView(ModelView):
+    list_template = 'admin/custom_list.html'
     create_template = 'admin/slider_form.html'
     edit_template = 'admin/slider_form.html'
 
@@ -414,6 +423,7 @@ class SliderGroupView(ModelView):
     }
 
 class ServiceView(ModelView):
+    list_template = 'admin/custom_list.html'
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 
@@ -487,47 +497,53 @@ def create_app(config_class=Config):
         )
 
     with app.app_context():
+        from sqlalchemy.exc import OperationalError
 
-        if not HomeConfig.query.first():
-            print(">> Veritabanı boş: Varsayılan HomeConfig oluşturuluyor...")
-            default_home = HomeConfig()
-            db.session.add(default_home)
-            db.session.commit()
+        try:            
+            if not HomeConfig.query.first():
+                print(">> Veritabanı boş: Varsayılan HomeConfig oluşturuluyor...")
+                default_home = HomeConfig()
+                db.session.add(default_home)
+                db.session.commit()
 
-        if not Corporate.query.first():
-            print(">> Veritabanı boş: Varsayılan Corporate oluşturuluyor...")
-            default_corporate = Corporate()
-            db.session.add(default_corporate)
-            db.session.commit()
+            if not Corporate.query.first():
+                print(">> Veritabanı boş: Varsayılan Corporate oluşturuluyor...")
+                default_corporate = Corporate()
+                db.session.add(default_corporate)
+                db.session.commit()
 
-        if not References.query.first():
-            print(">> Veritabanı boş: Varsayılan References oluşturuluyor...")
-            default_references = References()
-            db.session.add(default_references)
-            db.session.commit()
+            if not References.query.first():
+                print(">> Veritabanı boş: Varsayılan References oluşturuluyor...")
+                default_references = References()
+                db.session.add(default_references)
+                db.session.commit()
 
-        if not Contact.query.first():
-            print(">> Veritabanı boş: Varsayılan Contact oluşturuluyor...")
-            default_contact = Contact()
-            db.session.add(default_contact)
-            db.session.commit()
+            if not Contact.query.first():
+                print(">> Veritabanı boş: Varsayılan Contact oluşturuluyor...")
+                default_contact = Contact()
+                db.session.add(default_contact)
+                db.session.commit()
 
-        if not Getoffer.query.first():
-            print(">> Veritabanı boş: Varsayılan Getoffer oluşturuluyor...")
-            default_getoffer = Getoffer()
-            db.session.add(default_getoffer)
-            db.session.commit()
+            if not Getoffer.query.first():
+                print(">> Veritabanı boş: Varsayılan Getoffer oluşturuluyor...")
+                default_getoffer = Getoffer()
+                db.session.add(default_getoffer)
+                db.session.commit()
 
-        if not SiteSetting.query.first():
-            print(">> Veritabanı boş: Varsayılan Site Ayarları oluşturuluyor...")
-            default_settings = SiteSetting(site_title="Ekosan Web Sitesi")
-            db.session.add(default_settings)
-            db.session.commit()
+            if not SiteSetting.query.first():
+                print(">> Veritabanı boş: Varsayılan Site Ayarları oluşturuluyor...")
+                default_settings = SiteSetting(site_title="Ekosan Web Sitesi")
+                db.session.add(default_settings)
+                db.session.commit()
 
-        if not Footer.query.first():
-             print(">> Veritabanı boş: Varsayılan Footer oluşturuluyor...")
-             default_footer = Footer()
-             db.session.add(default_footer)
-             db.session.commit()
+            if not Footer.query.first():
+                 print(">> Veritabanı boş: Varsayılan Footer oluşturuluyor...")
+                 default_footer = Footer()
+                 db.session.add(default_footer)
+                 db.session.commit()
+                 
+        except OperationalError:
+            print(">> UYARI: Veritabanı tabloları bulunamadı. Migrasyon bekleniyor.")
+            pass
 
     return app

@@ -18,6 +18,8 @@ services:
     volumes:
       - app_uploads:/app/static/uploads
     restart: unless-stopped
+    ports:
+      - "5005:5000"
 
   # --- 2. Veritabanı (Postgres) ---
   db:

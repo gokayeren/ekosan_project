@@ -497,7 +497,7 @@ def create_app(config_class=Config):
         )
 
     with app.app_context():
-        from sqlalchemy.exc import OperationalError
+        from sqlalchemy.exc import OperationalError, ProgrammingError
 
         try:            
             if not HomeConfig.query.first():
@@ -542,8 +542,10 @@ def create_app(config_class=Config):
                  db.session.add(default_footer)
                  db.session.commit()
                  
-        except OperationalError:
-            print(">> UYARI: Veritabanı tabloları bulunamadı. Migrasyon bekleniyor.")
+        except (OperationalError, ProgrammingError):
+            print(">> UYARI: Tablolar henüz yok. 'flask db upgrade' bekleniyor...")
+            # db.session.rollback() eklemek iyi bir pratiktir, hata sonrası session'ı temizler
+            db.session.rollback()
             pass
 
     return app

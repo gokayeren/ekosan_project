@@ -427,7 +427,7 @@ class ServiceView(ModelView):
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 
-    column_list = ('title', 'order', 'is_active')
+    column_list = ('image_path', 'title', 'order', 'is_active')
     column_default_sort = ('order', False)
 
     form_columns = (

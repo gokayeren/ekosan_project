@@ -2,7 +2,7 @@
 
 {% block body %}
     <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
-        
+
         <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-[#0f172a]">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
@@ -27,7 +27,7 @@
                     </p>
                 </div>
             </div>
-            
+
             {% if admin_view.can_create %}
             <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 px-5 h-10 rounded-lg shadow-lg shadow-blue-900/20 font-medium transition-all flex items-center gap-2">
                 <i class="fa fa-plus"></i> Yeni Ekle
@@ -40,11 +40,10 @@
             <table class="table w-full border-collapse">
                 <thead>
                     <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
-                        {# Sütun Başlıklarını Dinamik Döndür #}
                         {% for c, name in list_columns %}
                             <th class="px-6 py-4 {% if c == 'id' or c == 'order' %}text-center w-20{% endif %}">
                                 {{ name }}
-                                {# Sıralama İkonu #}
+
                                 {% if admin_view.column_sortable_list %}
                                     {% if c in admin_view.column_sortable_list %}
                                     <a href="{{ sort_url(c) }}" title="Sırala" class="ml-1 text-slate-600 hover:text-blue-400">
@@ -54,8 +53,7 @@
                                 {% endif %}
                             </th>
                         {% endfor %}
-                        
-                        {# İşlemler Sütunu (Eğer yetki varsa) #}
+
                         {% if admin_view.can_edit or admin_view.can_delete %}
                             <th class="px-6 py-4 text-right w-32">İşlemler</th>
                         {% endif %}
@@ -65,12 +63,10 @@
                 <tbody class="divide-y divide-slate-800/50 text-sm">
                 {% for row in data %}
                     <tr class="hover:bg-slate-800/30 transition-colors group">
-                        
-                        {# Sütun Değerlerini Dinamik Döndür #}
+
                         {% for c, name in list_columns %}
                             <td class="px-6 py-4 {% if c == 'id' or c == 'order' %}text-center{% endif %}">
-                                
-                                {# Özel Sütun Biçimlendirmeleri #}
+
                                 {% if c == 'id' or c == 'order' %}
                                     <span class="font-bold text-slate-500 font-mono">{{ get_value(row, c) }}</span>
                                 
@@ -82,7 +78,6 @@
                                     {% endif %}
                                 
                                 {% elif c == 'submission_data' %}
-                                    {# Form verileri HTML olarak geldiği için safe filtresi gerekebilir ama get_value genelde string döner #}
                                     <div class="text-slate-300 text-xs leading-relaxed space-y-1">
                                         {{ get_value(row, c) }} 
                                     </div>
@@ -106,7 +101,6 @@
                             </td>
                         {% endfor %}
 
-                        {# İşlemler #}
                         {% if admin_view.can_edit or admin_view.can_delete %}
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-4">

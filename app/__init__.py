@@ -423,7 +423,7 @@ class SliderGroupView(ModelView):
     }
 
 class ServiceView(ModelView):
-    list_template = 'admin/custom_list.html'
+    list_template = 'admin/service_list.html'
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 

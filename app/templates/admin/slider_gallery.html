@@ -1,22 +1,15 @@
 {% extends 'admin/model/list.html' %}
 
-{# --- 1. GEREKSİZ BLOKLARI TEMİZLEME (Yazı sorununu çözer) --- #}
-
-{# Standart menüyü gizle #}
 {% block model_menu_bar %}{% endblock %}
 
-{# "Actions" formunu ve o garip JSON yazısını üreten bloğu tamamen boşaltıyoruz #}
 {% block actions %}{% endblock %}
 
-{# Sayfa başlığını gizle (İsteğe bağlı) #}
 {% block content_title %}{% endblock %}
 
-{# --- 2. LİSTELEME GÖVDESİ --- #}
 {% block list_body %}
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 pb-20">
-        
-        {# YENİ EKLE KARTI #}
+
         <a href="{{ url_for('.create_view', url=return_url) }}" class="card bg-white border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 flex items-center justify-center min-h-[300px] group cursor-pointer text-gray-400 hover:text-blue-600">
             <div class="text-center">
                 <div class="w-16 h-16 rounded-full bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center mx-auto mb-4 transition-colors">
@@ -28,8 +21,7 @@
 
         {% for row in data %}
         <div class="card bg-base-100 shadow-xl border border-gray-200 group hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
-            
-            {# GÖRSEL #}
+
             <figure class="px-4 pt-4 relative h-48">
                 {% if row.items and row.items|length > 0 %}
                     <img src="{{ url_for('static', filename='uploads/' + row.items[0].image_path) }}" 
@@ -62,21 +54,16 @@
                     <span class="text-xs text-gray-400">ID: #{{ get_pk_value(row) }}</span>
                     
                     <div class="flex gap-2">
-                        {# Düzenle #}
                         <a href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}" class="btn btn-sm btn-square btn-ghost text-blue-600 hover:bg-blue-100 tooltip tooltip-top" data-tip="Düzenle">
                             <i class="fa fa-pencil"></i>
                         </a>
 
-                        {# --- SİLME İŞLEMİ (DÜZELTİLDİ) --- #}
-                        {# WTForms yerine manuel input kullanıyoruz #}
                         <form class="icon inline-block" method="POST" action="{{ url_for('.delete_view') }}">
-                            
-                            {# CSRF Token (Varsa ekle) #}
+
                             {% if delete_form.csrf_token %}
                                 {{ delete_form.csrf_token }}
                             {% endif %}
 
-                            {# KRİTİK DÜZELTME: ID'yi manuel input olarak veriyoruz #}
                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
                             <input type="hidden" name="url" value="{{ return_url }}">
 
@@ -91,8 +78,7 @@
         {% endfor %}
 
     </div>
-    
-    {# Sayfalama #}
+
     {% if num_pages > 1 %}
     <div class="p-4">
         {{ lib.pager(page, num_pages, pager_url) }}
@@ -101,8 +87,6 @@
 
 {% endblock %}
 
-{# --- 3. EKSTRA TEMİZLİK (Tail Bloğu) --- #}
-{# Altta kalan script kalıntılarını temizlemek için tail bloğunu override edip sadece gerekenleri çağırıyoruz #}
 {% block tail %}
     <script src="{{ admin_static.url(filename='vendor/jquery.min.js', v='3.5.1') }}" type="text/javascript"></script>
     <script src="{{ admin_static.url(filename='bootstrap/bootstrap4/js/bootstrap.min.js', v='4.2.1') }}" type="text/javascript"></script>

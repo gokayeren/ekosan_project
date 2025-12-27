@@ -126,7 +126,7 @@ class MenuView(ModelView):
         'is_active',
     )
 
-    batch_actions = None 
+    batch_actions = None
 
     def is_action_allowed(self, name):
         return False
@@ -355,6 +355,11 @@ class FormBuilderView(ModelView):
 
     inline_models = (FormFieldInline(FormField),)
 
+    batch_actions = None
+
+    def is_action_allowed(self, name):
+        return False
+
 class FormSubmissionView(ModelView):
     can_create = False
     can_edit = False
@@ -371,6 +376,11 @@ class FormSubmissionView(ModelView):
         'submission_data': 'Başvuru Detayları',
         'ip_address': 'IP Adresi'
     }
+
+    batch_actions = None
+
+    def is_action_allowed(self, name):
+        return False
 
     def _format_data(view, context, model, name):
         if not model.submission_data:
@@ -403,6 +413,11 @@ class SliderItemInline(InlineFormAdmin):
         'image_path': ImageUploadField('Resim Dosyası', base_path=path, url_relative_path='uploads/')
     }
 
+    batch_actions = None
+
+    def is_action_allowed(self, name):
+        return False
+
 class SliderGroupView(ModelView):
     list_template = 'admin/custom_list.html'
     create_template = 'admin/slider_form.html'
@@ -421,6 +436,11 @@ class SliderGroupView(ModelView):
     column_formatters = {
         'item_count': _item_count
     }
+
+    batch_actions = None
+
+    def is_action_allowed(self, name):
+        return False
 
 class ServiceView(ModelView):
     list_template = 'admin/service_list.html'
@@ -446,6 +466,11 @@ class ServiceView(ModelView):
     form_extra_fields = {
         'image_path': ImageUploadField('Hizmet Görseli', base_path=path, url_relative_path='uploads/')
     }
+
+    batch_actions = None
+
+    def is_action_allowed(self, name):
+        return False
     
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -465,7 +490,7 @@ def create_app(config_class=Config):
     admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
-    admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Medya"))
+    admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
 
     from app.main import main

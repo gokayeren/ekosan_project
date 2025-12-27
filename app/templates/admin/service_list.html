@@ -1,54 +1,62 @@
 {% extends 'admin/model/list.html' %}
 
-{% block list_body %}
-    
-    {# --- ANA KAPLAYICI (Dark Mode Panel) --- #}
-    <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl mb-20">
+{% block body %}
+    <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
 
         {# --- ÜST BAŞLIK ALANI --- #}
-        <div class="px-6 py-5 border-b border-slate-800 flex flex-col md:flex-row justify-between items-center bg-[#0f172a] gap-4">
-            
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
-                    <i class="fa fa-concierge-bell"></i>
+        <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-[#0f172a]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    {% if 'Başvuru' in admin_view.name %}
+                        <i class="fa fa-envelope-open-text"></i>
+                    {% elif 'Slider' in admin_view.name %}
+                        <i class="fa fa-images"></i>
+                    {% elif 'Hizmet' in admin_view.name %}
+                        <i class="fa fa-concierge-bell"></i>
+                    {% else %}
+                        <i class="fa fa-list"></i>
+                    {% endif %}
                 </div>
                 <div>
-                    <h3 class="font-bold text-slate-100 text-base">Hizmet Listesi</h3>
+                    <h3 class="font-bold text-slate-100 text-base">{{ admin_view.name }}</h3>
                     <p class="text-xs text-slate-500 mt-0.5">
-                        Web sitesindeki hizmetleri ve içeriklerini buradan yönetebilirsiniz.
+                        {% if 'Başvuru' in admin_view.name %}
+                            Web sitesinden gelen form yanıtlarını inceleyin.
+                        {% else %}
+                            {{ admin_view.name }} kayıtlarını buradan yönetebilirsiniz.
+                        {% endif %}
                     </p>
                 </div>
             </div>
 
             {% if admin_view.can_create %}
-            <div class="w-full md:w-auto">
-                <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 px-5 h-10 rounded-lg shadow-lg shadow-blue-900/20 font-medium transition-all flex items-center justify-center gap-2 w-full md:w-auto">
-                    <i class="fa fa-plus"></i> Yeni Hizmet Ekle
-                </a>
-            </div>
+            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 px-5 h-10 rounded-lg shadow-lg shadow-blue-900/20 font-medium transition-all flex items-center gap-2">
+                <i class="fa fa-plus"></i> Yeni Ekle
+            </a>
             {% endif %}
         </div>
 
-        {# --- TABLO ALANI --- #}
         <div class="overflow-x-auto">
+            {% block model_list_table %}
             <table class="table w-full border-collapse">
                 <thead>
-                    <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold text-left">
-                        
-                        {# Sütun Başlıkları #}
+                    <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
                         {% for c, name in list_columns %}
-                            <th class="px-6 py-4 whitespace-nowrap {% if c == 'id' or c == 'order' %}text-center w-20{% endif %}">
+                            <th class="px-6 py-4 {% if c == 'id' or c == 'order' %}text-center w-20{% endif %}">
                                 {{ name }}
-                                {% if admin_view.column_sortable_list and c in admin_view.column_sortable_list %}
-                                    <a href="{{ sort_url(c) }}" title="Sırala" class="ml-1 text-slate-600 hover:text-blue-400 transition-colors">
+
+                                {% if admin_view.column_sortable_list %}
+                                    {% if c in admin_view.column_sortable_list %}
+                                    <a href="{{ sort_url(c) }}" title="Sırala" class="ml-1 text-slate-600 hover:text-blue-400">
                                         <i class="fa fa-sort"></i>
                                     </a>
+                                    {% endif %}
                                 {% endif %}
                             </th>
                         {% endfor %}
 
                         {% if admin_view.can_edit or admin_view.can_delete %}
-                            <th class="px-6 py-4 text-right w-32 sticky right-0 bg-[#020617]">İşlemler</th>
+                            <th class="px-6 py-4 text-right w-32">İşlemler</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -58,51 +66,31 @@
                     <tr class="hover:bg-slate-800/30 transition-colors group">
 
                         {% for c, name in list_columns %}
-                            <td class="px-6 py-3 align-middle {% if c == 'id' or c == 'order' %}text-center{% endif %}">
+                            <td class="px-6 py-4 {% if c == 'id' or c == 'order' %}text-center{% endif %}">
 
-                                {# --- ÖZEL SÜTUN FORMATLARI --- #}
-
-                                {# 1. GÖRSEL (Image Path) #}
-                                {% if c == 'image_path' %}
-                                    {% if row.image_path %}
-                                        <div class="w-12 h-12 rounded-lg border border-slate-700 overflow-hidden bg-slate-900 p-0.5">
-                                            <img src="{{ url_for('static', filename='uploads/' + row.image_path) }}" 
-                                                 alt="Hizmet" 
-                                                 class="w-full h-full object-cover rounded-md">
+                                {# --- 1. ID ve ORDER (Ortalı, Mono Font) --- #}
+                                {% if c == 'id' or c == 'order' %}
+                                    <span class="font-bold text-slate-500 font-mono">{{ get_value(row, c) }}</span>
+                                
+                                {# --- 2. RESİM ALANI (Hizmetler için Eklendi) --- #}
+                                {% elif c == 'image_path' %}
+                                    {% if get_value(row, c) %}
+                                        <div class="w-12 h-12 rounded border border-slate-700 bg-slate-800 p-0.5 overflow-hidden">
+                                            <img src="{{ url_for('static', filename='uploads/' + get_value(row, c)) }}" class="w-full h-full object-cover rounded-sm">
                                         </div>
                                     {% else %}
-                                        <div class="w-12 h-12 rounded-lg border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-600">
-                                            <i class="fa fa-camera-retro opacity-50"></i>
-                                        </div>
+                                        <span class="text-slate-600 text-xs italic">Görsel Yok</span>
                                     {% endif %}
 
-                                {# 2. ID ve SIRA (Mono Font) #}
-                                {% elif c == 'id' or c == 'order' %}
-                                    <span class="font-bold text-slate-500 font-mono text-xs">{{ get_value(row, c) }}</span>
-                                
-                                {# 3. DURUM (Aktif/Pasif) #}
+                                {# --- 3. AKTİF/PASİF DURUMU --- #}
                                 {% elif c == 'is_active' %}
                                     {% if get_value(row, c) == True %}
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span> Aktif
-                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-900/20 text-emerald-500 border border-emerald-900/30">Aktif</span>
                                     {% else %}
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold uppercase bg-red-500/10 text-red-400 border border-red-500/20">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span> Pasif
-                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-900/20 text-red-500 border border-red-900/30">Pasif</span>
                                     {% endif %}
-
-                                {# 4. BAŞLIK (Vurgulu) #}
-                                {% elif c == 'title' %}
-                                    <div class="font-medium text-slate-200">{{ get_value(row, c) }}</div>
-
-                                {# 5. AÇIKLAMA (Kısıtlı Metin) #}
-                                {% elif c == 'description' %}
-                                    <div class="text-slate-400 text-xs max-w-xs truncate" title="{{ get_value(row, c) }}">
-                                        {{ get_value(row, c) }}
-                                    </div>
-
-                                {# 6. DİĞER STANDART ALANLAR #}
+                                
+                                {# --- 4. DİĞER ALANLAR (Varsayılan) --- #}
                                 {% else %}
                                     <div class="text-slate-300">
                                         {{ get_value(row, c) }}
@@ -111,33 +99,23 @@
                             </td>
                         {% endfor %}
 
-                        {# --- İŞLEMLER BUTONLARI --- #}
                         {% if admin_view.can_edit or admin_view.can_delete %}
-                        <td class="px-6 py-3 text-right sticky right-0 bg-[#0f172a] group-hover:bg-[#131c31] transition-colors border-l border-slate-800/50">
-                            <div class="flex items-center justify-end gap-3">
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-4">
                                 
-                                {# Düzenle #}
                                 {% if admin_view.can_edit %}
-                                <a href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}" 
-                                   class="w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all" 
-                                   title="Düzenle">
-                                    <i class="fa fa-pencil-alt"></i>
+                                <a href="{{ url_for('.edit_view', id=row.id) }}" class="text-slate-500 hover:text-blue-400 transition-colors transform hover:scale-110" title="Düzenle / İncele">
+                                    <i class="fa fa-pencil-alt text-lg"></i>
                                 </a>
                                 {% endif %}
                                 
-                                {# Sil #}
                                 {% if admin_view.can_delete %}
                                 <form class="inline-block m-0 p-0" method="POST" action="{{ url_for('.delete_view') }}">
-                                    {% if delete_form.csrf_token %}
-                                        {{ delete_form.csrf_token }}
-                                    {% endif %}
-                                    <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
-                                    <input type="hidden" name="url" value="{{ return_url }}">
-                                    
-                                    <button onclick="return confirm('Bu hizmeti silmek istediğinize emin misiniz?');" 
-                                            class="w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all cursor-pointer" 
-                                            title="Sil">
-                                        <i class="fa fa-trash"></i>
+                                    {{ delete_form.id(value=row.id) }}
+                                    {{ delete_form.url(value=return_url) }}
+                                    {{ delete_form.csrf_token }}
+                                    <button onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?');" class="text-slate-500 hover:text-red-500 transition-colors transform hover:scale-110 bg-transparent border-0 cursor-pointer p-0" title="Sil">
+                                        <i class="fa fa-trash text-lg"></i>
                                     </button>
                                 </form>
                                 {% endif %}
@@ -147,13 +125,13 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="100" class="px-6 py-20 text-center">
+                        <td colspan="{{ list_columns|length + 1 }}" class="px-6 py-16 text-center">
                             <div class="flex flex-col items-center justify-center">
-                                <div class="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4 border border-slate-700">
-                                    <i class="fa fa-search text-2xl text-slate-500"></i>
+                                <div class="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fa fa-folder-open text-3xl text-slate-600"></i>
                                 </div>
-                                <h3 class="text-slate-200 font-medium text-base">Kayıt Bulunamadı</h3>
-                                <p class="text-slate-500 text-sm mt-1">Henüz eklenmiş bir hizmet bulunmuyor.</p>
+                                <h3 class="text-slate-300 font-medium text-base">Kayıt Bulunamadı</h3>
+                                <p class="text-slate-500 text-sm mt-1 max-w-xs mx-auto">Bu alanda henüz gösterilecek bir veri yok.</p>
                             </div>
                         </td>
                     </tr>
@@ -161,18 +139,13 @@
                 </tbody>
             </table>
             
-            {# --- SAYFALAMA --- #}
             {% if num_pages > 1 %}
             <div class="p-4 border-t border-slate-800 bg-[#0b1120] flex justify-center">
                 {{ lib.pager(page, num_pages, pager_url) }}
             </div>
             {% endif %}
             
+            {% endblock %}
         </div>
     </div>
-{% endblock %}
-
-{% block tail %}
-    <script src="{{ admin_static.url(filename='vendor/jquery.min.js', v='3.5.1') }}" type="text/javascript"></script>
-    <script src="{{ admin_static.url(filename='bootstrap/bootstrap4/js/bootstrap.min.js', v='4.2.1') }}" type="text/javascript"></script>
 {% endblock %}

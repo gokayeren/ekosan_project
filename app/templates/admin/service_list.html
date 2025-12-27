@@ -1,81 +1,128 @@
 {% extends 'admin/model/list.html' %}
 
-{% block body %}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        
-        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
-            <div>
-                <h3 class="font-bold text-gray-800 text-lg">Hizmetler</h3>
-                <p class="text-xs text-gray-500">Sunduğunuz hizmetleri ve ilişkili ürünleri yönetin.</p>
-            </div>
-            {% if admin_view.can_create %}
-            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm btn-primary">
-                <i class="fa fa-plus mr-1"></i> Yeni Hizmet Ekle
-            </a>
-            {% endif %}
-        </div>
+{# --- 1. GEREKSİZ BLOKLARI TEMİZLEME --- #}
+{% block model_menu_bar %}{% endblock %}
+{% block actions %}{% endblock %}
+{% block content_title %}{% endblock %}
 
-        <div class="overflow-x-auto">
-            {% block model_list_table %}
-            <table class="table w-full">
-                <thead>
-                    <tr class="bg-gray-50 text-gray-600 uppercase text-xs">
-                        <th class="w-16 text-center">Sıra</th>
-                        <th class="w-20">Görsel</th>
-                        <th>Başlık</th>
-                        <th>İlişkili Ürün Sayısı</th>
-                        <th>Durum</th>
-                        <th class="w-24 text-right">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                {% for row in data %}
-                    <tr class="hover:bg-gray-50 border-b border-gray-50">
-                        <td class="font-mono text-center text-gray-400">{{ row.order }}</td>
-                        <td>
-                            {% if row.image_path %}
-                            <div class="avatar">
-                                <div class="w-10 rounded">
-                                    <img src="{{ url_for('static', filename='uploads/' + row.image_path) }}" />
-                                </div>
-                            </div>
-                            {% else %}
-                                <i class="fa fa-image text-gray-300 text-xl"></i>
-                            {% endif %}
-                        </td>
-                        <td class="font-bold text-gray-700">{{ row.title }}</td>
-                        <td>
-                            <span class="badge badge-ghost">{{ row.products|length }} Ürün</span>
-                        </td>
-                        <td>
-                            {% if row.is_active %}
-                                <span class="badge badge-success badge-xs gap-1">Aktif</span>
-                            {% else %}
-                                <span class="badge badge-error badge-xs gap-1">Pasif</span>
-                            {% endif %}
-                        </td>
-                        <td class="flex justify-end gap-1">
-                            <a href="{{ url_for('.edit_view', id=row.id) }}" class="btn btn-square btn-sm btn-ghost text-blue-600">
-                                <i class="fa fa-pencil-alt"></i>
-                            </a>
-                            {% if admin_view.can_delete %}
-                            <form class="icon" method="POST" action="{{ url_for('.delete_view') }}">
-                                {{ delete_form.id(value=row.id) }}
-                                {{ delete_form.url(value=return_url) }}
-                                {{ delete_form.csrf_token }}
-                                <button onclick="return confirm('Silmek istediğine emin misin?');" class="btn btn-square btn-sm btn-ghost text-red-500">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
+{# --- 2. LİSTELEME GÖVDESİ --- #}
+{% block list_body %}
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 pb-20">
+        
+        {# YENİ EKLE KARTI #}
+        {% if admin_view.can_create %}
+        <a href="{{ url_for('.create_view', url=return_url) }}" class="card bg-white border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 flex items-center justify-center min-h-[350px] group cursor-pointer text-gray-400 hover:text-blue-600">
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-full bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center mx-auto mb-4 transition-colors">
+                    <i class="fa fa-plus text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-lg">Yeni Hizmet Ekle</h3>
+                <p class="text-xs mt-2 text-gray-400 group-hover:text-blue-400">Ürünlerle ilişkilendirilebilir</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% for row in data %}
+        <div class="card bg-base-100 shadow-xl border border-gray-200 group hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+            
+            {# GÖRSEL ALANI #}
+            <figure class="px-4 pt-4 relative h-48">
+                {% if row.image_path %}
+                    <img src="{{ url_for('static', filename='uploads/' + row.image_path) }}" 
+                         alt="{{ row.title }}" 
+                         class="rounded-xl object-cover h-full w-full" />
                 {% else %}
-                    <tr><td colspan="6" class="text-center py-8 text-gray-400">Kayıt bulunamadı.</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            {% endblock %}
+                    <div class="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+                        <div class="text-center">
+                            <i class="fa fa-tools text-3xl mb-1 opacity-50"></i>
+                            <span class="text-xs block">Görsel Yok</span>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Ürün Sayısı Badge #}
+                <div class="absolute top-6 right-6 badge badge-neutral text-white font-bold shadow-sm">
+                    {{ row.products|length }} Ürün
+                </div>
+
+                {# Sıralama Badge (Sol Üst) #}
+                <div class="absolute top-6 left-6 badge bg-white/90 text-gray-600 font-mono text-xs border-0 shadow-sm backdrop-blur-sm">
+                    Sıra: {{ row.order }}
+                </div>
+            </figure>
+
+            <div class="card-body p-5 flex-grow">
+                
+                {# BAŞLIK #}
+                <h2 class="card-title text-base font-bold text-gray-800 line-clamp-1" title="{{ row.title }}">
+                    {{ row.title }}
+                </h2>
+                
+                {# AÇIKLAMA (Kısa) #}
+                <p class="text-xs text-gray-500 line-clamp-2 min-h-[2.5em]">
+                    {{ row.description if row.description else 'Açıklama girilmemiş.' }}
+                </p>
+                
+                {# DURUM BİLGİSİ (Slider'daki kod alanı yerine Durum geliyor) #}
+                <div class="mt-3">
+                    {% if row.is_active %}
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100 w-full justify-center">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Yayında (Aktif)
+                        </div>
+                    {% else %}
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-red-50 text-red-700 text-xs font-bold border border-red-100 w-full justify-center">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            Pasif
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {# FOOTER: ID ve İşlemler #}
+                <div class="card-actions justify-between items-center mt-auto border-t border-gray-100 pt-4">
+                    <span class="text-xs text-gray-400 font-mono">ID: #{{ get_pk_value(row) }}</span>
+                    
+                    <div class="flex gap-2">
+                        {# Düzenle #}
+                        <a href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}" class="btn btn-sm btn-square btn-ghost text-blue-600 hover:bg-blue-100 tooltip tooltip-top" data-tip="Düzenle">
+                            <i class="fa fa-pencil-alt"></i>
+                        </a>
+
+                        {# Silme İşlemi #}
+                        {% if admin_view.can_delete %}
+                        <form class="icon inline-block" method="POST" action="{{ url_for('.delete_view') }}">
+                            {% if delete_form.csrf_token %}
+                                {{ delete_form.csrf_token }}
+                            {% endif %}
+                            
+                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                            <input type="hidden" name="url" value="{{ return_url }}">
+
+                            <button onclick="return confirm('Bu hizmeti silmek istediğinize emin misiniz?');" class="btn btn-sm btn-square btn-ghost text-red-500 hover:bg-red-100 tooltip tooltip-top" data-tip="Sil">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
+        {% endfor %}
+
     </div>
+    
+    {# Sayfalama #}
+    {% if num_pages > 1 %}
+    <div class="p-4">
+        {{ lib.pager(page, num_pages, pager_url) }}
+    </div>
+    {% endif %}
+
+{% endblock %}
+
+{# --- 3. SCRIPTS --- #}
+{% block tail %}
+    <script src="{{ admin_static.url(filename='vendor/jquery.min.js', v='3.5.1') }}" type="text/javascript"></script>
+    <script src="{{ admin_static.url(filename='bootstrap/bootstrap4/js/bootstrap.min.js', v='4.2.1') }}" type="text/javascript"></script>
 {% endblock %}

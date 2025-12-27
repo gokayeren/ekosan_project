@@ -3,8 +3,7 @@
 {% block content_title %}{% endblock %}
 
 {% block body %}
-    
-    {# --- ÜST BAŞLIK VE AKSİYONLAR (DARK MODE) --- #}
+
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
             <a href="{{ return_url }}" class="btn btn-circle btn-sm btn-ghost bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white transition-all shadow-sm">
@@ -27,7 +26,6 @@
         </div>
     </div>
 
-    {# --- FLASH MESAJLARI (DARK) --- #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-8 space-y-3">
@@ -41,7 +39,6 @@
         {% endif %}
     {% endwith %}
 
-    {# --- ANA FORM --- #}
     <form id="sliderForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-32">
         
         {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
@@ -49,13 +46,10 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {# --- SOL KOLON: SLAYT İÇERİKLERİ (GENİŞ ALAN) --- #}
             <div class="lg:col-span-2 space-y-6">
                 
-                {# KART ARKA PLANI: bg-slate-800 (KOYU) #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
-                    
-                    {# KART BAŞLIĞI #}
+
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
@@ -69,11 +63,9 @@
                         <span class="badge badge-ghost bg-slate-700 border border-slate-600 text-slate-300 font-mono text-xs">Adet: <span id="image-count" class="ml-1 text-white font-bold">{{ form.items|length }}</span></span>
                     </div>
 
-                    {# KART İÇERİĞİ: bg-slate-900/30 (BİRAZ DAHA KOYU ZEMİN) #}
                     <div class="p-6 bg-slate-900/30 min-h-[300px]">
                         <div id="items-container" class="space-y-5">
                             {% for subform in form.items %}
-                                {# ITEM KARTI: bg-slate-800 #}
                                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm relative group hover:border-slate-500 transition-all item-card" id="item-card-{{ loop.index0 }}">
                                     
                                     {% if subform.csrf_token %}{{ subform.csrf_token }}{% endif %}
@@ -86,7 +78,6 @@
                                     {% endif %}
 
                                     <div class="flex flex-col sm:flex-row gap-6">
-                                        {# GÖRSEL ALANI #}
                                         <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-3">
                                             <div class="aspect-video bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden border border-slate-700 relative group-hover:shadow-lg transition-all">
                                                 {% if subform.image_path.data and subform.image_path.data is string %}
@@ -101,7 +92,6 @@
                                                     </div>
                                                 {% endif %}
                                             </div>
-                                            {# FILE INPUT (DARK) #}
                                             {{ subform.image_path(class="file-input file-input-bordered file-input-ghost file-input-xs w-full text-xs text-slate-400 bg-slate-900 border-slate-700") }}
                                             
                                             <div class="flex items-center gap-2 bg-slate-900 px-2 py-1.5 rounded-lg border border-slate-700">
@@ -110,7 +100,6 @@
                                             </div>
                                         </div>
 
-                                        {# TEXT INPUTS (DARK) #}
                                         <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div class="col-span-1 md:col-span-2 form-control">
                                                 <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Ana Başlık</label>
@@ -131,7 +120,6 @@
                                         </div>
                                     </div>
 
-                                    {# SİLME BUTONU (DARK) #}
                                     <button type="button" onclick="removeExistingItem('item-card-{{ loop.index0 }}')" 
                                             class="absolute -top-3 -right-3 btn btn-circle btn-sm bg-slate-800 border border-slate-600 text-slate-400 hover:bg-red-900/30 hover:text-red-400 hover:border-red-800 shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
                                             title="Slaytı Sil">
@@ -142,7 +130,6 @@
                             {% endfor %}
                         </div>
 
-                        {# YENİ EKLEME ALANI (DARK DASHED) #}
                         <div onclick="addSliderItem()" class="mt-6 py-6 border-2 border-dashed border-slate-600 rounded-xl flex flex-col items-center justify-center bg-slate-800/50 hover:bg-slate-800 hover:border-slate-500 transition-all cursor-pointer group gap-2">
                            <div class="w-10 h-10 rounded-full bg-slate-700 shadow-sm border border-slate-600 group-hover:border-slate-500 group-hover:text-white flex items-center justify-center transition-all text-slate-400">
                                 <i class="fa fa-plus text-sm"></i>
@@ -154,7 +141,6 @@
 
             </div>
 
-            {# --- SAĞ KOLON: GENEL AYARLAR (DAR ALAN) --- #}
             <div class="space-y-6">
                 
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden sticky top-6">
@@ -210,7 +196,6 @@
     <script>
         let itemIndex = {{ form.items|length }};
 
-        // --- 1. SİLME FONKSİYONLARI ---
         function removeExistingItem(cardId) {
             const card = document.getElementById(cardId);
             if (!card) return;
@@ -232,12 +217,10 @@
             setTimeout(() => { card.remove(); updateCount(); }, 300);
         }
 
-        // --- 2. YENİ SLAYT EKLEME (JS HTML STRING DE DARK MODE OLARAK GÜNCELLENDİ) ---
         function addSliderItem() {
             const container = document.getElementById('items-container');
             const newCardId = `new-item-${itemIndex}`;
 
-            // JS ile eklenen kartın tasarımı da DARK MODE uyumlu
             const newRowHtml = `
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm relative group item-card fade-in mt-4 border-l-4 border-l-slate-500" id="${newCardId}">
                     

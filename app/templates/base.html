@@ -320,8 +320,8 @@
                 </div>
 
                 <div class="w-full md:w-2/3 relative">
-                    
-                    {% set partner_slider_key = home_config.slider_select %}
+
+                    {% set partner_slider_key = home_config.slider_select.group_key if home_config.slider_select else None %}
                     {% set partners = get_slider(partner_slider_key) if partner_slider_key else [] %}
 
                     {% if partners %}

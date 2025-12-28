@@ -1,0 +1,189 @@
+{% extends 'admin/model/list.html' %}
+
+{% block body %}
+    <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl mb-20">
+
+        {# --- ÜST BAŞLIK VE YENİ EKLE BUTONU --- #}
+        <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-[#0f172a]">
+            <div class="flex items-center gap-3">
+                {# İkon Değişikliği: Ürünler için Kutu ikonu #}
+                <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <i class="fa fa-cube"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-100 text-base">Ürün Yönetimi</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Katalogdaki ürünleri, fiyatları ve stok durumlarını buradan yönetebilirsiniz.
+                    </p>
+                </div>
+            </div>
+
+            {% if admin_view.can_create %}
+            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 px-5 h-10 rounded-lg shadow-lg shadow-blue-900/20 font-medium transition-all flex items-center gap-2">
+                <i class="fa fa-plus"></i> Yeni Ürün
+            </a>
+            {% endif %}
+        </div>
+
+        {# --- TABLO ALANI --- #}
+        <div class="overflow-x-auto">
+            {% block model_list_table %}
+            <table class="table w-full border-collapse">
+                <thead>
+                    <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                        
+                        {# SÜTUN BAŞLIKLARI #}
+                        {% for c, name in list_columns %}
+                            <th class="px-6 py-4 whitespace-nowrap {% if c == 'is_active' or c == 'price' %}text-center{% endif %}">
+                                {{ name }}
+                                {% if admin_view.column_sortable_list and c in admin_view.column_sortable_list %}
+                                    <a href="{{ sort_url(c) }}" title="Sırala" class="ml-1 text-slate-600 hover:text-blue-400">
+                                        <i class="fa fa-sort"></i>
+                                    </a>
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+
+                        {% if admin_view.can_edit or admin_view.can_delete %}
+                            <th class="px-6 py-4 text-right w-32 sticky right-0 bg-[#020617]">İşlemler</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                
+                <tbody class="divide-y divide-slate-800/50 text-sm">
+                {% for row in data %}
+                    <tr class="hover:bg-slate-800/30 transition-colors group">
+                        
+                        {# SÜTUN VERİLERİ #}
+                        {% for c, name in list_columns %}
+                            <td class="px-6 py-3 align-middle {% if c == 'is_active' or c == 'price' %}text-center{% endif %}">
+                                
+                                {# 1. GÖRSEL (image_file) #}
+                                {% if c == 'image_file' %}
+                                    {% if row.image_file %}
+                                        <div class="w-12 h-12 rounded border border-slate-700 bg-slate-800 p-0.5 overflow-hidden mx-auto md:mx-0 relative group-hover:border-slate-500 transition-colors">
+                                            <img src="{{ url_for('static', filename='uploads/' + row.image_file) }}" 
+                                                 class="w-full h-full object-cover rounded-sm"
+                                                 alt="Ürün">
+                                        </div>
+                                    {% else %}
+                                        <div class="w-12 h-12 rounded border border-slate-700 bg-slate-800/50 flex items-center justify-center text-slate-600">
+                                            <i class="fa fa-image opacity-50"></i>
+                                        </div>
+                                    {% endif %}
+
+                                {# 2. AKTİF/PASİF (is_active) #}
+                                {% elif c == 'is_active' %}
+                                    {% if row.is_active %}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span> Yayında
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold uppercase bg-slate-700/30 text-slate-400 border border-slate-600/30">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span> Taslak
+                                        </span>
+                                    {% endif %}
+
+                                {# 3. FİYAT (price) #}
+                                {% elif c == 'price' %}
+                                    {% if row.price %}
+                                        <span class="font-mono font-bold text-indigo-300 bg-indigo-900/20 px-2 py-1 rounded border border-indigo-500/20 text-xs">
+                                            ₺{{ row.price }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-slate-600 text-xs">-</span>
+                                    {% endif %}
+
+                                {# 4. ÜRÜN ADI (name) #}
+                                {% elif c == 'name' %}
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-slate-200 text-sm group-hover:text-blue-400 transition-colors">
+                                            {{ row.name }}
+                                        </span>
+                                        {# Eğer Slug varsa altına küçük yazalım #}
+                                        {% if row.slug %}
+                                            <span class="text-[10px] text-slate-500 font-mono mt-0.5 truncate max-w-[200px]">/{{ row.slug }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                {# 5. TARİH (created_at) #}
+                                {% elif c == 'created_at' %}
+                                    <div class="text-xs text-slate-400 flex flex-col">
+                                        <span>{{ row.created_at.strftime('%d.%m.%Y') }}</span>
+                                        <span class="text-[10px] text-slate-600">{{ row.created_at.strftime('%H:%M') }}</span>
+                                    </div>
+
+                                {# 6. Diğer Alanlar #}
+                                {% else %}
+                                    <div class="text-slate-400 text-sm">
+                                        {{ get_value(row, c) }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+
+                        {# İŞLEMLER BUTONLARI #}
+                        {% if admin_view.can_edit or admin_view.can_delete %}
+                        <td class="px-6 py-3 text-right sticky right-0 bg-[#0f172a] group-hover:bg-[#131c31] transition-colors border-l border-slate-800/50">
+                            <div class="flex items-center justify-end gap-3">
+                                
+                                {% if admin_view.can_edit %}
+                                <a href="{{ url_for('.edit_view', id=get_pk_value(row), url=return_url) }}" 
+                                   class="w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all border border-transparent hover:border-blue-400/20" 
+                                   title="Düzenle">
+                                    <i class="fa fa-pencil-alt"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% if admin_view.can_delete %}
+                                <form class="inline-block m-0 p-0" method="POST" action="{{ url_for('.delete_view') }}">
+                                    {% if delete_form.csrf_token %}
+                                        {{ delete_form.csrf_token }}
+                                    {% endif %}
+                                    <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                    <input type="hidden" name="url" value="{{ return_url }}">
+                                    
+                                    <button onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz? \n\nDikkat: Bu işlem geri alınamaz.');" 
+                                            class="w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all cursor-pointer border border-transparent hover:border-red-400/20" 
+                                            title="Sil">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="100" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-20 h-20 bg-slate-800/30 rounded-full flex items-center justify-center mb-4 border border-slate-700/50">
+                                    <i class="fa fa-box-open text-3xl text-slate-600"></i>
+                                </div>
+                                <h3 class="text-slate-200 font-bold text-lg">Ürün Bulunamadı</h3>
+                                <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto">
+                                    Sisteme henüz bir ürün eklenmemiş veya arama kriterlerine uygun kayıt yok.
+                                </p>
+                                {% if admin_view.can_create %}
+                                <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm btn-ghost text-blue-400 hover:bg-blue-400/10 mt-4">
+                                    <i class="fa fa-plus mr-2"></i> İlk Ürünü Ekle
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if num_pages > 1 %}
+            <div class="p-4 border-t border-slate-800 bg-[#0b1120] flex justify-center">
+                {{ lib.pager(page, num_pages, pager_url) }}
+            </div>
+            {% endif %}
+            
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

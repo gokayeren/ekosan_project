@@ -494,7 +494,9 @@ class ProductImageInline(InlineFormAdmin):
     }
 
 class ProductView(ModelView):
-    list_template = 'admin/custom_list.html'
+    list_template = 'admin/product_list.html'
+    create_template = 'admin/product_form.html'
+    edit_template = 'admin/product_form.html'
     column_list = ('image_file', 'name', 'price', 'is_active', 'created_at')
     column_default_sort = ('created_at', True)
 

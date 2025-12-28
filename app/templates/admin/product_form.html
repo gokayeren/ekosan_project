@@ -1,0 +1,330 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block content_title %}{% endblock %}
+
+{% block body %}
+    
+    {# --- ÜST BAŞLIK VE AKSİYONLAR --- #}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{{ return_url }}" class="btn btn-circle btn-sm btn-ghost bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white transition-all shadow-sm">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">
+                    {% if model %}Ürün Düzenle{% else %}Yeni Ürün Ekle{% endif %}
+                </h1>
+                <div class="text-xs text-slate-400 flex items-center gap-2 mt-1">
+                    <span class="opacity-75">Katalog</span>
+                    <i class="fa fa-chevron-right text-[10px] opacity-40"></i>
+                    <span class="text-slate-300 font-medium">Ürün Yönetimi</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button type="submit" form="productForm" class="btn btn-primary px-6 shadow-lg shadow-blue-900/20 gap-2 border-none text-white">
+                <i class="fa fa-save"></i>
+                {% if model %}Güncelle{% else %}Kaydet{% endif %}
+            </button>
+        </div>
+    </div>
+
+    {# --- FLASH MESAJLARI --- #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-8 space-y-3">
+                {% for category, message in messages %}
+                    <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm border border-slate-700 bg-slate-800 text-slate-200">
+                        <i class="fa fa-info-circle"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {# --- ANA FORM --- #}
+    <form id="productForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-32">
+        
+        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {# --- SOL KOLON: GENİŞ İÇERİK --- #}
+            <div class="lg:col-span-2 space-y-6">
+                
+                {# KART 1: TEMEL BİLGİLER #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-cube text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Ürün Kimliği</h3>
+                            <p class="text-[11px] text-slate-400">Ürünün temel tanımlama bilgilerini giriniz.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-5 bg-slate-900/30">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Ürün Adı</label>
+                                {{ form.name(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600", placeholder="Örn: Akıllı Termostat v2") }}
+                            </div>
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">URL (Slug)</label>
+                                {{ form.slug(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-400 font-mono text-sm transition-all placeholder:text-slate-600", placeholder="Otomatik oluşturulur") }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Kısa Açıklama (Özet)</label>
+                            {{ form.short_description(class="textarea textarea-bordered w-full h-20 bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 transition-all placeholder:text-slate-600", placeholder="Listeleme sayfalarında görünecek kısa metin...") }}
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 2: DETAYLI İÇERİK #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-align-left text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Ürün Detayları</h3>
+                            <p class="text-[11px] text-slate-400">Geniş açıklama ve teknik specler.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 space-y-6 bg-slate-900/30">
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Detaylı Açıklama</label>
+                            {# Eğer CKEditor kullanıyorsanız class'ı değiştirebilirsiniz, şimdilik textarea stili verildi #}
+                            {{ form.description(class="textarea textarea-bordered w-full min-h-[200px] bg-slate-900 border-slate-700 focus:border-slate-500 text-slate-200", placeholder="Ürün hikayesi...") }}
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Teknik Özellikler</label>
+                            {{ form.tech_specs(class="textarea textarea-bordered w-full h-32 bg-slate-900 border-slate-700 focus:border-slate-500 text-slate-200 font-mono text-sm", placeholder="JSON veya HTML formatında teknik detaylar...") }}
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 3: GALERİ (INLINE MODELS) #}
+                {# Flask-Admin InlineModelFormList için Döngü #}
+                {% for field in form %}
+                    {% if field.type == 'InlineModelFormList' %}
+                    <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3 justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                                    <i class="fa fa-images text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-200 text-sm">{{ field.label.text }}</h3>
+                                    <p class="text-[11px] text-slate-400">Ürün için ek görseller yükleyin.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-slate-900/30 inline-field-container">
+                            {{ field(class="w-full") }}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+
+            {# --- SAĞ KOLON: AYARLAR VE MEDYA --- #}
+            <div class="space-y-6">
+                
+                {# KART 4: YAYIN VE FİYAT #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-tag"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-200 text-sm">Satış Bilgileri</h3>
+                    </div>
+                    <div class="p-6 bg-slate-900/30 space-y-5">
+                        
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Fiyat (₺)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">₺</span>
+                                {{ form.price(class="input input-bordered w-full pl-8 bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600") }}
+                            </div>
+                        </div>
+
+                        <div class="divider my-1 before:bg-slate-700 after:bg-slate-700"></div>
+
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
+                                <span class="font-bold text-slate-300 text-sm">Yayında</span> 
+                                {{ form.is_active(class="toggle toggle-success toggle-sm") }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 5: ANA GÖRSEL #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-camera"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-200 text-sm">Kapak Görseli</h3>
+                    </div>
+                    <div class="p-6 bg-slate-900/30 space-y-4">
+                        <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-slate-700 group">
+                            {% if model is defined and model.image_file %}
+                                {# Not: path konfigürasyonunuza göre static yolunu ayarlayınız. Genelde uploads klasörü static altındadır #}
+                                <img src="{{ url_for('static', filename='uploads/' + model.image_file) }}" class="object-cover w-full h-full">
+                                <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
+                                    <span class="text-white text-xs font-medium"><i class="fa fa-pen mr-1"></i> Değiştir</span>
+                                </div>
+                            {% else %}
+                                <div class="flex flex-col items-center text-slate-500">
+                                    <i class="fa fa-image text-3xl mb-2 opacity-50"></i>
+                                    <span class="text-xs font-medium">Görsel Yok</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {{ form.image_file(class="file-input file-input-bordered file-input-ghost file-input-sm w-full text-xs text-slate-400 bg-slate-900 border-slate-700") }}
+                    </div>
+                </div>
+
+                {# KART 6: İLİŞKİLİ HİZMETLER #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-concierge-bell"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-200 text-sm">Hizmetler</h3>
+                    </div>
+                    <div class="p-6 bg-slate-900/30">
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">Bağlı Hizmetler</label>
+                            {{ form.services(class="w-full", style="width: 100%") }}
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 7: SEO AYARLARI #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-search"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-200 text-sm">SEO</h3>
+                    </div>
+                    <div class="p-4 bg-slate-900/30 space-y-4">
+                        <div class="form-control">
+                            <label class="label pt-0 text-[10px] font-bold text-slate-500 uppercase">SEO Başlık</label>
+                            {{ form.meta_title(class="input input-sm input-bordered bg-slate-900 border-slate-700 text-slate-300 w-full") }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label pt-0 text-[10px] font-bold text-slate-500 uppercase">SEO Açıklama</label>
+                            {{ form.meta_description(class="textarea textarea-sm textarea-bordered bg-slate-900 border-slate-700 text-slate-300 w-full h-20") }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label pt-0 text-[10px] font-bold text-slate-500 uppercase">Anahtar Kelimeler</label>
+                            {{ form.meta_keywords(class="input input-sm input-bordered bg-slate-900 border-slate-700 text-slate-300 w-full") }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {# SABİT ALT MENÜ (MOBİL) #}
+        <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+            <div class="flex justify-end gap-3 max-w-7xl mx-auto">
+                <a href="{{ return_url }}" class="btn btn-ghost text-slate-400">İptal</a>
+                <button type="submit" class="btn btn-primary px-8 border-none text-white">
+                    <i class="fa fa-save mr-2"></i> Kaydet
+                </button>
+            </div>
+        </div>
+
+    </form>
+{% endblock %}
+
+{% block tail %}
+    {{ super() }}
+    <style>
+        /* Dark Mode Select2 Özelleştirmesi (Service Form'dan miras alındı) */
+        .select2-container--default .select2-selection--multiple {
+            background-color: #0f172a !important; border-color: #334155 !important;
+            border-radius: 0.5rem; min-height: 45px; padding: 4px;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #64748b !important;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #334155 !important; border: 1px solid #475569 !important;
+            color: #e2e8f0 !important; border-radius: 4px; margin-top: 4px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #94a3b8 !important; border-right: 1px solid #475569 !important; margin-right: 6px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            background-color: #ef4444 !important; color: white !important;
+        }
+        .select2-dropdown {
+            background-color: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important;
+        }
+        .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+            background-color: #3b82f6 !important; color: white !important;
+        }
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #334155 !important;
+        }
+
+        /* Inline Model (Tablo) Düzenlemeleri */
+        .inline-field-container table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        .inline-field-container th {
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #94a3b8; /* slate-400 */
+            padding-bottom: 8px;
+            font-weight: 700;
+        }
+        .inline-field-container td {
+            background-color: #0f172a; /* slate-900 */
+            border-top: 1px solid #334155;
+            border-bottom: 1px solid #334155;
+            padding: 10px;
+        }
+        .inline-field-container td:first-child {
+            border-left: 1px solid #334155;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        .inline-field-container td:last-child {
+            border-right: 1px solid #334155;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        /* Inline içindeki inputlar */
+        .inline-field-container input[type="text"], 
+        .inline-field-container input[type="number"] {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: 100%;
+        }
+        /* Silme butonu */
+        .inline-remove-field button {
+            color: #ef4444; /* red-500 */
+        }
+    </style>
+{% endblock %}

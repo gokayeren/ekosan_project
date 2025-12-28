@@ -449,19 +449,35 @@ class ServiceView(ModelView):
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 
-    column_list = ('image_path', 'title', 'order', 'is_active')
+    # Listeleme ekranında görünecek sütunlar
+    column_list = ('image_path', 'title', 'slug', 'order', 'is_active')
     column_default_sort = ('order', False)
 
+    # Düzenleme/Ekleme formunda çıkacak alanlar (EKSİKSİZ)
     form_columns = (
         'title',
-        'slug',  # <-- Geri geldi
+        'slug',  # <-- Bu alan artık veritabanında var, burada da olmalı
         'description',
         'image_path',
         'products',
         'order',
         'is_active',
-        'meta_title', 'meta_description', 'meta_keywords' # <-- Geri geldi
+        # SEO Alanları
+        'meta_title', 'meta_description', 'meta_keywords'
     )
+
+    column_labels = {
+        'title': 'Hizmet Başlığı',
+        'description': 'Açıklama',
+        'image_path': 'Hizmet Görseli',
+        'products': 'İlişkili Ürünler',
+        'order': 'Sıralama',
+        'is_active': 'Yayında mı?',
+        'meta_title': 'SEO Başlık',
+        'meta_description': 'SEO Açıklama',
+        'meta_keywords': 'SEO Anahtar Kelimeler',
+        'slug': 'URL Yolu (Otomatik)'
+    }
 
     path = op.join(op.dirname(__file__), 'static', 'uploads')
     if not os.path.exists(path):
@@ -470,8 +486,9 @@ class ServiceView(ModelView):
     form_extra_fields = {
         'image_path': ImageUploadField('Hizmet Görseli', base_path=path, url_relative_path='uploads/')
     }
-    
+
     batch_actions = None
+
     def is_action_allowed(self, name):
         return False
 

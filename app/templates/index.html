@@ -4,21 +4,18 @@
 
 {% block content %}
 
-{# --- BACKEND DEĞİŞKENLERİ (DOKUNULMADI) --- #}
 {% set hero_slider_key = home_config.hero_slider.group_key if home_config.hero_slider else None %}
 {% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
 
 <div class="relative w-full h-[500px] lg:h-[650px] bg-neutral-900 overflow-hidden font-sans group">
 
-    {# Swiper Container #}
     <div class="swiper myHeroSwiper h-full w-full pointer-events-none"> 
         <div class="swiper-wrapper">
             
             {% if hero_items %}
                 {% for item in hero_items %}
                 <div class="swiper-slide relative w-full h-full">
-                    
-                    {# RESİM OPTİMİZASYONU: İlk resim hızlı, diğerleri lazy #}
+
                     <div class="absolute inset-0 z-0">
                         {% if item.image_path %}
                             <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
@@ -41,7 +38,6 @@
                             
                             <div class="text-left">
                                 {% if item.title %}
-                                    {# Animasyon sınıfları korundu #}
                                     <h1 class="text-2xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 drop-shadow-lg tracking-tight slider-title opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-300">
                                         {{ item.title }}
                                     </h1>
@@ -69,7 +65,6 @@
                 </div>
                 {% endfor %}
             {% else %}
-                {# Varsayılan Slider #}
                 <div class="swiper-slide relative w-full h-full">
                     <div class="absolute inset-0 z-0">
                          <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1920&q=80&fit=crop" class="w-full h-full object-cover" loading="lazy" />
@@ -85,7 +80,6 @@
     </div>
 </div>
 
-{# --- SUNUM BÖLÜMÜ --- #}
 <section class="flex justify-center py-12 border-b border-gray-100 relative overflow-hidden bg-white">
     
     <div class="absolute top-0 right-0 p-10 opacity-5 pointer-events-none select-none">
@@ -115,7 +109,6 @@
     </div>
 </section>
 
-{# --- HİZMETLER BÖLÜMÜ --- #}
 <section class="pt-8 pb-16 mb:pb-20 bg-gray-50 relative overflow-hidden">
     <div class="absolute inset-0 z-0 opacity-5 pointer-events-none"
          style="background-image: url('{{ url_for('static', filename='img/pattern.svg') }}'); background-repeat: repeat; background-position: center;">
@@ -131,13 +124,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-6">
             {% for service in services %}
 
-            {# Backend değişkeni aynen korundu #}
             {% set random_speed = (((loop.index * 17) % 20) - 10) / 400 %}
 
             <div class="parallax-card-wrapper relative w-full h-[300px]" 
                  data-speed="{{ random_speed }}">
-                
-                {# MOBİL FİX: Mobilde hover olmadığı için içerik her zaman görünsün diye 'group' class'ını lg: ekranlara sakladık #}
+
                 <a href="#" class="group relative block w-full h-full bg-orange-600 border-[1px] border-orange-600 rounded-md shadow-md shadow-gray-300 hover:shadow-xl hover:shadow-gray-900/20 overflow-hidden transition-all duration-300 hover:-translate-y-1">
                     
                     {% if service.image_path %}
@@ -152,7 +143,6 @@
                          loading="lazy" />
                     {% endif %}
 
-                    {# Overlay: Mobilde koyu, Masaüstünde hover ile koyulaşsın #}
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent lg:bg-none lg:group-hover:bg-gradient-to-t lg:group-hover:from-black/90 transition-all duration-500"></div>
 
                     <div class="absolute inset-0 flex flex-col justify-end">
@@ -163,9 +153,6 @@
                             </span>
                         </div>
 
-                        {# MOBİL İÇİN KRİTİK DÜZENLEME: #}
-                        {# Masaüstünde (lg:) opacity-0 ile gizli, hover ile gelir. #}
-                        {# Mobilde (default) opacity-100 ile her zaman görünür. #}
                         <div class="bg-gray-900/90 backdrop-blur-sm border-t border-white/10 p-4 pt-5 z-10 w-full lg:translate-y-full lg:group-hover:translate-y-0 transition-transform duration-500">
                             <p class="text-gray-300 text-xs leading-relaxed line-clamp-2 font-medium">
                                 {{ service.description|striptags }}
@@ -194,10 +181,8 @@
     </div>
 </section>
 
-{# --- PARALLAX BÖLÜMÜ --- #}
 <section id="parallax-section" class="relative w-full h-[400px] flex items-center overflow-hidden">
-    
-    {# will-change eklendi: GPU hızlandırma için #}
+
     <div id="parallax-bg" 
          class="absolute top-0 left-0 w-full h-[150%] z-0 bg-center bg-cover bg-no-repeat transform-gpu will-change-transform"
          style="background-image: url('{{ url_for('static', filename='uploads/' + home_config.parallax_image) }}');">
@@ -220,27 +205,21 @@
 </section>
 
 <script>
-    // --- OPTİMİZE EDİLMİŞ JAVASCRIPT --- //
-    
     document.addEventListener("DOMContentLoaded", function() {
-        
-        // 1. PARALLAX OPTİMİZASYONU (requestAnimationFrame kullanımı)
+
         const section = document.getElementById('parallax-section');
         const bg = document.getElementById('parallax-bg');
         const speed = 0.3; 
         
         let lastScrollY = window.scrollY;
-        let ticking = false; // Performans kilidi
+        let ticking = false;
 
         function updateParallax() {
             if (!section || !bg) return;
             
             const rect = section.getBoundingClientRect();
-            // Sadece ekrandaysa hesapla
             if (rect.top < window.innerHeight && rect.bottom > 0) {
-                // Basit hesaplama: Yavaşlatılmış scroll
                 const distance = (window.scrollY - (section.offsetTop - window.innerHeight)) * speed;
-                // Translate3d GPU kullanımını zorlar
                 bg.style.transform = `translate3d(0, ${distance * 0.2}px, 0)`; 
             }
             ticking = false;
@@ -254,16 +233,13 @@
             }
         }, { passive: true });
 
-        // İlk yüklemede çalıştır
         updateParallax();
 
-
-        // 2. SWIPER AYARLARI (Mobil için basitleştirildi)
         var heroSwiper = new Swiper(".myHeroSwiper", {
             spaceBetween: 0,
             effect: "fade",
             fadeEffect: { crossFade: true },
-            speed: 1500, // Hız optimize edildi
+            speed: 1500,
             loop: true,
             allowTouchMove: false, 
             autoplay: {
@@ -288,7 +264,6 @@
             }
         });
 
-        // 3. ANİMASYON FONKSİYONLARI (Aynen korundu)
         function animateSlideContent(slide) {
             let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
             elements.forEach(el => {

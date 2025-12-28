@@ -2,11 +2,7 @@ from app import db
 from datetime import datetime
 from slugify import slugify
 
-# --- 1. YARDIMCI SINIFLAR (MIXINS) ---
 class SEOMixin:
-    """
-    Tüm sayfalara, ürünlere ve hizmetlere SEO özellikleri kazandırır.
-    """
     meta_title = db.Column(db.String(150))
     meta_description = db.Column(db.String(300))
     meta_keywords = db.Column(db.String(200))
@@ -15,8 +11,6 @@ class SEOMixin:
         self.meta_title = title
         self.meta_description = desc
         self.meta_keywords = keywords
-
-# --- 2. GENEL AYARLAR VE YAPILANDIRMA MODELLERİ (MEVCUT YAPI KORUNDU) ---
 
 class SiteSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -145,8 +139,6 @@ class FormSubmission(db.Model):
     def __str__(self):
         return f"{self.form.title} - {self.created_at.strftime('%d.%m.%Y')}"
 
-# --- SAYFA AYARLARI MODELLERİ (MEVCUT YAPI KORUNDU) ---
-
 class HomeConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     
@@ -258,14 +250,11 @@ class Getoffer(db.Model):
     def __str__(self):
         return "Teklif Al Sabit Ayarları"
 
-# --- 3. ÜRÜN VE HİZMET İLİŞKİSİ VE MODELLERİ (GÜNCELLENEN KISIM) ---
-
-# Çoktan çoğa ilişki tablosu (Ürünler <-> Hizmetler)
 products_services = db.Table('products_services',
     db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True),
     db.Column('service_id', db.Integer, db.ForeignKey('service.id'), primary_key=True)
 )
-    
+
 class Service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -273,8 +262,6 @@ class Service(db.Model):
     image_path = db.Column(db.String(200))
     is_active = db.Column(db.Boolean, default=True)
     order = db.Column(db.Integer, default=0)
-
-    # Bir hizmetin içindeki ürünlere erişmek için
     products = db.relationship('Product', secondary=products_services, lazy='subquery',
         backref=db.backref('services', lazy=True))
 
@@ -282,35 +269,18 @@ class Service(db.Model):
         return self.title
 
 class Product(db.Model, SEOMixin):
-    """
-    Gelişmiş Ürün Modeli:
-    - SEO uyumlu (SEOMixin kullanır)
-    - Zengin içerik (HTML açıklama)
-    - E-ticaret özellikleri kaldırıldı (Satın al butonu yok)
-    - Çoklu görsel desteği (ProductImage ilişkisi)
-    """
     __tablename__ = 'product'
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     slug = db.Column(db.String(150), unique=True)
-    
-    # Katalog Görünümü İçin Fiyat (Opsiyonel, sadece bilgi amaçlı)
     price = db.Column(db.Float, nullable=True)
-    
-    # İçerik Alanları
-    short_description = db.Column(db.String(500), nullable=True) # Kartlarda gözükecek kısa özet
-    description = db.Column(db.Text, nullable=False) # Detaylı uzun açıklama (HTML destekli)
-    tech_specs = db.Column(db.Text, nullable=True) # Teknik Özellikler Tablosu (HTML veya JSON)
-    
-    # Ana Liste Görseli (Thumbnail)
+    short_description = db.Column(db.String(500), nullable=True)
+    description = db.Column(db.Text, nullable=False)
+    tech_specs = db.Column(db.Text, nullable=True)
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
-    
-    # Durum Bilgileri
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # İLİŞKİ: Sınırsız Ekstra Görsel (Option 1, Option 2 gibi)
     images = db.relationship('ProductImage', backref='product', lazy=True, cascade="all, delete-orphan", order_by="ProductImage.order")
 
     def save(self):
@@ -323,18 +293,14 @@ class Product(db.Model, SEOMixin):
         return self.name
 
 class ProductImage(db.Model):
-    """
-    Ürünler için ekstra galeri resimleri veya seçenek resimleri.
-    Örnek: 'İç Ünite Görünümü', 'Dış Ünite Görünümü' vb.
-    """
     __tablename__ = 'product_images'
     
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     image_path = db.Column(db.String(200), nullable=False)
-    title = db.Column(db.String(100), nullable=True) # Resim başlığı (Örn: "Dış Cephe Görünümü")
-    description = db.Column(db.String(255), nullable=True) # Resim altı kısa açıklama
-    order = db.Column(db.Integer, default=0) # Sıralama
+    title = db.Column(db.String(100), nullable=True)
+    description = db.Column(db.String(255), nullable=True)
+    order = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return f"{self.title or 'Image'} ({self.product.name})"

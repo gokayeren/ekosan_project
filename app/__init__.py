@@ -20,7 +20,6 @@ admin = Admin(
 )
 admin.base_template = 'admin/master.html'
 
-# Modellerin import edilmesi (Product ve ProductImage eklendi)
 from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
@@ -449,21 +448,16 @@ class ServiceView(ModelView):
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 
-    # Listeleme ekranında görünecek sütunlar
-    column_list = ('image_path', 'title', 'slug', 'order', 'is_active')
+    column_list = ('image_path', 'title', 'order', 'is_active')
     column_default_sort = ('order', False)
 
-    # Düzenleme/Ekleme formunda çıkacak alanlar (EKSİKSİZ)
     form_columns = (
         'title',
-        'slug',  # <-- Bu alan artık veritabanında var, burada da olmalı
         'description',
         'image_path',
         'products',
         'order',
-        'is_active',
-        # SEO Alanları
-        'meta_title', 'meta_description', 'meta_keywords'
+        'is_active'
     )
 
     column_labels = {
@@ -472,11 +466,7 @@ class ServiceView(ModelView):
         'image_path': 'Hizmet Görseli',
         'products': 'İlişkili Ürünler',
         'order': 'Sıralama',
-        'is_active': 'Yayında mı?',
-        'meta_title': 'SEO Başlık',
-        'meta_description': 'SEO Açıklama',
-        'meta_keywords': 'SEO Anahtar Kelimeler',
-        'slug': 'URL Yolu (Otomatik)'
+        'is_active': 'Yayında mı?'
     }
 
     path = op.join(op.dirname(__file__), 'static', 'uploads')
@@ -504,23 +494,20 @@ class ProductImageInline(InlineFormAdmin):
     }
 
 class ProductView(ModelView):
-    # Ürün Listeleme Ekranı
-    list_template = 'admin/custom_list.html' # veya service_list.html ile benzer yapı kullanılabilir
+    list_template = 'admin/custom_list.html'
     column_list = ('image_file', 'name', 'price', 'is_active', 'created_at')
     column_default_sort = ('created_at', True)
-    
-    # Ürün Düzenleme/Ekleme Formu
+
     form_columns = (
         'name',
         'slug',
         'is_active',
         'price',
-        'image_file', # Ana Resim
-        'services',   # İlişkili Hizmetler
+        'image_file',
+        'services',
         'short_description',
         'description',
         'tech_specs',
-        # SEO Alanları
         'meta_title', 'meta_description', 'meta_keywords'
     )
 
@@ -548,15 +535,12 @@ class ProductView(ModelView):
         'image_file': ImageUploadField('Ana Ürün Görseli', base_path=path, url_relative_path='uploads/')
     }
 
-    # Çoklu Resim Yükleme (Inline)
     inline_models = (ProductImageInline(ProductImage),)
     
     def is_action_allowed(self, name):
         if name == 'delete':
             return True
         return False
-
-# -----------------------------------------------
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -577,9 +561,7 @@ def create_app(config_class=Config):
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
-    
-    # Ürün ve Hizmet Kategorisi
-    # admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
+    admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
     admin.add_view(ProductView(Product, db.session, name="Ürünler", category="Ürün & Hizmet"))
 
     from app.main import main
@@ -658,7 +640,6 @@ def create_app(config_class=Config):
                  
         except (OperationalError, ProgrammingError):
             print(">> UYARI: Tablolar henüz yok. 'flask db upgrade' bekleniyor...")
-            # db.session.rollback() eklemek iyi bir pratiktir, hata sonrası session'ı temizler
             db.session.rollback()
             pass
 

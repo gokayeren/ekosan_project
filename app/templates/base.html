@@ -140,7 +140,7 @@
                             {% else %}
                                 <li>
                                     <a href="{{ item.url }}" 
-                                    class="text-sm py-0.5 px-1 mx-3 rounded-none hover:bg-transparent hover:border-b-2 hover:border-orange-500
+                                    class="text-sm py-0.5 px-1 mx-3 rounded-none outline-none ring-0 !bg-transparent focus:!bg-transparent active:!bg-transparent hover:bg-transparent hover:border-b-2 hover:border-orange-500 focus:text-white active:text-white
                                     {{ 'border-b-2 border-orange-500' if request.path == item.url else 'border-b-2 border-transparent' }}">
                                     {{ item.label }}
                                     </a>

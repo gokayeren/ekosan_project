@@ -449,33 +449,19 @@ class ServiceView(ModelView):
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 
+    # DİKKAT: image_path dışındakileri eski haline getirdik
     column_list = ('image_path', 'title', 'order', 'is_active')
     column_default_sort = ('order', False)
 
+    # DİKKAT: slug ve meta_... alanlarını buradan GEÇİCİ OLARAK SİLDİK
     form_columns = (
         'title',
-        'slug',
         'description',
         'image_path',
         'products',
         'order',
-        'is_active',
-        # SEO Alanları Eklendi
-        'meta_title', 'meta_description', 'meta_keywords'
+        'is_active'
     )
-
-    column_labels = {
-        'title': 'Hizmet Başlığı',
-        'description': 'Açıklama',
-        'image_path': 'Hizmet Görseli',
-        'products': 'İlişkili Ürünler',
-        'order': 'Sıralama',
-        'is_active': 'Yayında mı?',
-        'meta_title': 'SEO Başlık',
-        'meta_description': 'SEO Açıklama',
-        'meta_keywords': 'SEO Anahtar Kelimeler',
-        'slug': 'URL Yolu (Otomatik)'
-    }
 
     path = op.join(op.dirname(__file__), 'static', 'uploads')
     if not os.path.exists(path):
@@ -484,13 +470,10 @@ class ServiceView(ModelView):
     form_extra_fields = {
         'image_path': ImageUploadField('Hizmet Görseli', base_path=path, url_relative_path='uploads/')
     }
-
+    
     batch_actions = None
-
     def is_action_allowed(self, name):
         return False
-
-# --- YENİ EKLENEN SINIFLAR (ÜRÜN YÖNETİMİ) ---
 
 class ProductImageInline(InlineFormAdmin):
     form_columns = ('id', 'image_path', 'title', 'description', 'order')

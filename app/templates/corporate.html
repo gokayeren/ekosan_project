@@ -87,7 +87,7 @@
 
             <div class="md:col-span-6 lg:col-span-5 relative">
 
-                {% set presentation_key = corporate.presentation_slider %}
+                {% set presentation_key = corporate.presentation_slider.group_key if corporate.presentation_slider else None %}
                 {% set presentation_items = get_slider(presentation_key) if presentation_key else [] %}
 
                 <div id="corporateSlider" class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-200 aspect-[4/3] group bg-gray-100">

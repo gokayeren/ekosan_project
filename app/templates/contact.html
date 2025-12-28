@@ -4,7 +4,7 @@
 
 {% block content %}
 
-{% set hero_slider_key = contact.hero_slider %}
+{% set hero_slider_key = contact.hero_slider.group_key if contact.hero_slider else None %}
 {% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
 
 <div class="relative w-full h-[200px] lg:h-[300px] bg-neutral-900 overflow-hidden font-sans group">

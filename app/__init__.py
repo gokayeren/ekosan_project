@@ -449,18 +449,18 @@ class ServiceView(ModelView):
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
 
-    # DİKKAT: image_path dışındakileri eski haline getirdik
     column_list = ('image_path', 'title', 'order', 'is_active')
     column_default_sort = ('order', False)
 
-    # DİKKAT: slug ve meta_... alanlarını buradan GEÇİCİ OLARAK SİLDİK
     form_columns = (
         'title',
+        'slug',  # <-- Geri geldi
         'description',
         'image_path',
         'products',
         'order',
-        'is_active'
+        'is_active',
+        'meta_title', 'meta_description', 'meta_keywords' # <-- Geri geldi
     )
 
     path = op.join(op.dirname(__file__), 'static', 'uploads')
@@ -562,7 +562,7 @@ def create_app(config_class=Config):
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
     
     # Ürün ve Hizmet Kategorisi
-    # admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
+    admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
     admin.add_view(ProductView(Product, db.session, name="Ürünler", category="Ürün & Hizmet"))
 
     from app.main import main

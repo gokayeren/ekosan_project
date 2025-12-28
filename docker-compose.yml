@@ -1,10 +1,10 @@
 version: '3.8'
+
 services:
   # --- 1. Uygulama (Flask) ---
   app:
     build: .
     container_name: ekosan_app_v2
-    command: sh -c "flask db init || true && flask db migrate || true && flask db upgrade && flask run --host=0.0.0.0"
     environment:
       - FLASK_APP=run.py
       - FLASK_ENV=production
@@ -41,19 +41,21 @@ services:
     container_name: ekosan_npm
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - '80:80'    # HTTP Trafiği
+      - '81:81'    # Yönetim Paneli (Admin UI)
+      - '443:443'  # HTTPS (SSL) Trafiği
     volumes:
-      - ./npm_data:/data
-      - ./npm_letsencrypt:/etc/letsencrypt
+      - ./npm_data:/data              # Ayarların kaybolmaması için
+      - ./npm_letsencrypt:/etc/letsencrypt  # SSL sertifikalarının saklanması için
     networks:
       - ekosan_net
 
+# --- Kalıcı Depolama Alanları ---
 volumes:
   pg_data:
   app_uploads:
 
+# --- Ağ Ayarları ---
 networks:
   ekosan_net:
     driver: bridge

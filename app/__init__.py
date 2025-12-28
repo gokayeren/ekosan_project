@@ -562,7 +562,7 @@ def create_app(config_class=Config):
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
     
     # Ürün ve Hizmet Kategorisi
-    admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
+    # admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
     admin.add_view(ProductView(Product, db.session, name="Ürünler", category="Ürün & Hizmet"))
 
     from app.main import main

@@ -1,11 +1,12 @@
 import requests
 import json
-from flask import render_template, request, redirect, url_for, flash, current_app
+from flask import render_template, request, redirect, url_for, flash, current_app, abort
 from app import db
 from app.main import main
+# Product modelini buraya ekledik
 from app.models import (
     HomeConfig, Corporate, References, Contact, Getoffer,
-    Service, Form, FormSubmission
+    Service, Form, FormSubmission, Product
 )
 
 @main.route("/")
@@ -14,6 +15,7 @@ def index():
     if not home_config:
         home_config = HomeConfig()
 
+    # Hizmetleri menüde veya footerda göstermek için çekiyoruz
     services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
 
     return render_template('index.html',
@@ -79,10 +81,32 @@ def getoffer():
 
     services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
 
-    return render_template('contact.html',
+    return render_template('contact.html', # Teklif al için genellikle contact şablonu veya ayrı bir şablon kullanılır
                            home_config=home_config,
                            contact=contact_data,
                            getoffer=getoffer_data,
+                           services=services)
+
+# --- YENİ EKLENEN: ÜRÜN DETAY ROTASI ---
+@main.route("/urun/<string:slug>")
+def product_detail(slug):
+    # 1. Genel ayarları çek (Header/Footer için gerekebilir)
+    home_config = HomeConfig.query.first() or HomeConfig()
+    
+    # 2. Ürünü Slug ile bul, eğer yoksa veya pasifse 404 hatası ver
+    product = Product.query.filter_by(slug=slug, is_active=True).first_or_404()
+    
+    # 3. Breadcrumb ve "Benzer Ürünler" için ana hizmeti belirle
+    # Ürün birden fazla hizmete bağlı olabilir, ilkini ana kategori kabul ediyoruz.
+    main_service = product.services[0] if product.services else None
+    
+    # 4. Menü/Footer için servis listesi (Standart yapı)
+    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
+
+    return render_template('product_detail.html',
+                           product=product,
+                           main_service=main_service,
+                           home_config=home_config,
                            services=services)
 
 @main.route('/form-submit', methods=['POST'])
@@ -126,32 +150,27 @@ def submit_contact_form():
 
                 # FormSubmit Ayarları
                 payload['_subject'] = f"Yeni Mesaj: {form_obj.title}"
-                payload['_captcha'] = "false"  # Robot doğrulaması kapalı
-                payload['_template'] = "table" # Görünüm tipi
+                payload['_captcha'] = "false"
+                payload['_template'] = "table"
 
-                # Reply-to (Yanıtla) ayarı
+                # Reply-to ayarı
                 for key, value in data.items():
                     if 'mail' in key.lower() or 'e-posta' in key.lower():
                         payload['_replyto'] = value
                         break
                 
-                # --- KRİTİK DÜZELTME: HEADERS EKLENDİ ---
-                # FormSubmit'in bizi "Python Script" değil "Tarayıcı" sanması için:
                 headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Referer': request.url  # İsteğin geldiği sayfa adresi
+                    'Referer': request.url
                 }
 
-                # İsteği gönderiyoruz ve yanıtı yakalıyoruz (response)
                 response = requests.post(
                     f"https://formsubmit.co/{target_email}", 
                     data=payload, 
-                    headers=headers, # Header'ı buraya ekledik
-                    timeout=10 # Süreyi biraz uzattık
+                    headers=headers,
+                    timeout=10
                 )
 
-                # --- HATA KONTROLÜ ---
-                # Eğer işlem başarılı değilse (200 OK dönmediyse) hatayı loglayalım
                 if response.status_code != 200:
                     current_app.logger.error(f"FormSubmit HATA KODU: {response.status_code}")
                     current_app.logger.error(f"FormSubmit HATA MESAJI: {response.text}")
@@ -159,7 +178,6 @@ def submit_contact_form():
                     current_app.logger.info(f"Mail başarıyla gönderildi: {target_email}")
                 
             except Exception as mail_error:
-                # Burası Python tarafındaki hataları yakalar (İnternet yok, DNS hatası vb.)
                 current_app.logger.error(f"FormSubmit bağlantı hatası (Form ID: {form_id}): {mail_error}")
         
         else:

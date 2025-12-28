@@ -20,10 +20,12 @@ admin = Admin(
 )
 admin.base_template = 'admin/master.html'
 
+# Modellerin import edilmesi (Product ve ProductImage eklendi)
 from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
-    Contact, Getoffer, Form, FormField, FormSubmission
+    Contact, Getoffer, Form, FormField, FormSubmission,
+    Product, ProductImage
 )
 
 class SettingsView(ModelView):
@@ -452,12 +454,28 @@ class ServiceView(ModelView):
 
     form_columns = (
         'title',
+        'slug',
         'description',
         'image_path',
         'products',
         'order',
-        'is_active'
+        'is_active',
+        # SEO Alanları Eklendi
+        'meta_title', 'meta_description', 'meta_keywords'
     )
+
+    column_labels = {
+        'title': 'Hizmet Başlığı',
+        'description': 'Açıklama',
+        'image_path': 'Hizmet Görseli',
+        'products': 'İlişkili Ürünler',
+        'order': 'Sıralama',
+        'is_active': 'Yayında mı?',
+        'meta_title': 'SEO Başlık',
+        'meta_description': 'SEO Açıklama',
+        'meta_keywords': 'SEO Anahtar Kelimeler',
+        'slug': 'URL Yolu (Otomatik)'
+    }
 
     path = op.join(op.dirname(__file__), 'static', 'uploads')
     if not os.path.exists(path):
@@ -471,7 +489,75 @@ class ServiceView(ModelView):
 
     def is_action_allowed(self, name):
         return False
+
+# --- YENİ EKLENEN SINIFLAR (ÜRÜN YÖNETİMİ) ---
+
+class ProductImageInline(InlineFormAdmin):
+    form_columns = ('id', 'image_path', 'title', 'description', 'order')
+    form_label = 'Ekstra Görsel'
+
+    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    if not os.path.exists(path): os.makedirs(path)
+
+    form_extra_fields = {
+        'image_path': ImageUploadField('Resim Dosyası', base_path=path, url_relative_path='uploads/')
+    }
+
+class ProductView(ModelView):
+    # Ürün Listeleme Ekranı
+    list_template = 'admin/custom_list.html' # veya service_list.html ile benzer yapı kullanılabilir
+    column_list = ('image_file', 'name', 'price', 'is_active', 'created_at')
+    column_default_sort = ('created_at', True)
     
+    # Ürün Düzenleme/Ekleme Formu
+    form_columns = (
+        'name',
+        'slug',
+        'is_active',
+        'price',
+        'image_file', # Ana Resim
+        'services',   # İlişkili Hizmetler
+        'short_description',
+        'description',
+        'tech_specs',
+        # SEO Alanları
+        'meta_title', 'meta_description', 'meta_keywords'
+    )
+
+    column_labels = {
+        'name': 'Ürün Adı',
+        'slug': 'URL (Otomatik)',
+        'price': 'Fiyat (Opsiyonel)',
+        'image_file': 'Ana Görsel (Thumbnail)',
+        'short_description': 'Kısa Açıklama (Özet)',
+        'description': 'Detaylı Açıklama',
+        'tech_specs': 'Teknik Özellikler',
+        'services': 'Bağlı Olduğu Hizmetler',
+        'is_active': 'Yayında',
+        'created_at': 'Oluşturulma',
+        'meta_title': 'SEO Başlık',
+        'meta_description': 'SEO Açıklama',
+        'meta_keywords': 'SEO Kelimeler'
+    }
+
+    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    form_extra_fields = {
+        'image_file': ImageUploadField('Ana Ürün Görseli', base_path=path, url_relative_path='uploads/')
+    }
+
+    # Çoklu Resim Yükleme (Inline)
+    inline_models = (ProductImageInline(ProductImage),)
+    
+    def is_action_allowed(self, name):
+        if name == 'delete':
+            return True
+        return False
+
+# -----------------------------------------------
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -491,7 +577,10 @@ def create_app(config_class=Config):
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
+    
+    # Ürün ve Hizmet Kategorisi
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Ürün & Hizmet"))
+    admin.add_view(ProductView(Product, db.session, name="Ürünler", category="Ürün & Hizmet"))
 
     from app.main import main
     app.register_blueprint(main)

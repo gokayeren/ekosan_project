@@ -4,7 +4,7 @@
 
 {% block content %}
 
-{% set hero_slider_key = references.hero_slider %}
+{% set hero_slider_key = references.hero_slider.group_key if references.hero_slider else None %}
 {% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
 
 <div class="relative w-full h-[200px] lg:h-[300px] bg-neutral-900 overflow-hidden font-sans group">
@@ -89,7 +89,7 @@
                 </h2>
             </div>
                 
-            {% set corporate_slider_key = references.corporate_slider %}
+            {% set corporate_slider_key = references.corporate_slider.group_key if references.corporate_slider else None %}
             {% set corporate_slider_items = get_slider(corporate_slider_key) if corporate_slider_key else [] %}
 
             {% if corporate_slider_items %}
@@ -159,8 +159,8 @@
                     Bireysel Referanslarımız
                 </h2>
             </div>
-                
-            {% set personal_slider_key = references.personal_slider %}
+
+            {% set personal_slider_key = references.personal_slider.group_key if references.personal_slider else None %}
             {% set personal_slider_items = get_slider(personal_slider_key) if personal_slider_key else [] %}
 
             {% if personal_slider_items %}

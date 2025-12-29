@@ -183,25 +183,32 @@
 
 <section id="parallax-section" class="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
 
-    <div id="parallax-bg" 
-         class="absolute -top-[40%] left-0 w-full h-[180%] z-0 bg-center bg-cover bg-no-repeat will-change-transform"
-         style="background-image: url('{{ url_for('static', filename='uploads/' + home_config.parallax_image) }}');">
-        
-        <div class="absolute inset-0 bg-black/60"></div>
-    </div>
+    {% if references.parallax_image %}
+        <div id="parallax-bg" 
+            class="absolute -top-[40%] left-0 w-full h-[180%] z-0 bg-center bg-cover bg-no-repeat will-change-transform"
+            style="background-image: url('{{ url_for('static', filename='uploads/' + references.parallax_image) }}');">
+            
+            <div class="absolute inset-0 bg-black/60"></div>
+        </div>
+    {% else %}
+        <div id="parallax-bg" 
+            class="absolute -top-[40%] left-0 w-full h-[180%] z-0 bg-center bg-cover bg-no-repeat will-change-transform bg-gray-900">
+            
+            <div class="absolute inset-0 bg-black/60"></div>
+        </div>
+    {% endif %}
 
     <div class="container relative z-10 mx-auto px-4 max-w-4xl text-white text-center">
-        <div class="flex flex-col justify-center items-center gap-6">
+        <div class="flex flex-col justify-center items-center gap-4">
             
             <span class="font-bold tracking-[0.2em] uppercase text-orange-500 text-sm md:text-base bg-black/30 px-4 py-1 rounded-full backdrop-blur-sm">
-                {{ home_config.parallax_title }}
+                Referanslarımız
             </span>
-            
+
             <h2 class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight drop-shadow-lg">
-                {{ home_config.parallax_subtitle }}
+                {{ references.parallax_title }}
             </h2>
 
-            <div class="w-24 h-1 bg-orange-600 rounded-full mt-2"></div>
         </div>
     </div>
 </section>
@@ -218,14 +225,15 @@
 
         function updateParallax() {
             if (!section || !bg) return;
-
-            const scrollY = window.scrollY;
+            
+            const rect = section.getBoundingClientRect();
             const windowHeight = window.innerHeight;
 
-            if (scrollY + windowHeight > sectionTop && scrollY < sectionTop + section.offsetHeight) {
-                const distance = (scrollY - sectionTop) * speed;
-                bg.style.transform = `translate3d(0, ${distance}px, 0)`;
+            if (rect.top < windowHeight && rect.bottom > 0) {
+                const distance = (windowHeight - rect.top) * speed;
+                bg.style.transform = `translate3d(0, ${distance}px, 0)`; 
             }
+            ticking = false;
         }
 
         window.addEventListener('scroll', function() {

@@ -183,10 +183,10 @@
 
 <section id="parallax-section" class="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
 
-    {% if references.parallax_image %}
+    {% if home_config.parallax_image %}
         <div id="parallax-bg" 
             class="absolute -top-[40%] left-0 w-full h-[180%] z-0 bg-center bg-cover bg-no-repeat will-change-transform"
-            style="background-image: url('{{ url_for('static', filename='uploads/' + references.parallax_image) }}');">
+            style="background-image: url('{{ url_for('static', filename='uploads/' + home_config.parallax_image) }}');">
             
             <div class="absolute inset-0 bg-black/60"></div>
         </div>
@@ -206,7 +206,7 @@
             </span>
 
             <h2 class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight drop-shadow-lg">
-                {{ references.parallax_title }}
+                {{ home_config.parallax_title }}
             </h2>
 
         </div>

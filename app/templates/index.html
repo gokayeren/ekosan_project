@@ -210,34 +210,31 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-
         const section = document.getElementById('parallax-section');
         const bg = document.getElementById('parallax-bg');
         const speed = 0.3; 
-        
-        let lastScrollY = window.scrollY;
-        let ticking = false;
+
+        let sectionTop = 0;
+        function setDimensions() {
+            if(section) {
+                sectionTop = section.getBoundingClientRect().top + window.scrollY;
+            }
+        }
 
         function updateParallax() {
             if (!section || !bg) return;
-            
-            const rect = section.getBoundingClientRect();
+
+            const scrollY = window.scrollY;
             const windowHeight = window.innerHeight;
 
-            if (rect.top < windowHeight && rect.bottom > 0) {
-                const distance = (windowHeight - rect.top) * speed;
-                bg.style.transform = `translate3d(0, ${distance}px, 0)`; 
+            if (scrollY + windowHeight > sectionTop && scrollY < sectionTop + section.offsetHeight) {
+                const distance = (scrollY - sectionTop) * speed;
+                bg.style.transform = `translate3d(0, ${distance}px, 0)`;
             }
-            ticking = false;
         }
-
-        window.addEventListener('scroll', function() {
-            if (!ticking) {
-                window.requestAnimationFrame(updateParallax);
-                ticking = true;
-            }
-        }, { passive: true });
-
+        window.addEventListener('scroll', updateParallax, { passive: true });
+        window.addEventListener('resize', setDimensions);
+        setDimensions();
         updateParallax();
 
         var heroSwiper = new Swiper(".myHeroSwiper", {

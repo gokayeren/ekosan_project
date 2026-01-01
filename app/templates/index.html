@@ -181,34 +181,29 @@
     </div>
 </section>
 
-<section id="parallax-section" class="relative w-full h-[400px] md:h-[500px] flex items-center justify-center overflow-hidden">
-
+<section id="parallax-section" class="relative w-full h-[400px] flex items-center overflow-hidden">
     {% if home_config.parallax_image %}
         <div id="parallax-bg" 
-            class="absolute -top-[40%] left-0 w-full h-[180%] z-0 bg-center bg-cover bg-no-repeat will-change-transform"
+            class="absolute top-0 left-0 w-full h-[150%] z-0 bg-center bg-cover bg-no-repeat transform-gpu will-change-transform"
             style="background-image: url('{{ url_for('static', filename='uploads/' + home_config.parallax_image) }}');">
             
             <div class="absolute inset-0 bg-black/60"></div>
         </div>
     {% else %}
         <div id="parallax-bg" 
-            class="absolute -top-[40%] left-0 w-full h-[180%] z-0 bg-center bg-cover bg-no-repeat will-change-transform bg-gray-900">
+            class="absolute top-0 left-0 w-full h-[150%] z-0 bg-center bg-cover bg-no-repeat transform-gpu will-change-transform">
             
             <div class="absolute inset-0 bg-black/60"></div>
         </div>
     {% endif %}
 
-    <div class="container relative z-10 mx-auto px-4 max-w-4xl text-white text-center">
-        <div class="flex flex-col justify-center items-center gap-4">
-            
-            <span class="font-bold tracking-[0.2em] uppercase text-orange-500 text-sm md:text-base bg-black/30 px-4 py-1 rounded-full backdrop-blur-sm">
-                Referanslarımız
-            </span>
-
-            <h2 class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight drop-shadow-lg">
-                {{ home_config.parallax_title }}
-            </h2>
-
+    <div class="container relative z-10 mx-auto px-6 max-w-6xl text-white">
+        <div class="flex flex-col md:flex-row justify-start items-end gap-4">
+            <div class="text-left w-full md:w-1/2">
+                <span class="font-bold tracking-wider uppercase text-lg md:text-2xl block mb-4">
+                    {{ home_config.parallax_title }}
+                </span>
+            </div>
         </div>
     </div>
 </section>

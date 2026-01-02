@@ -250,57 +250,26 @@ class Getoffer(db.Model):
     def __str__(self):
         return "Teklif Al Sabit Ayarları"
 
-products_services = db.Table('products_services',
-    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True),
-    db.Column('service_id', db.Integer, db.ForeignKey('service.id'), primary_key=True)
-)
-
-class Service(db.Model):
+class Service(db.Model, SEOMixin):
+    __tablename__ = 'services'
+    
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
+    title = db.Column(db.String(150), nullable=False)
+    slug = db.Column(db.String(150), unique=True)
+    
+    short_description = db.Column(db.String(500), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    
     image_path = db.Column(db.String(200))
     is_active = db.Column(db.Boolean, default=True)
     order = db.Column(db.Integer, default=0)
-    products = db.relationship('Product', secondary=products_services, lazy='subquery',
-        backref=db.backref('services', lazy=True))
-
-    def __repr__(self):
-        return self.title
-
-class Product(db.Model, SEOMixin):
-    __tablename__ = 'product'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
-    slug = db.Column(db.String(150), unique=True)
-    price = db.Column(db.Float, nullable=True)
-    short_description = db.Column(db.String(500), nullable=True)
-    description = db.Column(db.Text, nullable=False)
-    tech_specs = db.Column(db.Text, nullable=True)
-    image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
-    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    images = db.relationship('ProductImage', backref='product', lazy=True, cascade="all, delete-orphan", order_by="ProductImage.order")
 
     def save(self):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.title)
         db.session.add(self)
         db.session.commit()
 
     def __repr__(self):
-        return self.name
-
-class ProductImage(db.Model):
-    __tablename__ = 'product_images'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    image_path = db.Column(db.String(200), nullable=False)
-    title = db.Column(db.String(100), nullable=True)
-    description = db.Column(db.String(255), nullable=True)
-    order = db.Column(db.Integer, default=0)
-
-    def __repr__(self):
-        return f"{self.title or 'Image'} ({self.product.name})"
+        return self.title

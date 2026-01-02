@@ -3,34 +3,27 @@ import json
 from flask import render_template, request, redirect, url_for, flash, current_app, abort
 from app import db
 from app.main import main
-# Product modelini buraya ekledik
 from app.models import (
     HomeConfig, Corporate, References, Contact, Getoffer,
-    Service, Form, FormSubmission, Product
+    Service, Form, FormSubmission
 )
+
+def get_shared_data():
+    home_config = HomeConfig.query.first() or HomeConfig()
+    services = Service.query.filter_by(is_active=True).order_by(Service.order.asc()).all()
+    return home_config, services
 
 @main.route("/")
 def index():
-    home_config = HomeConfig.query.first()
-    if not home_config:
-        home_config = HomeConfig()
-
-    # Hizmetleri menüde veya footerda göstermek için çekiyoruz
-    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
-
+    home_config, services = get_shared_data()
     return render_template('index.html',
                            home_config=home_config,
                            services=services)
 
 @main.route("/kurumsal")
 def corporate():
-    home_config = HomeConfig.query.first() or HomeConfig()
-    
-    corporate_data = Corporate.query.first()
-    if not corporate_data:
-        corporate_data = Corporate() 
-
-    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
+    home_config, services = get_shared_data()
+    corporate_data = Corporate.query.first() or Corporate()
 
     return render_template('corporate.html',
                            home_config=home_config,
@@ -39,13 +32,9 @@ def corporate():
 
 @main.route("/referanslar")
 def references():
-    home_config = HomeConfig.query.first() or HomeConfig()
+    home_config, services = get_shared_data()
 
-    references_data = References.query.first()
-    if not references_data:
-        references_data = References() 
-
-    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
+    references_data = References.query.first() or References()
 
     return render_template('references.html',
                            home_config=home_config,
@@ -54,13 +43,9 @@ def references():
 
 @main.route("/iletisim")
 def contact():
-    home_config = HomeConfig.query.first() or HomeConfig()
+    home_config, services = get_shared_data()
 
-    contact_data = Contact.query.first()
-    if not contact_data:
-        contact_data = Contact()
-
-    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
+    contact_data = Contact.query.first() or Contact()
 
     return render_template('contact.html',
                            home_config=home_config,
@@ -69,43 +54,24 @@ def contact():
 
 @main.route("/teklifal")
 def getoffer():
-    home_config = HomeConfig.query.first() or HomeConfig()
+    home_config, services = get_shared_data()
+    contact_data = Contact.query.first() or Contact()
+    
+    getoffer_data = Getoffer.query.first() or Getoffer()
 
-    contact_data = Contact.query.first()
-    if not contact_data:
-        contact_data = Contact()
-
-    getoffer_data = Getoffer.query.first()
-    if not getoffer_data:
-        getoffer_data = Getoffer()
-
-    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
-
-    return render_template('contact.html', # Teklif al için genellikle contact şablonu veya ayrı bir şablon kullanılır
+    return render_template('contact.html', 
                            home_config=home_config,
                            contact=contact_data,
                            getoffer=getoffer_data,
                            services=services)
 
-# --- YENİ EKLENEN: ÜRÜN DETAY ROTASI ---
-@main.route("/urun/<string:slug>")
-def product_detail(slug):
-    # 1. Genel ayarları çek (Header/Footer için gerekebilir)
-    home_config = HomeConfig.query.first() or HomeConfig()
-    
-    # 2. Ürünü Slug ile bul, eğer yoksa veya pasifse 404 hatası ver
-    product = Product.query.filter_by(slug=slug, is_active=True).first_or_404()
-    
-    # 3. Breadcrumb ve "Benzer Ürünler" için ana hizmeti belirle
-    # Ürün birden fazla hizmete bağlı olabilir, ilkini ana kategori kabul ediyoruz.
-    main_service = product.services[0] if product.services else None
-    
-    # 4. Menü/Footer için servis listesi (Standart yapı)
-    services = Service.query.filter_by(is_active=True).order_by(Service.order.desc()).limit(6).all()
+@main.route("/hizmetler/<string:slug>")
+def service_detail(slug):
+    home_config, services = get_shared_data()
+    service = Service.query.filter_by(slug=slug, is_active=True).first_or_404()
 
-    return render_template('product_detail.html',
-                           product=product,
-                           main_service=main_service,
+    return render_template('service_detail.html',
+                           service=service,
                            home_config=home_config,
                            services=services)
 
@@ -133,7 +99,6 @@ def submit_contact_form():
         data.pop('csrf_token', None)
 
         json_data = json.dumps(data, ensure_ascii=False)
-        
         submission = FormSubmission(
             form_id=form_id,
             submission_data=json_data,
@@ -148,19 +113,17 @@ def submit_contact_form():
                 target_email = form_obj.recipient_email
                 payload = data.copy()
 
-                # FormSubmit Ayarları
-                payload['_subject'] = f"Yeni Mesaj: {form_obj.title}"
+                payload['_subject'] = f"Yeni Mesaj: {form_obj.title} - {request.host}"
                 payload['_captcha'] = "false"
                 payload['_template'] = "table"
 
-                # Reply-to ayarı
                 for key, value in data.items():
                     if 'mail' in key.lower() or 'e-posta' in key.lower():
                         payload['_replyto'] = value
                         break
                 
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'User-Agent': 'Ekosan-Flask-App',
                     'Referer': request.url
                 }
 
@@ -171,24 +134,20 @@ def submit_contact_form():
                     timeout=10
                 )
 
-                if response.status_code != 200:
-                    current_app.logger.error(f"FormSubmit HATA KODU: {response.status_code}")
-                    current_app.logger.error(f"FormSubmit HATA MESAJI: {response.text}")
-                else:
+                if response.status_code == 200:
                     current_app.logger.info(f"Mail başarıyla gönderildi: {target_email}")
+                else:
+                    current_app.logger.error(f"Mail gönderme hatası: {response.text}")
                 
             except Exception as mail_error:
-                current_app.logger.error(f"FormSubmit bağlantı hatası (Form ID: {form_id}): {mail_error}")
+                current_app.logger.error(f"Mail sunucusu hatası: {mail_error}")
         
-        else:
-            current_app.logger.warning(f"Form ID: {form_id} için 'recipient_email' tanımlı değil.")
-
-        success_msg = form_obj.success_message or "Mesajınız başarıyla iletildi. Teşekkür ederiz."
+        success_msg = form_obj.success_message or "Mesajınız başarıyla iletildi."
         flash(success_msg, 'success')
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Form gönderim hatası: {e}")
+        current_app.logger.error(f"Form işlem hatası: {e}")
         flash('Bir hata oluştu, lütfen tekrar deneyiniz.', 'danger')
 
     return redirect(request.referrer or url_for('main.contact'))

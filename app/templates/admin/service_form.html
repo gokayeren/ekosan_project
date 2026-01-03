@@ -55,157 +55,206 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
-            {# --- SOL KOLON: İÇERİK VE SEO --- #}
-            <div class="xl:col-span-2 space-y-6">
+            {# --- SOL KOLON: İÇERİK --- #}
+            <div class="xl:col-span-2 space-y-8">
                 
-                {# KART 1: TEMEL İÇERİK #}
+                {# KART 1: ANA BAŞLIKLAR #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
-                            <i class="fa fa-pen-nib text-sm"></i>
+                            <i class="fa fa-heading text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-200 text-sm">Hizmet İçeriği</h3>
-                            <p class="text-[11px] text-slate-400">Sayfa içeriğini buradan yönetebilirsiniz.</p>
+                            <h3 class="font-bold text-slate-200 text-sm">Başlık ve Intro</h3>
+                            <p class="text-[11px] text-slate-400">Sayfanın en üstünde görünecek ana başlıklar.</p>
                         </div>
                     </div>
 
                     <div class="p-6 space-y-5 bg-slate-900/30">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="form-control">
-                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Hizmet Başlığı <span class="text-red-500">*</span></label>
-                                {{ form.title(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Örn: Isı Pompası Sistemleri") }}
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Sayfa Başlığı (H1) <span class="text-red-500">*</span></label>
+                                {{ form.title(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600 font-bold", placeholder="Örn: ISI POMPASI") }}
                             </div>
                             <div class="form-control">
                                 <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">URL Slug (Otomatik)</label>
-                                {{ form.slug(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-400 placeholder:text-slate-600", placeholder="isi-pompasi-sistemleri") }}
-                                <label class="label pb-0"><span class="label-text-alt text-slate-500">Boş bırakırsanız başlıktan otomatik oluşturulur.</span></label>
+                                {{ form.slug(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-400 placeholder:text-slate-600", placeholder="isi-pompasi") }}
                             </div>
                         </div>
                         
                         <div class="form-control">
-                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Kısa Açıklama (Özet)</label>
-                            {{ form.short_description(class="textarea textarea-bordered w-full h-24 bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Listeleme sayfalarında görünecek kısa özet metni...") }}
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Detaylı İçerik</label>
-                            {{ form.description(class="textarea textarea-bordered w-full h-64 bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Hizmetin tüm detaylarını buraya yazınız...") }}
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Intro Alt Başlık (Gri Yazı)</label>
+                            {{ form.subtitle(class="textarea textarea-bordered w-full h-20 bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Başlığın altındaki açıklama metni...") }}
                         </div>
                     </div>
                 </div>
 
-                {# KART 2: SEO AYARLARI (YENİ) #}
+                {# KART 2: SLIDER VE ÖZELLİKLER (YAN YANA) #}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    {# Sol: Slider Seçimi #}
+                    <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden h-full">
+                        <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                            <i class="fa fa-images text-slate-400"></i>
+                            <h3 class="font-bold text-slate-200 text-sm">Sol Kısım: Slider</h3>
+                        </div>
+                        <div class="p-6 bg-slate-900/30 h-full">
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Slider Grubu Seçin</label>
+                                {{ form.slider_group(class="select select-bordered w-full bg-slate-900 border-slate-700 text-slate-200 focus:outline-none") }}
+                                <label class="label pb-0"><span class="label-text-alt text-slate-500">Önce 'Slider Yönetimi'nden bir grup oluşturun.</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Sağ: Video Butonu #}
+                    <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden h-full">
+                        <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                            <i class="fa fa-play-circle text-slate-400"></i>
+                            <h3 class="font-bold text-slate-200 text-sm">Sağ Kısım: Video</h3>
+                        </div>
+                        <div class="p-6 bg-slate-900/30 space-y-4">
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Buton Metni</label>
+                                {{ form.video_btn_text(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200", placeholder="Tanıtım Filmini İzle") }}
+                            </div>
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Video Linki (URL)</label>
+                                {{ form.video_url(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200", placeholder="https://youtube.com/...") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 3: ÖZELLİKLER LİSTESİ (SAĞ TARAF) #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-indigo-900/30 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-sm">
-                            <i class="fa fa-search text-sm"></i>
+                        <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-list-ul text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-200 text-sm">SEO Yapılandırması</h3>
-                            <p class="text-[11px] text-slate-400">Google ve arama motorları için meta etiketleri.</p>
+                            <h3 class="font-bold text-slate-200 text-sm">Sağ Kısım: Özellikler</h3>
+                            <p class="text-[11px] text-slate-400">Slider'ın sağında yer alacak başlık ve liste.</p>
                         </div>
                     </div>
 
                     <div class="p-6 space-y-5 bg-slate-900/30">
                         <div class="form-control">
-                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Meta Başlık (Title)</label>
-                            {{ form.meta_title(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-indigo-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Tarayıcı sekmesinde görünecek başlık") }}
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Bölüm Başlığı</label>
+                            {{ form.features_title(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200 font-bold", placeholder="Örn: Yüzlerce aile İfyıl pelet kazanlar ile...") }}
                         </div>
                         
                         <div class="form-control">
-                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Meta Açıklama (Description)</label>
-                            {{ form.meta_description(class="textarea textarea-bordered w-full h-20 bg-slate-900 border-slate-700 focus:border-indigo-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Arama sonuçlarında başlığın altında çıkan kısa açıklama") }}
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Özellikler (HTML Listesi)</label>
+                            {{ form.features(class="textarea textarea-bordered w-full h-40 bg-slate-900 border-slate-700 text-slate-200 font-mono text-sm", placeholder="<ul>\n  <li>Özellik 1</li>\n  <li>Özellik 2</li>\n</ul>") }}
+                            <label class="label pb-0"><span class="label-text-alt text-slate-500">Maddeli liste (ul/li) formatında HTML girebilirsiniz.</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 4: DETAYLI ALT İÇERİK #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-align-left text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Alt Kısım: Detaylı Açıklama</h3>
+                            <p class="text-[11px] text-slate-400">Sayfanın en altındaki uzun metin alanı.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-5 bg-slate-900/30">
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Bölüm Başlığı</label>
+                            {{ form.description_title(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200 font-bold", placeholder="Örn: Avantajları Nelerdir?") }}
                         </div>
 
                         <div class="form-control">
-                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Anahtar Kelimeler (Keywords)</label>
-                            {{ form.meta_keywords(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-indigo-500 focus:ring-0 text-slate-200 placeholder:text-slate-600", placeholder="Virgül ile ayırarak yazınız: ısı pompası, kombi, klima") }}
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Detaylı İçerik</label>
+                            {{ form.description(class="textarea textarea-bordered w-full h-64 bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600") }}
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            {# --- SAĞ KOLON: GÖRSELLER VE DURUM --- #}
+            {# --- SAĞ KOLON: GÖRSELLER VE SEO --- #}
             <div class="space-y-6">
                 
-                {# KART 3: LİSTE GÖRSELİ #}
+                {# KART 5: LİSTE GÖRSELİ #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
-                            <i class="fa fa-image"></i>
-                        </div>
+                        <i class="fa fa-image text-slate-400"></i>
                         <div>
                             <h3 class="font-bold text-slate-200 text-sm">Liste Görseli</h3>
-                            <p class="text-[10px] text-slate-500">Anasayfa/Liste kartlarında görünür.</p>
+                            <p class="text-[10px] text-slate-500">Anasayfa kartlarında görünür.</p>
                         </div>
                     </div>
                     <div class="p-6 bg-slate-900/30 space-y-4">
                         <div class="aspect-[4/3] bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-slate-700 group">
                             {% if model is defined and model.image_path %}
                                 <img src="{{ url_for('static', filename='uploads/' + model.image_path) }}" class="object-cover w-full h-full">
-                                <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
-                                    <span class="text-white text-xs font-medium"><i class="fa fa-pen mr-1"></i> Değiştir</span>
-                                </div>
                             {% else %}
-                                <div class="flex flex-col items-center text-slate-500">
-                                    <i class="fa fa-image text-3xl mb-2 opacity-50"></i>
-                                    <span class="text-xs font-medium">Görsel Yok</span>
-                                </div>
+                                <i class="fa fa-image text-3xl opacity-50 text-slate-500"></i>
                             {% endif %}
                         </div>
-                        {{ form.image_path(class="file-input file-input-bordered file-input-ghost file-input-sm w-full text-xs text-slate-400 bg-slate-900 border-slate-700") }}
+                        {{ form.image_path(class="file-input file-input-bordered file-input-ghost file-input-sm w-full text-xs bg-slate-900 border-slate-700") }}
                     </div>
                 </div>
 
-                {# KART 4: DETAY SAYFA GÖRSELİ (YENİ) #}
+                {# KART 6: KAPAK GÖRSELİ #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
-                            <i class="fa fa-images"></i>
-                        </div>
+                        <i class="fa fa-panorama text-slate-400"></i>
                         <div>
-                            <h3 class="font-bold text-slate-200 text-sm">Detay Kapak Görseli</h3>
-                            <p class="text-[10px] text-slate-500">Detay sayfasının en üstünde görünür.</p>
+                            <h3 class="font-bold text-slate-200 text-sm">Kapak Görseli</h3>
+                            <p class="text-[10px] text-slate-500">Sayfanın en üst arka planı.</p>
                         </div>
                     </div>
                     <div class="p-6 bg-slate-900/30 space-y-4">
                         <div class="aspect-video bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-slate-700 group">
                             {% if model is defined and model.detail_image_path %}
                                 <img src="{{ url_for('static', filename='uploads/' + model.detail_image_path) }}" class="object-cover w-full h-full">
-                                <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[1px]">
-                                    <span class="text-white text-xs font-medium"><i class="fa fa-pen mr-1"></i> Değiştir</span>
-                                </div>
                             {% else %}
-                                <div class="flex flex-col items-center text-slate-500">
-                                    <i class="fa fa-panorama text-3xl mb-2 opacity-50"></i>
-                                    <span class="text-xs font-medium">Görsel Yok</span>
-                                </div>
+                                <i class="fa fa-panorama text-3xl opacity-50 text-slate-500"></i>
                             {% endif %}
                         </div>
-                        {{ form.detail_image_path(class="file-input file-input-bordered file-input-ghost file-input-sm w-full text-xs text-slate-400 bg-slate-900 border-slate-700") }}
+                        {{ form.detail_image_path(class="file-input file-input-bordered file-input-ghost file-input-sm w-full text-xs bg-slate-900 border-slate-700") }}
                     </div>
                 </div>
 
-                {# KART 5: YAYIN VE SIRA #}
+                {# KART 7: SEO AYARLARI #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
-                         <div class="w-8 h-8 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
-                            <i class="fa fa-sliders-h"></i>
-                        </div>
-                        <h3 class="font-bold text-slate-200 text-sm">Yayın Ayarları</h3>
+                        <i class="fa fa-search text-indigo-400"></i>
+                        <h3 class="font-bold text-slate-200 text-sm">SEO</h3>
                     </div>
+                    <div class="p-6 space-y-4 bg-slate-900/30">
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400">Meta Title</label>
+                            {{ form.meta_title(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-indigo-500 text-slate-200") }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400">Meta Description</label>
+                            {{ form.meta_description(class="textarea textarea-bordered w-full h-20 bg-slate-900 border-slate-700 focus:border-indigo-500 text-slate-200") }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400">Kısa Açıklama (Özet)</label>
+                            {{ form.short_description(class="textarea textarea-bordered w-full h-20 bg-slate-900 border-slate-700 text-slate-200", placeholder="Kartlarda görünecek...") }}
+                        </div>
+                    </div>
+                </div>
+
+                {# KART 8: YAYIN AYARLARI #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="p-6 bg-slate-900/30 space-y-5">
                         <div class="form-control">
-                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Sıralama (Order)</label>
-                            {{ form.order(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600") }}
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Sıralama</label>
+                            {{ form.order(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200") }}
                         </div>
-                        
-                        <div class="divider my-1 before:bg-slate-700 after:bg-slate-700"></div>
-                        
                         <div class="form-control">
-                            <label class="label cursor-pointer justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-slate-500 transition-colors">
+                            <label class="label cursor-pointer justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700">
                                 <span class="font-bold text-slate-300 text-sm">Yayında</span> 
                                 {{ form.is_active(class="toggle toggle-success toggle-sm") }}
                             </label>
@@ -216,8 +265,8 @@
             </div>
         </div>
 
-        {# SABİT ALT MENÜ (MOBİL İÇİN) #}
-        <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+        {# MOBİL ALT MENÜ #}
+        <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-lg">
             <div class="flex justify-end gap-3 max-w-7xl mx-auto">
                 <a href="{{ return_url }}" class="btn btn-ghost text-slate-400">İptal</a>
                 <button type="submit" class="btn btn-primary px-8 border-none text-white">

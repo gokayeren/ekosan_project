@@ -254,13 +254,31 @@ class Service(db.Model, SEOMixin):
     __tablename__ = 'services'
     
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(150), nullable=False) # Üstteki Büyük Başlık
     slug = db.Column(db.String(150), unique=True)
     
-    short_description = db.Column(db.String(500), nullable=True)
-    description = db.Column(db.Text, nullable=True)
+    # --- YENİ EKLENEN ALANLAR ---
+    subtitle = db.Column(db.String(500), nullable=True) # Başlığın altındaki gri açıklama yazısı
     
-    image_path = db.Column(db.String(200))
+    # Sol taraf için Slider Seçimi (SliderGroup ile ilişki)
+    slider_group_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    slider_group = db.relationship('SliderGroup', foreign_keys=[slider_group_id])
+    
+    # Sağ taraf (Features) alanı
+    features_title = db.Column(db.String(200), nullable=True) # "Yüzlerce aile..." başlığı
+    features = db.Column(db.Text, nullable=True) # Maddeli özellikler listesi (Editörden girilecek)
+    video_btn_text = db.Column(db.String(50), default="Tanıtım Filmini İzle")
+    video_url = db.Column(db.String(255), nullable=True) # Butona basınca gidilecek link
+    
+    # Alt kısım (Detaylı Açıklama)
+    description_title = db.Column(db.String(200), nullable=True) # "Avantajları Nelerdir?" başlığı
+    description = db.Column(db.Text, nullable=True) # En alttaki uzun yazı
+    
+    # Standart alanlar
+    short_description = db.Column(db.String(500), nullable=True) # Kartlarda gözükecek özet
+    image_path = db.Column(db.String(200)) # Liste görseli
+    detail_image_path = db.Column(db.String(200)) # Header arka plan görseli
+    
     is_active = db.Column(db.Boolean, default=True)
     order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

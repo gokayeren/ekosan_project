@@ -316,9 +316,16 @@ class ServiceView(ModelView):
 
     form_columns = (
         'title',
+        'subtitle',
         'slug',
-        'short_description',
+        'slider_group',
+        'features_title',
+        'features',
+        'video_btn_text',
+        'video_url',
+        'description_title',
         'description',
+        'short_description',
         'image_path',
         'detail_image_path',
         'order',
@@ -329,17 +336,33 @@ class ServiceView(ModelView):
     )
 
     column_labels = {
-        'title': 'Hizmet Başlığı',
-        'slug': 'URL Uzantısı (Otomatik)',
-        'short_description': 'Kısa Açıklama (Liste)',
-        'description': 'Detaylı İçerik',
+        'title': 'Sayfa Başlığı',
+        'subtitle': 'Üst Alt Başlık (Intro)',
+        'slider_group': 'Soldaki Slider Seçimi',
+        'features_title': 'Sağ Kısım Başlığı',
+        'features': 'Sağ Kısım Özellikler (Liste)',
+        'video_btn_text': 'Video Buton Yazısı',
+        'video_url': 'Video Linki',
+        'description_title': 'Alt Açıklama Başlığı',
+        'description': 'Alt Detaylı Açıklama',
         'image_path': 'Liste Görseli',
-        'detail_image_path': 'Detay Sayfa Görseli',
+        'detail_image_path': 'Header Kapak Görseli',
         'order': 'Sıralama',
         'is_active': 'Yayında mı?',
         'meta_title': 'SEO Başlığı',
         'meta_description': 'SEO Açıklaması',
         'meta_keywords': 'SEO Anahtar Kelimeler'
+    }
+
+    form_widget_args = {
+        'features': {
+            'rows': 10,
+            'class': 'form-control' 
+        },
+        'description': {
+            'rows': 10,
+            'class': 'form-control'
+        }
     }
 
     path = op.join(op.dirname(__file__), 'static', 'uploads')

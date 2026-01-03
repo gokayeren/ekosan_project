@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.meta_title or service.title }} - Ekosan{% endblock %}
+{% block description %}{{ service.meta_description or service.short_description }}{% endblock %}
+
+{% block content %}
+
+{# --- HEADER (PARALLAX) --- #}
+<div class="relative w-full h-[300px] lg:h-[400px] bg-neutral-900 overflow-hidden flex items-center justify-center">
+    <div class="absolute inset-0 z-0">
+        {% if service.detail_image_path %}
+            <img src="{{ url_for('static', filename='uploads/' + service.detail_image_path) }}" 
+                 class="w-full h-full object-cover opacity-60" alt="{{ service.title }}">
+        {% elif service.image_path %}
+            <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
+                 class="w-full h-full object-cover opacity-60 blur-sm" alt="{{ service.title }}">
+        {% else %}
+            <div class="w-full h-full bg-slate-800"></div>
+        {% endif %}
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+    
+    <div class="relative z-20 container mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 drop-shadow-xl">{{ service.title }}</h1>
+        <div class="text-sm breadcrumbs text-gray-300 justify-center flex">
+            <ul>
+                <li><a href="{{ url_for('main.index') }}" class="hover:text-orange-500 transition-colors">Anasayfa</a></li>
+                <li><a href="#" class="hover:text-orange-500 transition-colors">Hizmetlerimiz</a></li>
+                <li class="font-bold text-white">{{ service.title }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{# --- İÇERİK BÖLÜMÜ --- #}
+<section class="py-16 bg-white relative">
+    <div class="container mx-auto px-4 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+            {# SOL KOLON: ANA İÇERİK #}
+            <div class="lg:col-span-2 space-y-8">
+                {# Öne Çıkan Görsel (Opsiyonel - Eğer detay resmi headerda varsa buraya gerek olmayabilir ama görsel zenginlik katar) #}
+                {% if service.image_path %}
+                <div class="rounded-2xl overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100">
+                    <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
+                         alt="{{ service.title }}" 
+                         class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700">
+                </div>
+                {% endif %}
+
+                <div class="prose prose-lg prose-slate max-w-none">
+                    {# Kısa Açıklama (Vurgulu) #}
+                    {% if service.short_description %}
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-lg mb-8">
+                        <p class="text-xl font-medium text-slate-700 italic m-0">
+                            {{ service.short_description }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {# Uzun Açıklama (HTML İçerik) #}
+                    <div class="text-slate-600 leading-relaxed">
+                        {% if service.description %}
+                            {{ service.description | safe }}
+                        {% else %}
+                            <p>Bu hizmet için henüz detaylı açıklama girilmemiştir.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {# CTA Butonu #}
+                <div class="mt-8 pt-8 border-t border-gray-100">
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-primary btn-lg bg-orange-600 hover:bg-orange-700 border-none text-white shadow-lg shadow-orange-900/20 w-full sm:w-auto">
+                        <i class="fa fa-paper-plane mr-2"></i> Bu Hizmet İçin Teklif Al
+                    </a>
+                </div>
+            </div>
+
+            {# SAĞ KOLON: SIDEBAR (YAN MENÜ) #}
+            <div class="lg:col-span-1 space-y-8">
+                
+                {# Diğer Hizmetler Menüsü #}
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-24">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <span class="w-1 h-6 bg-orange-600 rounded-full"></span>
+                        Diğer Hizmetlerimiz
+                    </h3>
+                    <ul class="space-y-2">
+                        {% for s in services %}
+                        <li>
+                            <a href="{{ url_for('main.service_detail', slug=s.slug) }}" 
+                               class="group flex items-center justify-between p-3 rounded-lg transition-all duration-300 {{ 'bg-orange-600 text-white shadow-md' if s.id == service.id else 'bg-white text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-100' }}">
+                                <span class="font-medium text-sm">{{ s.title }}</span>
+                                {% if s.id == service.id %}
+                                    <i class="fa fa-chevron-right text-xs"></i>
+                                {% else %}
+                                    <i class="fa fa-chevron-right text-xs opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i>
+                                {% endif %}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    {# Hızlı İletişim Kartı #}
+                    <div class="mt-8 bg-slate-900 rounded-xl p-6 text-center text-white relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-orange-600 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                        <i class="fa fa-headset text-4xl mb-4 text-orange-500"></i>
+                        <h4 class="text-lg font-bold mb-2">Sorularınız mı var?</h4>
+                        <p class="text-slate-400 text-sm mb-4">Uzman ekibimiz size yardımcı olmaktan mutluluk duyar.</p>
+                        <a href="tel:{{ site_settings.phone_number }}" class="btn btn-outline btn-sm text-white border-slate-600 hover:bg-orange-600 hover:border-orange-600 w-full">
+                            Bizi Arayın
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

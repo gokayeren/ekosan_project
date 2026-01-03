@@ -73,33 +73,34 @@
                 
                 {% if service.slider_group and service.slider_group.items %}
                     {# Swiper Slider #}
-                    <div class="swiper serviceDetailSwiper rounded-xl overflow-hidden shadow-2xl shadow-slate-200 border border-slate-100 aspect-[4/3] bg-white">
+                    <div class="swiper serviceDetailSwiper rounded-xl overflow-hidden shadow-2xl shadow-slate-200 border border-slate-100 aspect-[4/3] bg-white relative">
                         <div class="swiper-wrapper">
                             {% for item in service.slider_group.items %}
                             <div class="swiper-slide relative">
                                 <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                     alt="{{ item.title }}" 
-                                     class="w-full h-full object-cover">
+                                        alt="{{ item.title }}" 
+                                        class="w-full h-full object-cover">
+                                
                                 {# Slider içi yazı varsa #}
                                 {% if item.title %}
-                                <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
-                                    <h4 class="text-white font-bold text-lg">{{ item.title }}</h4>
+                                <div class="absolute bottom-0 left-0 right-0 p-8 pb-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
+                                    <h4 class="text-white font-bold text-lg drop-shadow-md">{{ item.title }}</h4>
                                 </div>
                                 {% endif %}
                             </div>
                             {% endfor %}
                         </div>
-                        <div class="swiper-pagination"></div>
-                        <div class="swiper-button-next text-white/80 hover:text-white"></div>
-                        <div class="swiper-button-prev text-white/80 hover:text-white"></div>
+                        
+                        {# Sadece Noktalar (Pagination) #}
+                        <div class="swiper-pagination !bottom-4"></div>
                     </div>
 
                 {% elif service.image_path %}
                     {# Slider yoksa tek resim #}
                     <div class="rounded-xl overflow-hidden shadow-2xl shadow-slate-200 aspect-[4/3] bg-white">
-                         <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
-                              class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
-                              alt="{{ service.title }}">
+                            <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
+                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                                alt="{{ service.title }}">
                     </div>
                 {% else %}
                     {# Hiç resim yoksa placeholder #}
@@ -192,34 +193,44 @@
 document.addEventListener("DOMContentLoaded", function() {
     var swiper = new Swiper(".serviceDetailSwiper", {
         spaceBetween: 0,
-        effect: "fade", // Fade efekti (resimler üst üste geçiş yapar)
+        effect: "fade",
         fadeEffect: { crossFade: true },
         loop: true,
         autoplay: {
-            delay: 5000,
+            delay: 4000,
             disableOnInteraction: false,
         },
+        // Sadece Pagination (Noktalar) aktif
         pagination: {
             el: ".swiper-pagination",
             clickable: true,
-            dynamicBullets: true,
+            // dynamicBullets: true, // İstersen bunu açıp noktaların büyüklü küçüklü olmasını sağlayabilirsin
         },
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
+        // Navigation (Oklar) İPTAL EDİLDİ
     });
 });
 </script>
 
-{# --- ÖZEL CSS (Sadece bu sayfa için) --- #}
 <style>
-    /* Özellikler listesindeki maddelere özel check işareti ekleme */
-    .custom-features-list ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    /* Slider Noktaları Özelleştirme */
+    .serviceDetailSwiper .swiper-pagination-bullet {
+        width: 10px;
+        height: 10px;
+        background-color: #ffffff; /* Pasif noktalar beyaz */
+        opacity: 0.6;
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
     }
+
+    .serviceDetailSwiper .swiper-pagination-bullet-active {
+        background-color: #ea580c; /* Aktif nokta: Turuncu (veya #3b82f6 Mavi yapabilirsin) */
+        opacity: 1;
+        width: 24px; /* Aktif olunca uzayan şık yapı */
+        border-radius: 6px;
+    }
+
+    /* Özellikler listesindeki maddelere check işareti */
+    .custom-features-list ul { list-style: none; padding: 0; margin: 0; }
     .custom-features-list li {
         position: relative;
         padding-left: 1.75rem;
@@ -228,13 +239,13 @@ document.addEventListener("DOMContentLoaded", function() {
         align-items: start;
     }
     .custom-features-list li::before {
-        content: '\f00c'; /* FontAwesome Check Icon */
+        content: '\f00c';
         font-family: 'Font Awesome 6 Free';
         font-weight: 900;
         position: absolute;
         left: 0;
         top: 0.2rem;
-        color: #ea580c; /* Orange-600 */
+        color: #ea580c;
         font-size: 0.9rem;
     }
 </style>

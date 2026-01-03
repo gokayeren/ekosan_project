@@ -129,7 +129,9 @@
             <div class="parallax-card-wrapper relative w-full h-[300px]" 
                  data-speed="{{ random_speed }}">
 
-                <a href="#" class="group relative block w-full h-full bg-orange-600 border-[1px] border-orange-600 rounded-md shadow-md shadow-gray-300 hover:shadow-xl hover:shadow-gray-900/20 overflow-hidden transition-all duration-300 hover:-translate-y-1">
+                {# --- DEĞİŞİKLİK BURADA: href artık detay sayfasına gidiyor --- #}
+                <a href="{{ url_for('main.service_detail', slug=service.slug) }}" 
+                   class="group relative block w-full h-full bg-orange-600 border-[1px] border-orange-600 rounded-md shadow-md shadow-gray-300 hover:shadow-xl hover:shadow-gray-900/20 overflow-hidden transition-all duration-300 hover:-translate-y-1">
                     
                     {% if service.image_path %}
                     <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
@@ -154,8 +156,9 @@
                         </div>
 
                         <div class="bg-gray-900/90 backdrop-blur-sm border-t border-white/10 p-4 pt-5 z-10 w-full lg:translate-y-full lg:group-hover:translate-y-0 transition-transform duration-500">
+                            {# --- GÜNCELLEME: Varsa kısa açıklamayı, yoksa normal açıklamayı göster --- #}
                             <p class="text-gray-300 text-xs leading-relaxed line-clamp-2 font-medium">
-                                {{ service.description|striptags }}
+                                {{ service.short_description or service.description|striptags }}
                             </p>
                             
                             <div class="flex justify-end mt-2">

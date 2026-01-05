@@ -1,10 +1,86 @@
 {% extends 'admin/model/edit.html' %}
 
+{% macro render_faq_item(subform, index, is_template=False) %}
+    {% set idx = '__index__' if is_template else index %}
+    
+    <div class="faq-item-card bg-slate-900 border border-slate-700 rounded-xl p-5 relative group hover:border-slate-600 transition-all duration-300" data-index="{{ idx }}">
+        {% if is_template %}
+            <input type="hidden" name="items-{{ idx }}-csrf_token" value="{{ form.csrf_token.current_token }}">
+            <input type="hidden" name="items-{{ idx }}-id" value="">
+        {% else %}
+            {{ subform.csrf_token }}
+            {% if subform.id %}{{ subform.id }}{% endif %}
+        {% endif %}
+
+        <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-mono item-number">
+                    {{ idx if is_template else (index + 1) }}
+                </span>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Soru Kartı</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-slate-800 rounded px-2 py-1 border border-slate-700">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase">Sıra</span>
+                    {% if is_template %}
+                        <input type="number" name="items-{{ idx }}-order" class="bg-transparent text-center text-xs text-white w-8 focus:outline-none font-mono" value="0">
+                    {% else %}
+                        {{ subform.order(class="bg-transparent text-center text-xs text-white w-8 focus:outline-none font-mono") }}
+                    {% endif %}
+                </div>
+                
+                <label class="cursor-pointer label p-0" title="Yayında mı?">
+                    {% if is_template %}
+                        <input type="checkbox" name="items-{{ idx }}-is_active" class="toggle toggle-success toggle-xs" checked>
+                    {% else %}
+                        {{ subform.is_active(class="toggle toggle-success toggle-xs") }}
+                    {% endif %}
+                </label>
+
+                <label class="btn btn-xs btn-square btn-error btn-outline text-red-500 hover:text-white hover:bg-red-600 hover:border-red-600 transition-colors" title="Sil">
+                    {% if is_template %}
+                        <input type="checkbox" name="items-{{ idx }}-_delete" class="hidden delete-checkbox">
+                    {% else %}
+                        <input type="checkbox" name="{{ subform._delete.name }}" class="hidden delete-checkbox">
+                    {% endif %}
+                    <i class="fa fa-trash"></i>
+                </label>
+            </div>
+        </div>
+
+        <div class="grid gap-5">
+            <div class="form-control w-full">
+                <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">Soru Metni</label>
+                {% if is_template %}
+                    <input type="text" name="items-{{ idx }}-question" class="input input-bordered input-sm w-full bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-200 placeholder:text-slate-600 font-medium">
+                {% else %}
+                    {{ subform.question(class="input input-bordered input-sm w-full bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-200 placeholder:text-slate-600 font-medium") }}
+                {% endif %}
+            </div>
+
+            <div class="form-control w-full">
+                <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">Cevap Metni (HTML Destekli)</label>
+                {% if is_template %}
+                    <textarea name="items-{{ idx }}-answer" rows="3" class="textarea textarea-bordered w-full h-24 bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-300 text-sm leading-relaxed placeholder:text-slate-600"></textarea>
+                {% else %}
+                    {{ subform.answer(class="textarea textarea-bordered w-full h-24 bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-300 text-sm leading-relaxed placeholder:text-slate-600", rows="3") }}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="deleted-overlay absolute inset-0 bg-red-900/10 backdrop-blur-[1px] border-2 border-red-500/50 rounded-xl hidden flex-col items-center justify-center z-20 transition-all">
+            <div class="bg-slate-900 border border-red-500/30 p-4 rounded-lg shadow-2xl flex flex-col items-center gap-2">
+                <span class="text-red-500 font-bold text-sm uppercase tracking-wider"><i class="fa fa-trash-alt mr-2"></i>Silinecek</span>
+                <button type="button" class="undo-delete btn btn-xs btn-ghost text-slate-400 hover:text-white">Geri Al</button>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
 {% block content_title %}{% endblock %}
 
 {% block body %}
     
-    {# --- ÜST BAŞLIK VE AKSİYONLAR --- #}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
             <a href="{{ return_url }}" class="btn btn-circle btn-sm btn-ghost bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white transition-all shadow-sm">
@@ -33,7 +109,6 @@
         </div>
     </div>
 
-    {# --- FLASH MESAJLARI --- #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-8 space-y-3">
@@ -47,13 +122,11 @@
         {% endif %}
     {% endwith %}
 
-    {# --- ANA FORM --- #}
     <form id="faqForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-32 space-y-8">
         
         {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
         {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
 
-        {# --- BÖLÜM 1: GRUP BİLGİLERİ --- #}
         <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
@@ -80,7 +153,6 @@
             </div>
         </div>
 
-        {# --- BÖLÜM 2: SORULAR (INLINE LISTE) --- #}
         <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -93,80 +165,24 @@
                     </div>
                 </div>
                 
-                {# Yeni Ekle Butonu #}
-                <a href="javascript:void(0)" onclick="return false;" data-role="add-inline-button" data-target="items" class="btn btn-sm btn-primary border-none bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-lg shadow-indigo-900/20">
+                <a href="javascript:void(0)" id="add-new-faq-btn" class="btn btn-sm btn-primary border-none bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-lg shadow-indigo-900/20">
                     <i class="fa fa-plus"></i> Soru Ekle
                 </a>
             </div>
             
             <div class="p-6 bg-slate-900/30">
                 
-                {# Flask-Admin Inline Alanı #}
-                <div class="faq-inline-wrapper space-y-4">
+                <div class="faq-inline-wrapper space-y-4" id="faq-wrapper">
                     {% for subform in form.items %}
-                        <div class="faq-item-card bg-slate-900 border border-slate-700 rounded-xl p-5 relative group hover:border-slate-600 transition-all duration-300">
-                            
-                            {# Gizli ID ve CSRF Alanları #}
-                            {{ subform.csrf_token }}
-                            {% if subform.id %}{{ subform.id }}{% endif %}
-
-                            {# --- Kart Başlığı ve Aksiyonlar --- #}
-                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-mono item-index">
-                                        {{ loop.index }}
-                                    </span>
-                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Soru Kartı</span>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    {# Sıralama #}
-                                    <div class="flex items-center gap-2 bg-slate-800 rounded px-2 py-1 border border-slate-700">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase">Sıra</span>
-                                        {{ subform.order(class="bg-transparent text-center text-xs text-white w-8 focus:outline-none font-mono") }}
-                                    </div>
-                                    
-                                    {# Aktiflik Switch #}
-                                    <label class="cursor-pointer label p-0" title="Yayında mı?">
-                                        {{ subform.is_active(class="toggle toggle-success toggle-xs") }}
-                                    </label>
-
-                                    {# Silme Butonu (Görünür) #}
-                                    <label class="btn btn-xs btn-square btn-error btn-outline text-red-500 hover:text-white hover:bg-red-600 hover:border-red-600 transition-colors" title="Sil">
-                                        {# Flask-Admin'in asıl silme checkbox'ı (gizli) #}
-                                        <input type="checkbox" name="{{ subform._delete.name }}" class="hidden delete-checkbox">
-                                        <i class="fa fa-trash"></i>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {# --- Kart İçeriği --- #}
-                            <div class="grid gap-5">
-                                {# Soru #}
-                                <div class="form-control w-full">
-                                    <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">Soru Metni</label>
-                                    {{ subform.question(class="input input-bordered input-sm w-full bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-200 placeholder:text-slate-600 font-medium") }}
-                                </div>
-
-                                {# Cevap #}
-                                <div class="form-control w-full">
-                                    <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">Cevap Metni (HTML Destekli)</label>
-                                    {{ subform.answer(class="textarea textarea-bordered w-full h-24 bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-300 text-sm leading-relaxed placeholder:text-slate-600", rows="3") }}
-                                </div>
-                            </div>
-
-                            {# --- Silindi Yerleşimi (Overlay) --- #}
-                            <div class="deleted-overlay absolute inset-0 bg-red-900/10 backdrop-blur-[1px] border-2 border-red-500/50 rounded-xl hidden flex-col items-center justify-center z-20 transition-all">
-                                <div class="bg-slate-900 border border-red-500/30 p-4 rounded-lg shadow-2xl flex flex-col items-center gap-2">
-                                    <span class="text-red-500 font-bold text-sm uppercase tracking-wider"><i class="fa fa-trash-alt mr-2"></i>Silinecek</span>
-                                    <button type="button" class="undo-delete btn btn-xs btn-ghost text-slate-400 hover:text-white">Geri Al</button>
-                                </div>
-                            </div>
-                        </div>
+                        {{ render_faq_item(subform, loop.index0, False) }}
                     {% endfor %}
                 </div>
 
-                {# Boş Durum (Eğer hiç soru yoksa JS ile gizlenebilir ama şimdilik kalsın) #}
-                <div class="empty-state hidden mt-8 text-center py-10 border-2 border-dashed border-slate-700 rounded-xl">
+                <template id="faq-item-template">
+                    {{ render_faq_item(None, 0, True) }}
+                </template>
+
+                <div class="empty-state {% if form.items|length > 0 %}hidden{% endif %} mt-8 text-center py-10 border-2 border-dashed border-slate-700 rounded-xl">
                     <i class="fa fa-plus-circle text-4xl text-slate-600 mb-3"></i>
                     <p class="text-slate-400 text-sm">Henüz hiç soru eklenmemiş.</p>
                 </div>
@@ -174,7 +190,6 @@
             </div>
         </div>
 
-        {# MOBİL ALT MENÜ #}
         <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
             <div class="flex justify-end gap-3 max-w-7xl mx-auto">
                 <a href="{{ return_url }}" class="btn btn-ghost text-slate-400">İptal</a>
@@ -186,52 +201,64 @@
 
     </form>
 
-    {# --- INLINE FORM İÇİN ÖZEL SCRİPT VE STİL --- #}
     <style>
-        /* Silinmiş öğe efekti */
         .faq-item-card.marked-for-delete .deleted-overlay { display: flex; }
         .faq-item-card.marked-for-delete { opacity: 0.8; }
     </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Silme İşlemi (Görsel Efekt)
-            function bindDeleteEvents() {
-                // Silme butonları
-                document.querySelectorAll('.delete-checkbox').forEach(chk => {
-                    chk.addEventListener('change', function() {
+            function bindRowEvents(rowElement) {
+                const deleteChk = rowElement.querySelector('.delete-checkbox');
+                if(deleteChk) {
+                    deleteChk.addEventListener('change', function() {
                         const card = this.closest('.faq-item-card');
                         if(this.checked) card.classList.add('marked-for-delete');
                         else card.classList.remove('marked-for-delete');
                     });
-                });
+                }
 
-                // Geri al butonları
-                document.querySelectorAll('.undo-delete').forEach(btn => {
-                    btn.onclick = function() { // addEventListener yerine onclick (tekrar bind edilirse çakışmasın)
+                const undoBtn = rowElement.querySelector('.undo-delete');
+                if(undoBtn) {
+                    undoBtn.addEventListener('click', function() {
                         const card = this.closest('.faq-item-card');
                         const chk = card.querySelector('.delete-checkbox');
-                        chk.click(); // Checkbox'ı tetikle
-                    };
-                });
+                        chk.checked = false;
+                        const event = new Event('change');
+                        chk.dispatchEvent(event);
+                    });
+                }
             }
 
-            // Sayfa yüklendiğinde bağla
-            bindDeleteEvents();
+            document.querySelectorAll('.faq-item-card').forEach(row => bindRowEvents(row));
 
-            // Flask-Admin yeni satır eklediğinde (MutationObserver ile izle)
-            // Çünkü Flask-Admin jQuery ile DOM'a yeni eleman basıyor
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.addedNodes.length) {
-                        bindDeleteEvents(); // Yeni gelen elemanlara da event bağla
-                    }
+            const addBtn = document.getElementById('add-new-faq-btn');
+            const wrapper = document.getElementById('faq-wrapper');
+            const template = document.getElementById('faq-item-template');
+            const emptyState = document.querySelector('.empty-state');
+
+            if(addBtn && wrapper && template) {
+                addBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const currentIndex = wrapper.querySelectorAll('.faq-item-card').length;
+                    
+                    const clone = template.content.cloneNode(true);
+                    const card = clone.querySelector('.faq-item-card');
+
+                    const numberBadge = card.querySelector('.item-number');
+                    if(numberBadge) numberBadge.textContent = currentIndex + 1;
+
+                    card.querySelectorAll('[name*="__index__"]').forEach(input => {
+                        input.name = input.name.replace('__index__', currentIndex);
+                        input.id = input.name;
+                    });
+
+                    bindRowEvents(card);
+                    wrapper.appendChild(clone);
+
+                    if(emptyState) emptyState.classList.add('hidden');
                 });
-            });
-
-            const wrapper = document.querySelector('.faq-inline-wrapper');
-            if(wrapper) {
-                observer.observe(wrapper, { childList: true });
             }
         });
     </script>

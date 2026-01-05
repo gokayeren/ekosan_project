@@ -401,7 +401,6 @@ class FaqItemInline(InlineFormAdmin):
     def is_action_allowed(self, name): return False
 
 class FaqGroupView(ModelView):
-    # Bu iki satırı değiştiriyoruz:
     list_template = 'admin/faq_list.html'
     create_template = 'admin/faq_form.html'
     edit_template = 'admin/faq_form.html'

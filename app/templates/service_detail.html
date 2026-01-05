@@ -5,234 +5,212 @@
 
 {% block content %}
 
-{# --- 1. HEADER (KAPAK) BÖLÜMÜ --- #}
-<div class="relative w-full h-[300px] lg:h-[450px] bg-neutral-900 overflow-hidden flex items-center justify-center">
+<div class="relative w-full h-[250px] lg:h-[350px] bg-neutral-900 overflow-hidden">
     <div class="absolute inset-0 z-0">
-        {# Eğer detay kapak görseli varsa onu kullan, yoksa liste görselini, o da yoksa gri arka plan #}
         {% if service.detail_image_path %}
             <img src="{{ url_for('static', filename='uploads/' + service.detail_image_path) }}" 
-                 class="w-full h-full object-cover opacity-50 animate-hero-slow" alt="{{ service.title }}">
+                 class="w-full h-full object-cover opacity-40" alt="{{ service.title }}">
         {% elif service.image_path %}
             <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
-                 class="w-full h-full object-cover opacity-50 blur-sm" alt="{{ service.title }}">
+                 class="w-full h-full object-cover opacity-40 blur-sm" alt="{{ service.title }}">
         {% else %}
-            <div class="w-full h-full bg-slate-800 opacity-50"></div>
+            <div class="w-full h-full bg-slate-900 opacity-40"></div>
         {% endif %}
     </div>
     
-    {# Gradyan Efekti #}
-    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
     
-    <div class="relative z-20 container mx-auto px-4 text-center">
-        <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-6 drop-shadow-2xl uppercase">
+    <div class="relative z-20 container mx-auto px-4 h-full flex flex-col justify-center items-start text-left">
+        <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3 uppercase drop-shadow-lg">
             {{ service.title }}
         </h1>
         
-        {# Breadcrumb (Yol Haritası) #}
-        <div class="inline-flex items-center gap-2 text-sm md:text-base font-medium text-gray-300 bg-white/10 px-6 py-2 rounded-full backdrop-blur-sm border border-white/10">
-            <a href="{{ url_for('main.index') }}" class="hover:text-orange-500 transition-colors">Anasayfa</a>
+        <div class="flex items-center gap-2 text-xs md:text-sm font-medium text-gray-300">
+            <a href="{{ url_for('main.index') }}" class="hover:text-blue-500 transition-colors">Anasayfa</a>
             <i class="fa fa-chevron-right text-[10px] opacity-50"></i>
-            <span class="text-orange-500">Hizmetlerimiz</span>
+            <span class="text-blue-500">Hizmetlerimiz</span>
             <i class="fa fa-chevron-right text-[10px] opacity-50"></i>
-            <span class="text-white">{{ service.title }}</span>
+            <span class="text-white opacity-80">{{ service.title }}</span>
         </div>
     </div>
 </div>
 
-{# --- 2. ANA İÇERİK ALANI --- #}
-<section class="py-16 lg:py-24 bg-white relative overflow-hidden">
-    {# Arka plan deseni (Opsiyonel) #}
-
-    <div class="container mx-auto px-4 max-w-7xl relative z-10">
+<section class="py-12 lg:py-20 bg-white relative">
+    <div class="container mx-auto px-4 max-w-7xl">
         
-        {# A. INTRO BÖLÜMÜ (Başlık ve Alt Başlık) #}
-        <div class="text-center max-w-4xl mx-auto mb-16 space-y-4">
-            <h2 class="text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-wide leading-tight">
-                <span class="text-orange-600">{{ service.title }}</span> KONUSUNDA PROFESYONEL ÇÖZÜMLER
+        <div class="max-w-4xl mb-12 space-y-3">
+            <h2 class="text-2xl md:text-3xl font-black text-slate-900 uppercase leading-tight">
+                <span class="text-blue-600">{{ service.title }}</span> ÇÖZÜMLERİ
             </h2>
             {% if service.subtitle %}
-            <div class="relative inline-block">
-                <p class="text-slate-500 font-medium text-base md:text-lg leading-relaxed px-8">
-                    {{ service.subtitle }}
-                </p>
-                {# Süsleme Çizgileri #}
-                <span class="absolute top-0 left-0 text-4xl text-orange-200 opacity-50 font-serif">“</span>
-                <span class="absolute bottom-0 right-0 text-4xl text-orange-200 opacity-50 font-serif translate-y-2">”</span>
-            </div>
+            <p class="text-slate-500 font-medium text-base md:text-lg leading-relaxed">
+                {{ service.subtitle }}
+            </p>
             {% endif %}
         </div>
 
-        {# B. ORTA BÖLÜM: SLIDER (SOL) ve ÖZELLİKLER (SAĞ) #}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start mb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start mb-20">
             
-            {# SOL: SLIDER ALANI #}
-            <div class="w-full relative group">
-                <div class="absolute -inset-2 bg-gradient-to-r from-orange-600 to-blue-600 rounded-2xl opacity-20 blur-lg group-hover:opacity-40 transition duration-500"></div>
-                
+            <div class="w-full">
                 {% if service.slider_group and service.slider_group.items %}
-                    {# Swiper Slider #}
-                    <div class="swiper serviceDetailSwiper rounded-xl overflow-hidden shadow-2xl shadow-slate-200 border border-slate-100 aspect-[4/3] bg-white relative">
+                    <div class="swiper serviceDetailSwiper w-full bg-transparent">
                         <div class="swiper-wrapper">
                             {% for item in service.slider_group.items %}
-                            <div class="swiper-slide relative">
+                            <div class="swiper-slide rounded-xl overflow-hidden aspect-[4/3] bg-slate-100 shadow-lg border border-slate-100">
                                 <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                        alt="{{ item.title }}" 
-                                        class="w-full h-full object-cover">
+                                     alt="{{ item.title }}" 
+                                     class="w-full h-full object-cover">
                                 
-                                {# Slider içi yazı varsa #}
                                 {% if item.title %}
-                                <div class="absolute bottom-0 left-0 right-0 p-8 pb-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
-                                    <h4 class="text-white font-bold text-lg drop-shadow-md">{{ item.title }}</h4>
+                                <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                                    <h4 class="text-white font-bold text-lg">{{ item.title }}</h4>
                                 </div>
                                 {% endif %}
                             </div>
                             {% endfor %}
                         </div>
                         
-                        {# Sadece Noktalar (Pagination) #}
-                        <div class="swiper-pagination !bottom-4"></div>
+                        <div class="swiper-pagination"></div>
                     </div>
 
                 {% elif service.image_path %}
-                    {# Slider yoksa tek resim #}
-                    <div class="rounded-xl overflow-hidden shadow-2xl shadow-slate-200 aspect-[4/3] bg-white">
-                            <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
-                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
-                                alt="{{ service.title }}">
-                    </div>
-                {% else %}
-                    {# Hiç resim yoksa placeholder #}
-                    <div class="rounded-xl overflow-hidden shadow-inner bg-slate-100 aspect-[4/3] flex items-center justify-center text-slate-300">
-                        <i class="fa fa-image text-6xl"></i>
+                    <div class="rounded-xl overflow-hidden shadow-lg border border-slate-100 aspect-[4/3] bg-slate-100">
+                         <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
+                              class="w-full h-full object-cover" 
+                              alt="{{ service.title }}">
                     </div>
                 {% endif %}
             </div>
 
-            {# SAĞ: ÖZELLİKLER VE AKSİYON #}
-            <div class="flex flex-col h-full justify-center space-y-8">
+            <div class="flex flex-col h-full space-y-6">
                 <div>
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="w-12 h-1 bg-orange-600 rounded-full"></span>
-                        <h3 class="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
-                            {{ service.features_title or 'Öne Çıkan Özellikler' }}
-                        </h3>
-                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <span class="w-2 h-8 bg-blue-600 rounded-sm"></span>
+                        {{ service.features_title or 'Öne Çıkan Özellikler' }}
+                    </h3>
                     
-                    {# Editörden gelen Özellik Listesi (HTML) #}
-                    {# Tailwind Typography (prose) ile listeyi otomatik stillendiriyoruz #}
-                    <div class="prose prose-lg prose-slate prose-ul:list-none prose-ul:pl-0 prose-li:pl-0">
+                    <div class="prose prose-slate prose-ul:list-none prose-ul:pl-0 prose-li:pl-0">
                         {% if service.features %}
-                            {# Liste maddelerini özel ikonla süslemek için CSS trick yerine replace kullanıyoruz veya safe ile basıp CSS ile hallediyoruz. 
-                               Burada prose-li sınıfını özelleştirmek daha temiz. #}
-                            <div class="custom-features-list text-slate-600 font-medium">
+                            <div class="custom-features-list text-slate-600">
                                 {{ service.features | safe }}
                             </div>
-                        {% else %}
-                            <p class="text-slate-500 italic">Bu hizmet için henüz özellik listesi girilmemiştir.</p>
                         {% endif %}
                     </div>
                 </div>
 
-                {# Butonlar #}
-                <div class="flex flex-wrap gap-4 pt-4 border-t border-slate-100">
+                <div class="flex flex-wrap gap-4 pt-6 mt-auto">
                     {% if service.video_url %}
                     <a href="{{ service.video_url }}" target="_blank" 
-                       class="btn h-auto py-4 px-8 bg-slate-900 hover:bg-orange-600 text-white border-none rounded-lg shadow-lg shadow-slate-900/20 flex items-center gap-3 group transition-all duration-300">
-                        <span class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-orange-600 transition-colors">
-                            <i class="fa fa-play text-sm ml-1"></i>
-                        </span>
-                        <div class="text-left">
-                            <span class="block text-[10px] opacity-60 uppercase tracking-wider">Tanıtım</span>
-                            <span class="block font-bold text-base leading-none">{{ service.video_btn_text or 'Filmi İzle' }}</span>
-                        </div>
+                       class="btn h-12 px-6 bg-slate-900 hover:bg-blue-600 text-white border-none rounded-lg shadow-md flex items-center gap-3 transition-colors">
+                        <i class="fa fa-play text-xs"></i>
+                        <span>{{ service.video_btn_text or 'Filmi İzle' }}</span>
                     </a>
                     {% endif %}
 
                     <a href="{{ url_for('main.contact') }}" 
-                       class="btn h-auto py-4 px-8 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-lg shadow-sm flex items-center gap-3 group">
-                        <div class="text-left">
-                            <span class="block text-[10px] opacity-60 uppercase tracking-wider text-orange-600">İletişim</span>
-                            <span class="block font-bold text-base leading-none">Teklif Al</span>
-                        </div>
-                        <i class="fa fa-arrow-right text-slate-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all"></i>
+                       class="btn h-12 px-6 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-lg shadow-sm flex items-center gap-2">
+                        <span>Teklif Al</span>
+                        <i class="fa fa-arrow-right text-slate-400"></i>
                     </a>
                 </div>
             </div>
 
         </div>
 
-        {# C. ALT BÖLÜM: DETAYLI AÇIKLAMA #}
-        <div class="bg-slate-50 rounded-3xl p-8 md:p-12 lg:p-16 border border-slate-100 shadow-sm relative overflow-hidden">
-            {# Arka plan dekoru #}
-            <i class="fa fa-file-alt absolute -top-6 -right-6 text-[10rem] text-slate-200 opacity-20 pointer-events-none rotate-12"></i>
+        <div class="bg-slate-50 rounded-2xl p-8 md:p-12 border border-slate-100 mb-16">
+            <h3 class="text-xl font-bold text-slate-800 mb-6">
+                {{ service.description_title or 'Detaylı Bilgiler' }}
+            </h3>
             
-            <div class="relative z-10 max-w-5xl mx-auto">
-                <h3 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
-                    <i class="fa fa-info-circle text-orange-600"></i>
-                    {{ service.description_title or 'Detaylı Bilgiler ve Avantajlar' }}
-                </h3>
-                
-                {# Editörden gelen HTML İçerik #}
-                <div class="prose prose-lg prose-slate max-w-none prose-headings:text-slate-800 prose-a:text-orange-600 hover:prose-a:text-orange-700 prose-img:rounded-xl">
-                    {% if service.description %}
-                        {{ service.description | safe }}
-                    {% else %}
-                        <p class="text-slate-500">Detaylı açıklama hazırlanıyor...</p>
-                    {% endif %}
-                </div>
+            <div class="prose prose-lg prose-slate max-w-none prose-a:text-blue-600">
+                {% if service.description %}
+                    {{ service.description | safe }}
+                {% else %}
+                    <p class="text-slate-500 text-sm">İçerik hazırlanıyor...</p>
+                {% endif %}
             </div>
         </div>
+
+        {% if service.faq_group and service.faq_group.items %}
+        <div class="max-w-4xl mx-auto border-t border-slate-100 pt-16">
+            <div class="text-center mb-10">
+                <h3 class="text-2xl font-bold text-slate-900">Sıkça Sorulan Sorular</h3>
+            </div>
+
+            <div class="space-y-3">
+                {% for faq in service.faq_group.items %}
+                    {% if faq.is_active %}
+                    <details class="group bg-white rounded-lg border border-slate-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                        <summary class="flex items-center justify-between p-5 cursor-pointer text-slate-700 font-bold hover:bg-slate-50 transition-colors">
+                            <span>{{ faq.question }}</span>
+                            <span class="transition-transform duration-300 group-open:rotate-180">
+                                <i class="fa fa-chevron-down text-xs text-slate-400"></i>
+                            </span>
+                        </summary>
+                        <div class="px-5 pb-5 text-slate-600 text-sm leading-relaxed border-t border-slate-50">
+                            {{ faq.answer | safe }}
+                        </div>
+                    </details>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
     </div>
 </section>
 
-{# --- SWIPER JS AYARLARI --- #}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     var swiper = new Swiper(".serviceDetailSwiper", {
-        spaceBetween: 0,
+        spaceBetween: 20,
         effect: "fade",
         fadeEffect: { crossFade: true },
         loop: true,
         autoplay: {
-            delay: 4000,
+            delay: 5000,
             disableOnInteraction: false,
         },
-        // Sadece Pagination (Noktalar) aktif
         pagination: {
             el: ".swiper-pagination",
             clickable: true,
-            // dynamicBullets: true, // İstersen bunu açıp noktaların büyüklü küçüklü olmasını sağlayabilirsin
         },
-        // Navigation (Oklar) İPTAL EDİLDİ
     });
 });
 </script>
 
 <style>
-    /* Slider Noktaları Özelleştirme */
+    /* Swiper Dışarıda Pagination Ayarı */
+    .serviceDetailSwiper {
+        padding-bottom: 40px !important; /* Noktalar için alt boşluk */
+    }
+
+    .serviceDetailSwiper .swiper-pagination {
+        bottom: 0 !important; /* En alta sabitle */
+    }
+
+    /* Mavi Noktalar */
     .serviceDetailSwiper .swiper-pagination-bullet {
         width: 10px;
         height: 10px;
-        background-color: #ffffff; /* Pasif noktalar beyaz */
-        opacity: 0.6;
-        border: 1px solid rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
+        background-color: #cbd5e1; /* Pasif gri */
+        opacity: 1;
+        margin: 0 6px !important;
     }
 
     .serviceDetailSwiper .swiper-pagination-bullet-active {
-        background-color: #ea580c; /* Aktif nokta: Turuncu (veya #3b82f6 Mavi yapabilirsin) */
-        opacity: 1;
-        width: 24px; /* Aktif olunca uzayan şık yapı */
-        border-radius: 6px;
+        background-color: #2563eb; /* Aktif Mavi */
+        width: 20px;
+        border-radius: 10px;
+        transition: all 0.3s;
     }
 
-    /* Özellikler listesindeki maddelere check işareti */
+    /* Özellik Listesi Tikleri */
     .custom-features-list ul { list-style: none; padding: 0; margin: 0; }
     .custom-features-list li {
         position: relative;
-        padding-left: 1.75rem;
-        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
         display: flex;
         align-items: start;
     }
@@ -242,9 +220,9 @@ document.addEventListener("DOMContentLoaded", function() {
         font-weight: 900;
         position: absolute;
         left: 0;
-        top: 0.2rem;
-        color: #ea580c;
-        font-size: 0.9rem;
+        top: 0.3rem;
+        color: #2563eb; /* Mavi Tik */
+        font-size: 0.8rem;
     }
 </style>
 

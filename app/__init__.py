@@ -291,8 +291,11 @@ class SliderItemInline(InlineFormAdmin):
     path = op.join(op.dirname(__file__), 'static', 'uploads')
     if not os.path.exists(path): os.makedirs(path)
     form_extra_fields = {'image_path': ImageUploadField('Resim Dosyası', base_path=path, url_relative_path='uploads/')}
+
     batch_actions = None
-    def is_action_allowed(self, name): return False
+    def is_action_allowed(self, name): 
+        if name == 'delete': return True
+        return False
 
 class SliderGroupView(ModelView):
     list_template = 'admin/custom_list.html'
@@ -304,8 +307,11 @@ class SliderGroupView(ModelView):
     inline_models = (SliderItemInline(SliderItem),)
     def _item_count(view, context, model, name): return len(model.items)
     column_formatters = {'item_count': _item_count}
+
     batch_actions = None
-    def is_action_allowed(self, name): return False
+    def is_action_allowed(self, name): 
+        if name == 'delete': return True
+        return False
 
 class ServiceView(ModelView):
     list_template = 'admin/service_list.html'
@@ -378,7 +384,7 @@ class ServiceView(ModelView):
     }
 
     batch_actions = None
-    def is_action_allowed(self, name):
+    def is_action_allowed(self, name): 
         if name == 'delete': return True
         return False
     

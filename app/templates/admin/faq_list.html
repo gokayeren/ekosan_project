@@ -1,87 +1,109 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<div class="p-6 pb-32">
-    
-    {# --- ÜST BAŞLIK VE YENİ EKLEME --- #}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">SSS Yönetimi</h1>
-            <p class="text-slate-400 text-xs mt-1">Sıkça sorulan soruları gruplar halinde yönetin.</p>
-        </div>
-        <div>
+    <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl m-6">
+
+        {# --- BAŞLIK VE AKSİYONLAR --- #}
+        <div class="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-[#0f172a]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <i class="fa fa-question-circle"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-100 text-base">SSS Yönetimi</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Sıkça sorulan soruları gruplar halinde yönetin.</p>
+                </div>
+            </div>
+
             {% if admin_view.can_create %}
-            <a href="{{ url_for('.create_view') }}" class="btn btn-primary px-6 gap-2 border-none text-white shadow-lg shadow-blue-900/20">
+            <a href="{{ url_for('.create_view', url=return_url) }}" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 px-5 h-10 rounded-lg shadow-lg shadow-blue-900/20 font-medium transition-all flex items-center gap-2">
                 <i class="fa fa-plus"></i> Yeni Grup Ekle
             </a>
             {% endif %}
         </div>
-    </div>
 
-    {# --- LİSTE TABLOSU --- #}
-    <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+        {# --- TABLO --- #}
         <div class="overflow-x-auto">
-            <table class="table w-full text-left">
+            <table class="table w-full border-collapse">
                 <thead>
-                    <tr class="bg-slate-900/50 border-b border-slate-700 text-slate-400 text-xs uppercase">
-                        <th class="py-4 px-6 w-16">#</th>
-                        <th class="py-4 px-6">Grup Adı</th>
-                        <th class="py-4 px-6">Anahtar (Key)</th>
-                        <th class="py-4 px-6 text-center">Soru Sayısı</th>
-                        <th class="py-4 px-6 text-right">İşlemler</th>
+                    <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+                        <th class="px-6 py-4 text-center w-16">#</th>
+                        <th class="px-6 py-4">Grup Adı</th>
+                        <th class="px-6 py-4">Anahtar (Key)</th>
+                        <th class="px-6 py-4 text-center">Soru Sayısı</th>
+                        {% if admin_view.can_edit or admin_view.can_delete %}
+                            <th class="px-6 py-4 text-right w-32">İşlemler</th>
+                        {% endif %}
                     </tr>
                 </thead>
-                <tbody class="text-slate-300 text-sm divide-y divide-slate-700">
-                    {% for row in data %}
-                    <tr class="hover:bg-slate-700/30 transition-colors group">
-                        <td class="py-4 px-6 font-mono text-slate-500">{{ loop.index }}</td>
+                
+                <tbody class="divide-y divide-slate-800/50 text-sm">
+                {% for row in data %}
+                    <tr class="hover:bg-slate-800/30 transition-colors group">
                         
-                        <td class="py-4 px-6">
-                            <div class="font-bold text-white">{{ row.name }}</div>
+                        {# ID #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="font-bold text-slate-500 font-mono">{{ loop.index }}</span>
+                        </td>
+                        
+                        {# Grup Adı #}
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-200 text-base">{{ row.name }}</div>
                         </td>
 
-                        <td class="py-4 px-6">
-                            <span class="badge badge-ghost bg-slate-900 border-slate-600 text-slate-400 font-mono text-xs">
+                        {# Anahtar (Key) #}
+                        <td class="px-6 py-4">
+                            <span class="bg-[#111827] border border-slate-700 rounded px-2 py-1 text-[11px] font-mono text-blue-400">
                                 {{ row.group_key }}
                             </span>
                         </td>
 
-                        <td class="py-4 px-6 text-center">
-                            <span class="badge badge-info bg-blue-900/30 text-blue-400 border-blue-800">
+                        {# Soru Sayısı #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-900/30 text-indigo-400 border border-indigo-500/30">
                                 {{ row.items|length }} Soru
                             </span>
                         </td>
 
-                        <td class="py-4 px-6 text-right space-x-2">
-                            {% if admin_view.can_edit %}
-                            <a href="{{ url_for('.edit_view', id=get_pk_value(row)) }}" class="btn btn-square btn-sm btn-ghost text-blue-400 hover:bg-blue-900/30" title="Düzenle">
-                                <i class="fa fa-pen"></i>
-                            </a>
-                            {% endif %}
-                            
-                            {% if admin_view.can_delete %}
-                            <form class="icon" method="POST" action="{{ url_for('.delete_view') }}" style="display: inline;">
-                                <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
-                                <input type="hidden" name="url" value="{{ return_url }}">
-                                <button onclick="return confirm('Bu grubu ve içindeki tüm soruları silmek istediğinize emin misiniz?');" 
-                                        class="btn btn-square btn-sm btn-ghost text-red-400 hover:bg-red-900/30" title="Sil">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </form>
-                            {% endif %}
+                        {# İşlemler #}
+                        {% if admin_view.can_edit or admin_view.can_delete %}
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-4">
+                                
+                                {% if admin_view.can_edit %}
+                                <a href="{{ url_for('.edit_view', id=get_pk_value(row)) }}" class="text-slate-500 hover:text-blue-400 transition-colors transform hover:scale-110" title="Düzenle">
+                                    <i class="fa fa-pencil-alt text-lg"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% if admin_view.can_delete %}
+                                <form class="inline-block m-0 p-0" method="POST" action="{{ url_for('.delete_view') }}">
+                                    <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                    <input type="hidden" name="url" value="{{ return_url }}">
+                                    <button onclick="return confirm('Bu grubu ve içindeki tüm soruları silmek istediğinize emin misiniz?');" class="text-slate-500 hover:text-red-500 transition-colors transform hover:scale-110 bg-transparent border-0 cursor-pointer p-0" title="Sil">
+                                        <i class="fa fa-trash text-lg"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
                         </td>
+                        {% endif %}
                     </tr>
-                    {% else %}
+                {% else %}
                     <tr>
-                        <td colspan="5" class="py-12 text-center text-slate-500">
-                            <i class="fa fa-folder-open text-4xl mb-3 opacity-20"></i>
-                            <p>Henüz hiç SSS grubu oluşturulmamış.</p>
+                        <td colspan="5" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fa fa-folder-open text-3xl text-slate-600"></i>
+                                </div>
+                                <h3 class="text-slate-300 font-medium text-base">Kayıt Bulunamadı</h3>
+                                <p class="text-slate-500 text-sm mt-1 max-w-xs mx-auto">Henüz hiç SSS grubu oluşturulmamış.</p>
+                            </div>
                         </td>
                     </tr>
-                    {% endfor %}
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-</div>
 {% endblock %}

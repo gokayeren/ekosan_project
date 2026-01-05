@@ -1,7 +1,10 @@
 {% extends 'admin/model/edit.html' %}
 
+{% block content_title %}{% endblock %}
+
 {% block body %}
     
+    {# --- ÜST BAŞLIK VE AKSİYONLAR --- #}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
             <a href="{{ return_url }}" class="btn btn-circle btn-sm btn-ghost bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white transition-all shadow-sm">
@@ -9,163 +12,227 @@
             </a>
             <div>
                 <h1 class="text-2xl font-bold text-white tracking-tight">
-                    {% if request.endpoint.endswith('.create_view') %}Grup Oluştur{% else %}Grubu Düzenle{% endif %}
+                    {% if request.endpoint.endswith('.create_view') %}
+                        Yeni SSS Grubu
+                    {% else %}
+                        Grubu Düzenle
+                    {% endif %}
                 </h1>
-                <div class="text-xs text-slate-400 mt-1">Grup bilgilerini ve altındaki soruları yönetin.</div>
+                <div class="text-xs text-slate-400 flex items-center gap-2 mt-1">
+                    <span class="opacity-75">Panel</span>
+                    <i class="fa fa-chevron-right text-[10px] opacity-40"></i>
+                    <span class="text-slate-300 font-medium">SSS Yönetimi</span>
+                </div>
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <button type="submit" form="faqForm" class="btn btn-primary px-6 shadow-lg shadow-blue-900/20 gap-2 border-none text-white hover:bg-blue-600">
-                <i class="fa fa-save"></i> Kaydet
+            <button type="submit" form="faqForm" class="btn btn-primary px-6 shadow-lg shadow-blue-900/20 gap-2 border-none text-white hover:bg-blue-600 transition-colors">
+                <i class="fa fa-save"></i>
+                {% if request.endpoint.endswith('.create_view') %}Kaydet{% else %}Güncelle{% endif %}
             </button>
         </div>
     </div>
 
-    {# --- HATA MESAJLARI --- #}
+    {# --- FLASH MESAJLARI --- #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="mb-8 space-y-3">
                 {% for category, message in messages %}
-                <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm border border-slate-700 bg-slate-800 text-slate-200">
-                    <span>{{ message }}</span>
-                </div>
+                    <div role="alert" class="alert alert-{{ category if category != 'message' else 'info' }} shadow-sm border border-slate-700 bg-slate-800 text-slate-200">
+                        <i class="fa fa-info-circle"></i>
+                        <span>{{ message }}</span>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
 
-    <form id="faqForm" action="" method="POST" class="pb-32 space-y-8" enctype="multipart/form-data">
+    {# --- ANA FORM --- #}
+    <form id="faqForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-32 space-y-8">
+        
         {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
 
         {# --- BÖLÜM 1: GRUP BİLGİLERİ --- #}
         <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
-                <i class="fa fa-folder text-slate-400"></i>
-                <h3 class="font-bold text-slate-200 text-sm">Grup Detayları</h3>
-            </div>
-            <div class="p-6 bg-slate-900/30 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="form-control">
-                    <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase">Grup Adı</label>
-                    {{ form.name(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200") }}
+                <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
+                    <i class="fa fa-folder-open text-sm"></i>
                 </div>
-                <div class="form-control">
-                    <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase">Grup Anahtarı (Key)</label>
-                    {{ form.group_key(class="input input-bordered w-full bg-slate-900 border-slate-700 text-slate-200 font-mono") }}
-                    <label class="label pb-0"><span class="label-text-alt text-slate-500">Benzersiz olmalı (örn: isi_pompasi_sss)</span></label>
+                <div>
+                    <h3 class="font-bold text-slate-200 text-sm">Grup Detayları</h3>
+                    <p class="text-[11px] text-slate-400">SSS grubunun genel tanımları.</p>
+                </div>
+            </div>
+
+            <div class="p-6 bg-slate-900/30">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Grup Adı <span class="text-red-500">*</span></label>
+                        {{ form.name(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-200 placeholder:text-slate-600 font-bold", placeholder="Örn: Isı Pompası Soruları") }}
+                    </div>
+                    <div class="form-control">
+                        <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Grup Anahtarı (Key) <span class="text-red-500">*</span></label>
+                        {{ form.group_key(class="input input-bordered w-full bg-slate-900 border-slate-700 focus:border-slate-500 focus:ring-0 text-slate-400 font-mono placeholder:text-slate-600", placeholder="isi_pompasi_sss") }}
+                        <label class="label pb-0"><span class="label-text-alt text-slate-500">Benzersiz bir isim olmalı (Türkçe karakter kullanmayınız).</span></label>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {# --- BÖLÜM 2: SORULAR (INLINE FORM) --- #}
+        {# --- BÖLÜM 2: SORULAR (INLINE LISTE) --- #}
         <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <i class="fa fa-question-circle text-orange-500"></i>
+                    <div class="w-9 h-9 rounded-lg bg-indigo-900/30 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-sm">
+                        <i class="fa fa-question-circle text-sm"></i>
+                    </div>
                     <div>
                         <h3 class="font-bold text-slate-200 text-sm">Sorular ve Cevaplar</h3>
-                        <p class="text-[10px] text-slate-500">Bu gruba ait soruları aşağıdan ekleyip düzenleyebilirsiniz.</p>
+                        <p class="text-[11px] text-slate-400">Bu gruba ait soruları yönetin.</p>
                     </div>
                 </div>
+                
+                {# Yeni Ekle Butonu #}
+                <a href="javascript:void(0)" onclick="return false;" data-role="add-inline-button" data-target="items" class="btn btn-sm btn-primary border-none bg-indigo-600 hover:bg-indigo-500 text-white gap-2 shadow-lg shadow-indigo-900/20">
+                    <i class="fa fa-plus"></i> Soru Ekle
+                </a>
             </div>
             
             <div class="p-6 bg-slate-900/30">
+                
                 {# Flask-Admin Inline Alanı #}
                 <div class="faq-inline-wrapper space-y-4">
                     {% for subform in form.items %}
-                        <div class="faq-item-card bg-slate-900 border border-slate-700 rounded-lg p-5 relative group hover:border-slate-600 transition-colors">
-                            {# Form ID'leri (Gizli) #}
+                        <div class="faq-item-card bg-slate-900 border border-slate-700 rounded-xl p-5 relative group hover:border-slate-600 transition-all duration-300">
+                            
+                            {# Gizli ID ve CSRF Alanları #}
                             {{ subform.csrf_token }}
                             {% if subform.id %}{{ subform.id }}{% endif %}
 
-                            {# Silme Butonu (Sağ Üst) #}
-                            <div class="absolute top-4 right-4 z-10">
+                            {# --- Kart Başlığı ve Aksiyonlar --- #}
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs text-slate-500">Sıra:</span>
-                                    {{ subform.order(class="input input-xs w-12 bg-slate-800 border-slate-600 text-center") }}
+                                    <span class="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-mono item-index">
+                                        {{ loop.index }}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Soru Kartı</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    {# Sıralama #}
+                                    <div class="flex items-center gap-2 bg-slate-800 rounded px-2 py-1 border border-slate-700">
+                                        <span class="text-[10px] text-slate-500 font-bold uppercase">Sıra</span>
+                                        {{ subform.order(class="bg-transparent text-center text-xs text-white w-8 focus:outline-none font-mono") }}
+                                    </div>
                                     
-                                    <label class="btn btn-xs btn-circle btn-error btn-outline text-red-500 hover:text-white" title="Sil">
+                                    {# Aktiflik Switch #}
+                                    <label class="cursor-pointer label p-0" title="Yayında mı?">
+                                        {{ subform.is_active(class="toggle toggle-success toggle-xs") }}
+                                    </label>
+
+                                    {# Silme Butonu (Görünür) #}
+                                    <label class="btn btn-xs btn-square btn-error btn-outline text-red-500 hover:text-white hover:bg-red-600 hover:border-red-600 transition-colors" title="Sil">
+                                        {# Flask-Admin'in asıl silme checkbox'ı (gizli) #}
                                         <input type="checkbox" name="{{ subform._delete.name }}" class="hidden delete-checkbox">
                                         <i class="fa fa-trash"></i>
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="grid gap-4">
+                            {# --- Kart İçeriği --- #}
+                            <div class="grid gap-5">
                                 {# Soru #}
-                                <div class="form-control w-full pr-24">
-                                    <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-400 uppercase">Soru</label>
-                                    {{ subform.question(class="input input-bordered input-sm w-full bg-slate-800 border-slate-700 text-white font-bold") }}
+                                <div class="form-control w-full">
+                                    <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">Soru Metni</label>
+                                    {{ subform.question(class="input input-bordered input-sm w-full bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-200 placeholder:text-slate-600 font-medium") }}
                                 </div>
 
                                 {# Cevap #}
                                 <div class="form-control w-full">
-                                    <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-400 uppercase">Cevap</label>
-                                    {{ subform.answer(class="textarea textarea-bordered w-full h-24 bg-slate-800 border-slate-700 text-slate-300 text-sm leading-relaxed", rows="3") }}
-                                </div>
-
-                                {# Aktiflik #}
-                                <div class="flex items-center gap-2 mt-2">
-                                    <label class="label cursor-pointer gap-2 p-0">
-                                        {{ subform.is_active(class="checkbox checkbox-xs checkbox-success rounded-sm") }}
-                                        <span class="label-text text-xs text-slate-400">Bu soru yayında</span>
-                                    </label>
+                                    <label class="label pt-0 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">Cevap Metni (HTML Destekli)</label>
+                                    {{ subform.answer(class="textarea textarea-bordered w-full h-24 bg-slate-800 border-slate-700 focus:border-slate-500 text-slate-300 text-sm leading-relaxed placeholder:text-slate-600", rows="3") }}
                                 </div>
                             </div>
 
-                            {# Silindi İşaretlenince Görsel Efekt #}
-                            <div class="deleted-overlay absolute inset-0 bg-red-900/20 backdrop-blur-[1px] rounded-lg hidden items-center justify-center z-20">
-                                <span class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">SİLİNECEK</span>
-                                <button type="button" class="undo-delete btn btn-xs btn-ghost text-white ml-2 underline">Geri Al</button>
+                            {# --- Silindi Yerleşimi (Overlay) --- #}
+                            <div class="deleted-overlay absolute inset-0 bg-red-900/10 backdrop-blur-[1px] border-2 border-red-500/50 rounded-xl hidden flex-col items-center justify-center z-20 transition-all">
+                                <div class="bg-slate-900 border border-red-500/30 p-4 rounded-lg shadow-2xl flex flex-col items-center gap-2">
+                                    <span class="text-red-500 font-bold text-sm uppercase tracking-wider"><i class="fa fa-trash-alt mr-2"></i>Silinecek</span>
+                                    <button type="button" class="undo-delete btn btn-xs btn-ghost text-slate-400 hover:text-white">Geri Al</button>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
 
-                {# Yeni Ekleme Butonu #}
-                {# Not: Flask-Admin bu butonu JS ile yakalayıp yeni satır ekler #}
-                <div class="mt-6">
-                    <a href="javascript:void(0)" onclick="return false;" class="btn btn-outline btn-dashed w-full border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white hover:border-slate-500 gap-2" data-role="add-inline-button" data-target="items">
-                        <i class="fa fa-plus-circle"></i> Yeni Soru Ekle
-                    </a>
+                {# Boş Durum (Eğer hiç soru yoksa JS ile gizlenebilir ama şimdilik kalsın) #}
+                <div class="empty-state hidden mt-8 text-center py-10 border-2 border-dashed border-slate-700 rounded-xl">
+                    <i class="fa fa-plus-circle text-4xl text-slate-600 mb-3"></i>
+                    <p class="text-slate-400 text-sm">Henüz hiç soru eklenmemiş.</p>
                 </div>
+
             </div>
         </div>
+
+        {# MOBİL ALT MENÜ #}
+        <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+            <div class="flex justify-end gap-3 max-w-7xl mx-auto">
+                <a href="{{ return_url }}" class="btn btn-ghost text-slate-400">İptal</a>
+                <button type="submit" class="btn btn-primary px-8 border-none text-white">
+                    <i class="fa fa-save mr-2"></i> Kaydet
+                </button>
+            </div>
+        </div>
+
     </form>
 
-    {# --- INLINE FORM JS & CSS --- #}
+    {# --- INLINE FORM İÇİN ÖZEL SCRİPT VE STİL --- #}
     <style>
         /* Silinmiş öğe efekti */
         .faq-item-card.marked-for-delete .deleted-overlay { display: flex; }
-        .faq-item-card.marked-for-delete { border-color: #ef4444; opacity: 0.7; }
-        
-        /* Dashed Button */
-        .btn-dashed { border-style: dashed; border-width: 2px; }
+        .faq-item-card.marked-for-delete { opacity: 0.8; }
     </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Silme butonuna basılınca kartı işaretle
-            document.querySelectorAll('.delete-checkbox').forEach(chk => {
-                chk.addEventListener('change', function() {
-                    const card = this.closest('.faq-item-card');
-                    if(this.checked) card.classList.add('marked-for-delete');
-                    else card.classList.remove('marked-for-delete');
+            // 1. Silme İşlemi (Görsel Efekt)
+            function bindDeleteEvents() {
+                // Silme butonları
+                document.querySelectorAll('.delete-checkbox').forEach(chk => {
+                    chk.addEventListener('change', function() {
+                        const card = this.closest('.faq-item-card');
+                        if(this.checked) card.classList.add('marked-for-delete');
+                        else card.classList.remove('marked-for-delete');
+                    });
+                });
+
+                // Geri al butonları
+                document.querySelectorAll('.undo-delete').forEach(btn => {
+                    btn.onclick = function() { // addEventListener yerine onclick (tekrar bind edilirse çakışmasın)
+                        const card = this.closest('.faq-item-card');
+                        const chk = card.querySelector('.delete-checkbox');
+                        chk.click(); // Checkbox'ı tetikle
+                    };
+                });
+            }
+
+            // Sayfa yüklendiğinde bağla
+            bindDeleteEvents();
+
+            // Flask-Admin yeni satır eklediğinde (MutationObserver ile izle)
+            // Çünkü Flask-Admin jQuery ile DOM'a yeni eleman basıyor
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        bindDeleteEvents(); // Yeni gelen elemanlara da event bağla
+                    }
                 });
             });
 
-            // Geri al butonları
-            document.querySelectorAll('.undo-delete').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const card = this.closest('.faq-item-card');
-                    const chk = card.querySelector('.delete-checkbox');
-                    chk.checked = false;
-                    card.classList.remove('marked-for-delete');
-                });
-            });
-
-            // Flask-Admin yeni satır ekleme olayını dinle (Hack)
-            // Yeni eklenen satırın stili bozuk gelmesin diye
-            // Bu kısım biraz ileri seviye, şimdilik CSS ile idare edelim.
+            const wrapper = document.querySelector('.faq-inline-wrapper');
+            if(wrapper) {
+                observer.observe(wrapper, { childList: true });
+            }
         });
     </script>
 {% endblock %}

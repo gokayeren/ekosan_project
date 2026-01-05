@@ -89,7 +89,7 @@
                     </div>
                 </div>
 
-                {# KART 2: SLIDER VE ÖZELLİKLER (YAN YANA) #}
+                {# KART 2: SLIDER VE VIDEO (YAN YANA) #}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
                     {# Sol: Slider Seçimi #}
@@ -151,6 +151,32 @@
                         </div>
                     </div>
                 </div>
+
+                {# --- YENİ EKLENEN KISIM: SIKÇA SORULAN SORULAR --- #}
+                <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-900/30 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-sm">
+                            <i class="fa fa-question-circle text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">Sıkça Sorulan Sorular</h3>
+                            <p class="text-[11px] text-slate-400">Bu hizmet sayfasında görüntülenecek SSS grubunu seçin.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-slate-900/30">
+                        <div class="form-control">
+                            <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">SSS Grubu Seçin</label>
+                            {% if form.faq_group %}
+                                {{ form.faq_group(class="select select-bordered w-full bg-slate-900 border-slate-700 text-slate-200 focus:outline-none") }}
+                            {% else %}
+                                <div class="alert alert-warning text-xs">ModelView'da form_columns içine 'faq_group' eklediğinizden emin olun.</div>
+                            {% endif %}
+                            <label class="label pb-0"><span class="label-text-alt text-slate-500">Önce 'SSS Yönetimi'nden bir grup oluşturun.</span></label>
+                        </div>
+                    </div>
+                </div>
+                {# ------------------------------------------------ #}
 
                 {# KART 4: DETAYLI ALT İÇERİK #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">

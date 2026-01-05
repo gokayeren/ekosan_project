@@ -23,7 +23,8 @@ admin.base_template = 'admin/master.html'
 from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
-    Contact, Getoffer, Form, FormField, FormSubmission
+    Contact, Getoffer, Form, FormField, FormSubmission,
+    FaqGroup, FaqItem
 )
 
 class SettingsView(ModelView):
@@ -319,6 +320,7 @@ class ServiceView(ModelView):
         'subtitle',
         'slug',
         'slider_group',
+        'faq_group',
         'features_title',
         'features',
         'video_btn_text',
@@ -339,6 +341,7 @@ class ServiceView(ModelView):
         'title': 'Sayfa Başlığı',
         'subtitle': 'Üst Alt Başlık (Intro)',
         'slider_group': 'Soldaki Slider Seçimi',
+        'faq_group': 'Sıkça Sorulan Sorular (SSS)',
         'features_title': 'Sağ Kısım Başlığı',
         'features': 'Sağ Kısım Özellikler (Liste)',
         'video_btn_text': 'Video Buton Yazısı',
@@ -378,6 +381,39 @@ class ServiceView(ModelView):
     def is_action_allowed(self, name):
         if name == 'delete': return True
         return False
+    
+class FaqItemInline(InlineFormAdmin):
+    form_label = 'Soru & Cevap'
+    form_columns = ('id', 'question', 'answer', 'order', 'is_active')
+    form_widget_args = {
+        'answer': {
+            'rows': 4,
+            'class': 'form-control'
+        }
+    }
+    batch_actions = None
+    def is_action_allowed(self, name): return False
+
+class FaqGroupView(ModelView):
+    # Bu iki satırı değiştiriyoruz:
+    list_template = 'admin/faq_list.html'
+    create_template = 'admin/faq_form.html'
+    edit_template = 'admin/faq_form.html'
+    
+    column_list = ('name', 'group_key', 'item_count')
+    column_labels = {'name': 'SSS Grup Adı', 'group_key': 'Anahtar (Key)', 'item_count': 'Soru Sayısı'}
+    
+    form_columns = ('name', 'group_key', 'items')
+    
+    inline_models = (FaqItemInline(FaqItem),)
+    
+    def _item_count(view, context, model, name): return len(model.items)
+    column_formatters = {'item_count': _item_count}
+    
+    batch_actions = None
+    def is_action_allowed(self, name): 
+        if name == 'delete': return True
+        return False
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -398,6 +434,7 @@ def create_app(config_class=Config):
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
+    admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
 
     from app.main import main
@@ -428,12 +465,22 @@ def create_app(config_class=Config):
                 return form_obj
             except: return None
 
+        from app.models import FaqGroup
+        def get_faq(key):
+            """Verilen key'e sahip SSS grubunun sorularını döndürür."""
+            try:
+                group = FaqGroup.query.filter_by(group_key=key).first()
+                if group: return group.items
+            except: pass
+            return []
+
         return dict(
             site_settings=settings, 
             menu_items=menu, 
             footer_settings=footer, 
             get_slider=get_slider,
-            get_form=get_form
+            get_form=get_form,
+            get_faq=get_faq
         )
 
     with app.app_context():

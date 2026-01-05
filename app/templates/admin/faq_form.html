@@ -5,7 +5,6 @@
     
     <div class="faq-item-card bg-slate-900 border border-slate-700 rounded-xl p-5 relative group hover:border-slate-600 transition-all duration-300" data-index="{{ idx }}">
         {% if is_template %}
-            <input type="hidden" name="items-{{ idx }}-csrf_token" value="{{ form.csrf_token.current_token }}">
             <input type="hidden" name="items-{{ idx }}-id" value="">
         {% else %}
             {{ subform.csrf_token }}

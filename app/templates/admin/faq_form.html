@@ -7,7 +7,11 @@
         {% if is_template %}
             <input type="hidden" name="items-{{ idx }}-id" value="">
         {% else %}
-            {{ subform.csrf_token }}
+            {# Alt formda token varsa bas, yoksa hata verdirme #}
+            {% if subform.csrf_token %}
+                {{ subform.csrf_token }}
+            {% endif %}
+
             {% if subform.id %}{{ subform.id }}{% endif %}
         {% endif %}
 
@@ -40,7 +44,9 @@
                     {% if is_template %}
                         <input type="checkbox" name="items-{{ idx }}-_delete" class="hidden delete-checkbox">
                     {% else %}
-                        <input type="checkbox" name="{{ subform._delete.name }}" class="hidden delete-checkbox">
+                        {% if subform._delete %}
+                            <input type="checkbox" name="{{ subform._delete.name }}" class="hidden delete-checkbox">
+                        {% endif %}
                     {% endif %}
                     <i class="fa fa-trash"></i>
                 </label>

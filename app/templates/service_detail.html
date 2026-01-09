@@ -103,7 +103,7 @@
                     <div class="prose prose-slate prose-ul:list-none prose-ul:pl-0 prose-li:pl-0">
                         {% if service.features %}
                             <div class="custom-features-list text-slate-600">
-                                {{ service.features | safe }}
+                                {{ service.features | markdown | safe }}
                             </div>
                         {% endif %}
                     </div>

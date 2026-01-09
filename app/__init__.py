@@ -28,13 +28,6 @@ from app.models import (
     FaqGroup, FaqItem
 )
 
-@app.template_filter('markdown')
-def render_markdown(text):
-    if text is None:
-        return ""
-    # nl2br uzantısı enter tuşuna basılan yerleri <br> yapar
-    return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
-
 class SettingsView(ModelView):
     can_delete = False
     def can_create(self):
@@ -452,6 +445,13 @@ def create_app(config_class=Config):
 
     from app.main import main
     app.register_blueprint(main)
+
+    @app.template_filter('markdown')
+    def render_markdown(text):
+        if text is None:
+            return ""
+        # nl2br uzantısı enter tuşuna basılan yerleri <br> yapar
+        return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
 
     @app.context_processor
     def inject_global_data():

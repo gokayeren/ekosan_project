@@ -135,7 +135,7 @@
             
             <div class="prose prose-lg prose-slate max-w-none prose-a:text-blue-600">
                 {% if service.description %}
-                    {{ service.description | safe }}
+                    {{ service.description | markdown | safe }}
                 {% else %}
                     <p class="text-slate-500 text-sm">İçerik hazırlanıyor...</p>
                 {% endif %}

@@ -10,6 +10,7 @@ from flask_admin.model.form import InlineFormAdmin
 from config import Config
 import json
 from markupsafe import Markup
+import markdown
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -26,6 +27,13 @@ from app.models import (
     Contact, Getoffer, Form, FormField, FormSubmission,
     FaqGroup, FaqItem
 )
+
+@app.template_filter('markdown')
+def render_markdown(text):
+    if text is None:
+        return ""
+    # nl2br uzantısı enter tuşuna basılan yerleri <br> yapar
+    return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
 
 class SettingsView(ModelView):
     can_delete = False

@@ -129,7 +129,14 @@
                             {% if item.children|length > 0 %}
                                 <li class="group relative z-50">
                                     <details>
-                                        <summary class="nav-link rounded-lg hover:bg-white/10 transition-colors py-2">{{ item.label }}</summary>
+                                        <summary class="text-sm py-0.5 px-1 mx-3 rounded-none outline-none ring-0 cursor-pointer select-none
+                                                    !bg-transparent focus:!bg-transparent active:!bg-transparent
+                                                    border-b-2 border-transparent hover:border-orange-500 hover:bg-transparent
+                                                    flex items-center gap-1 transition-all duration-300">
+                                            {{ item.label }}
+                                            <i class="fa fa-chevron-down text-[10px] opacity-70 mt-0.5"></i>
+                                        </summary>
+                                        
                                         <ul class="p-2 min-w-[220px] bg-white text-gray-800 rounded-xl shadow-xl mt-4 border border-gray-100 animate-fade-in-up origin-top-left">
                                             {% for child in item.children %}
                                             <li><a href="{{ child.url }}" class="hover:text-ekosan-blue hover:bg-blue-50 text-sm font-medium py-2">{{ child.label }}</a></li>
@@ -197,10 +204,14 @@
                                 {% if item.children|length > 0 %}
                                     <li>
                                         <details>
-                                            <summary class="font-bold py-3 text-base text-xs">{{ item.label }}</summary>
-                                            <ul>
-                                                {% for child in item.children %}
-                                                <li><a href="{{ child.url }}" class="text-xs py-2 text-gray-600 hover:text-ekosan-blue">{{ child.label }}</a></li>
+                                            <summary class="flex justify-between items-center text-sm py-2 text-base px-2 rounded-none text-gray-600 
+                                                        border-l-2 border-transparent hover:text-ekosan-blue outline-none list-none">
+                                                <span class="font-bold text-xs">{{ item.label }}</span>
+                                                <i class="fa fa-chevron-down text-[10px] opacity-50"></i>
+                                            </summary>
+                                            
+                                            <ul class="before:hidden pl-4"> {% for child in item.children %}
+                                                <li><a href="{{ child.url }}" class="text-xs py-2 text-gray-500 hover:text-ekosan-blue block">{{ child.label }}</a></li>
                                                 {% endfor %}
                                             </ul>
                                         </details>
@@ -216,6 +227,7 @@
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
+                        
                         <div class="divider my-2"></div>
                         <div class="flex flex-col gap-3">
                             {% if site_settings and site_settings.phone_number %}

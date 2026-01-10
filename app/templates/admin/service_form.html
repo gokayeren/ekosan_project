@@ -89,25 +89,53 @@
                     </div>
                 </div>
 
-                {# KART 2: SLIDER VE VIDEO (YAN YANA) #}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
-                    {# Sol: Slider Seçimi #}
                     <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden h-full">
                         <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
-                            <i class="fa fa-images text-slate-400"></i>
-                            <h3 class="font-bold text-slate-200 text-sm">Sol Kısım: Slider</h3>
+                            <i class="fa fa-images text-indigo-400"></i>
+                            <div>
+                                <h3 class="font-bold text-slate-200 text-sm">Slider Alanları</h3>
+                                <p class="text-[10px] text-slate-500">Sayfadaki slider alanlarını yönetin.</p>
+                            </div>
                         </div>
-                        <div class="p-6 bg-slate-900/30 h-full">
+                        <div class="p-6 bg-slate-900/30 h-full space-y-5">
+                            
                             <div class="form-control">
-                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Slider Grubu Seçin</label>
-                                {{ form.slider_group(class="select select-bordered w-full bg-slate-900 border-slate-700 text-slate-200 focus:outline-none") }}
-                                <label class="label pb-0"><span class="label-text-alt text-slate-500">Önce 'Slider Yönetimi'nden bir grup oluşturun.</span></label>
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span> Sol/Üst Slider</span>
+                                </label>
+                                {{ form.slider_group(class="select select-bordered w-full bg-slate-900 border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500") }}
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-indigo-600 text-white flex items-center justify-center text-[10px]">2</span> Orta Alan Slider</span>
+                                </label>
+                                {% if form.slider_group_2 %}
+                                    {{ form.slider_group_2(class="select select-bordered w-full bg-slate-900 border-slate-700 text-slate-200 focus:outline-none focus:border-indigo-500") }}
+                                {% else %}
+                                    <div class="alert alert-error text-xs p-2">slider_group_2 alanı formda bulunamadı.</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label pt-0 text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-purple-600 text-white flex items-center justify-center text-[10px]">3</span> Alt Alan Slider</span>
+                                </label>
+                                {% if form.slider_group_3 %}
+                                    {{ form.slider_group_3(class="select select-bordered w-full bg-slate-900 border-slate-700 text-slate-200 focus:outline-none focus:border-purple-500") }}
+                                {% else %}
+                                    <div class="alert alert-error text-xs p-2">slider_group_3 alanı formda bulunamadı.</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-700/50">
+                                <label class="label pb-0"><span class="label-text-alt text-slate-500">Not: Slider içeriklerini 'Slider Yönetimi' sayfasından düzenleyebilirsiniz.</span></label>
                             </div>
                         </div>
                     </div>
 
-                    {# Sağ: Video Butonu #}
                     <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden h-full">
                         <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                             <i class="fa fa-play-circle text-slate-400"></i>
@@ -126,7 +154,6 @@
                     </div>
                 </div>
 
-                {# KART 3: ÖZELLİKLER LİSTESİ (SAĞ TARAF) #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
@@ -152,7 +179,6 @@
                     </div>
                 </div>
 
-                {# --- YENİ EKLENEN KISIM: SIKÇA SORULAN SORULAR --- #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-lg bg-indigo-900/30 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-sm">
@@ -176,9 +202,7 @@
                         </div>
                     </div>
                 </div>
-                {# ------------------------------------------------ #}
 
-                {# KART 4: DETAYLI ALT İÇERİK #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <div class="w-9 h-9 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 flex items-center justify-center shadow-sm">
@@ -205,10 +229,8 @@
 
             </div>
 
-            {# --- SAĞ KOLON: GÖRSELLER VE SEO --- #}
             <div class="space-y-6">
                 
-                {# KART 5: LİSTE GÖRSELİ #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <i class="fa fa-image text-slate-400"></i>
@@ -229,7 +251,6 @@
                     </div>
                 </div>
 
-                {# KART 6: KAPAK GÖRSELİ #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <i class="fa fa-panorama text-slate-400"></i>
@@ -250,7 +271,6 @@
                     </div>
                 </div>
 
-                {# KART 7: SEO AYARLARI #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="px-6 py-4 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
                         <i class="fa fa-search text-indigo-400"></i>
@@ -272,7 +292,6 @@
                     </div>
                 </div>
 
-                {# KART 8: YAYIN AYARLARI #}
                 <div class="bg-slate-800 rounded-xl shadow-xl shadow-black/20 border border-slate-700 overflow-hidden">
                     <div class="p-6 bg-slate-900/30 space-y-5">
                         <div class="form-control">
@@ -291,7 +310,6 @@
             </div>
         </div>
 
-        {# MOBİL ALT MENÜ #}
         <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 z-40 lg:hidden shadow-lg">
             <div class="flex justify-end gap-3 max-w-7xl mx-auto">
                 <a href="{{ return_url }}" class="btn btn-ghost text-slate-400">İptal</a>

@@ -282,6 +282,12 @@ class Service(db.Model, SEOMixin):
 
     slider_group_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
     slider_group = db.relationship('SliderGroup', foreign_keys=[slider_group_id])
+
+    slider_group_2_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    slider_group_2 = db.relationship('SliderGroup', foreign_keys=[slider_group_2_id])
+
+    slider_group_3_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
+    slider_group_3 = db.relationship('SliderGroup', foreign_keys=[slider_group_3_id])
     
     faq_group_id = db.Column(db.Integer, db.ForeignKey('faq_groups.id'), nullable=True)
     faq_group = db.relationship('FaqGroup', foreign_keys=[faq_group_id])

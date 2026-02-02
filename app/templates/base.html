@@ -338,12 +338,14 @@
                     <div class="swiper partnerSwiper px-8 md:px-12">
                         <div class="swiper-wrapper items-center select-none">
                             {% for item in partners %}
-                            <div class="swiper-slide flex justify-center items-center h-16">
-                                <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                    alt="{{ item.title }}" 
-                                    class="max-h-10 md:max-h-12 w-auto object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-pointer"
-                                    title="{{ item.title }}">
-                            </div>
+                                {% if item.image_path %} 
+                                <div class="swiper-slide flex justify-center items-center h-16">
+                                    <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                        alt="{{ item.title }}" 
+                                        class="max-h-10 md:max-h-12 w-auto object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-pointer"
+                                        title="{{ item.title }}">
+                                </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>

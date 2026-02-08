@@ -320,26 +320,37 @@ class SliderGroupView(ModelView):
     edit_template = 'admin/slider_form.html'
 
     column_list = ('name', 'group_key', 'item_count')
-    column_labels = {
-        'name': 'Slider Adı',
-        'group_key': 'Anahtar',
-        'item_count': 'Görsel Sayısı'
-    }
-
+    column_labels = {'name': 'Slider Adı', 'group_key': 'Anahtar', 'item_count': 'Görsel Sayısı'}
     form_columns = ('name', 'group_key')
-    
     inline_models = (SliderItemInline(SliderItem),)
+
+    batch_actions = None 
 
     def _item_count(view, context, model, name):
         return len(model.items)
 
     column_formatters = {'item_count': _item_count}
     
-    batch_actions = None 
-    
     def is_action_allowed(self, name):
         if name == 'delete': return True
         return False
+
+    def on_model_change(self, form, model, is_created):
+        if request.method == 'POST':
+            for key in request.form:
+                if key.endswith('-DELETE'):
+                    try:
+                        id_key = key.replace('-DELETE', '-id')
+                        item_id = request.form.get(id_key)
+
+                        if item_id and item_id.isdigit():
+                            SliderItem.query.filter_by(id=int(item_id)).delete()
+                            print(f">> ZORLA SİLİNDİ: SliderItem ID {item_id}")
+                            
+                    except Exception as e:
+                        print(f"Silme hatası: {e}")
+
+        return super(SliderGroupView, self).on_model_change(form, model, is_created)
 
 class ServiceView(ModelView):
     list_template = 'admin/service_list.html'

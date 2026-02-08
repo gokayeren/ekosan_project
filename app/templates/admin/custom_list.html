@@ -1,6 +1,5 @@
 {% extends 'admin/model/list.html' %}
 
-{# Gerekli CSS ve JS kütüphanelerinin yüklenmesi için head bloğunu koruyoruz #}
 {% block head %}
     {{ super() }}
 {% endblock %}
@@ -8,7 +7,6 @@
 {% block body %}
     <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl mb-10">
 
-        {# --- BAŞLIK ALANI --- #}
         <div class="px-6 py-5 border-b border-slate-800 flex flex-col md:flex-row justify-between items-center bg-[#0f172a] gap-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-sm">
@@ -41,7 +39,6 @@
             {% endif %}
         </div>
 
-        {# --- TABLO ALANI --- #}
         <div class="overflow-x-auto">
             <table class="table w-full border-collapse">
                 <thead>
@@ -76,7 +73,6 @@
                                     <span class="font-bold text-slate-500 font-mono">{{ get_value(row, c) }}</span>
                                 
                                 {% elif c == 'is_active' %}
-                                    {# Flask-Admin get_value bazen string dönebilir, güvenli kontrol #}
                                     {% set val = get_value(row, c) %}
                                     {% if val == True or val == 'True' or val == 1 %}
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-900/20 text-emerald-500 border border-emerald-900/30 tracking-wide">Yayında</span>
@@ -159,7 +155,6 @@
                 </tbody>
             </table>
             
-            {# SAYFALAMA #}
             {% if num_pages > 1 %}
             <div class="p-4 border-t border-slate-800 bg-[#0b1120] flex justify-center">
                 {{ lib.pager(page, num_pages, pager_url) }}
@@ -167,6 +162,9 @@
             {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block actions %}
 {% endblock %}
 
 {% block tail %}

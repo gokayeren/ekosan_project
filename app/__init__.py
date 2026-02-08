@@ -315,9 +315,9 @@ class SliderItemInline(InlineFormAdmin):
         return False
 
 class SliderGroupView(ModelView):
-    # list_template = 'admin/custom_list.html'   <-- KAPAT (Başına # koy)
-    # create_template = 'admin/slider_form.html' <-- KAPAT
-    # edit_template = 'admin/slider_form.html'   <-- KAPAT
+    list_template = 'admin/custom_list.html'
+    create_template = 'admin/slider_form.html'
+    edit_template = 'admin/slider_form.html'
 
     column_list = ('name', 'group_key', 'item_count')
     column_labels = {
@@ -340,6 +340,15 @@ class SliderGroupView(ModelView):
     def is_action_allowed(self, name):
         if name == 'delete': return True
         return False
+    
+    def on_model_change(self, form, model, is_created):
+        print("--- FORM VERİSİ GELİYOR ---")
+        for key, value in request.form.items():
+            if 'DELETE' in key:
+                print(f"SİLME İSTEĞİ TESPİT EDİLDİ: {key} = {value}")
+        
+        print("---------------------------")
+        return super(SliderGroupView, self).on_model_change(form, model, is_created)
 
 class ServiceView(ModelView):
     list_template = 'admin/service_list.html'

@@ -332,7 +332,7 @@ class SliderGroupView(ModelView):
     column_formatters = {'item_count': _item_count}
 
     def get_actions_list(self):
-        return []
+        return [], []
     
     def is_action_allowed(self, name):
         if name == 'delete': return True

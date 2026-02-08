@@ -8,6 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from config import Config
+from wtforms import BooleanField, HiddenField
 import json
 from markupsafe import Markup
 import markdown
@@ -289,12 +290,27 @@ class FormSubmissionView(ModelView):
 class SliderItemInline(InlineFormAdmin):
     form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'order')
     form_label = 'Slayt Görseli'
-    path = op.join(op.dirname(__file__), 'static', 'uploads')
-    if not os.path.exists(path): os.makedirs(path)
-    form_extra_fields = {'image_path': ImageUploadField('Resim Dosyası', base_path=path, url_relative_path='uploads/')}
 
-    batch_actions = None
-    def is_action_allowed(self, name): 
+    form_args = {
+        'id': {
+            'widget': HiddenField()
+        }
+    }
+
+    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    form_extra_fields = {
+        'image_path': ImageUploadField(
+            'Resim Dosyası',
+            base_path=path,
+            url_relative_path='uploads/'
+        ),
+        'DELETE': BooleanField('Sil')
+    }
+
+    def is_action_allowed(self, name):
         if name == 'delete': return True
         return False
 
@@ -302,15 +318,26 @@ class SliderGroupView(ModelView):
     list_template = 'admin/custom_list.html'
     create_template = 'admin/slider_form.html'
     edit_template = 'admin/slider_form.html'
+
     column_list = ('name', 'group_key', 'item_count')
-    column_labels = {'name': 'Slider Adı', 'group_key': 'Anahtar', 'item_count': 'Görsel Sayısı'}
+    column_labels = {
+        'name': 'Slider Adı',
+        'group_key': 'Anahtar',
+        'item_count': 'Görsel Sayısı'
+    }
+
     form_columns = ('name', 'group_key')
+
     inline_models = (SliderItemInline(SliderItem),)
-    def _item_count(view, context, model, name): return len(model.items)
+
+    def _item_count(view, context, model, name):
+        return len(model.items)
+
     column_formatters = {'item_count': _item_count}
 
     batch_actions = None
-    def is_action_allowed(self, name): 
+    
+    def is_action_allowed(self, name):
         if name == 'delete': return True
         return False
 

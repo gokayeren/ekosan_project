@@ -67,15 +67,12 @@
                         <div id="items-container" class="space-y-5">
                             {% for subform in form.items %}
                                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm relative group hover:border-slate-500 transition-all item-card" id="item-card-{{ loop.index0 }}">
-                                    
-                                    {% if subform.csrf_token %}{{ subform.csrf_token }}{% endif %}
-                                    {% for f in subform if f.type == 'HiddenField' and not f.name.endswith('DELETE') %}{{ f() }}{% endfor %}
 
-                                    {% if subform.DELETE %}
-                                        <div class="hidden">
-                                            {{ subform.DELETE(class="delete-checkbox") }}
-                                        </div>
-                                    {% endif %}
+                                    {% if subform.csrf_token %}{{ subform.csrf_token }}{% endif %}
+
+                                    {% for f in subform if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
+
+                                    <input type="checkbox" name="items-{{ loop.index0 }}-DELETE" class="hidden delete-checkbox">
 
                                     <div class="flex flex-col sm:flex-row gap-6">
                                         <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-3">
@@ -200,25 +197,21 @@
             const card = document.getElementById(cardId);
             if (!card) return;
 
-            let deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            const deleteCheckbox = card.querySelector('.delete-checkbox');
 
-            if (!deleteCheckbox) {
-                console.warn("DELETE checkbox HTML'de bulunamadı, dinamik oluşturuluyor...");
-
-                const parts = cardId.split('-');
-                const index = parts[parts.length - 1];
-
-                deleteCheckbox = document.createElement('input');
-                deleteCheckbox.type = 'checkbox';
-                deleteCheckbox.name = `items-${index}-DELETE`; 
-                deleteCheckbox.style.display = 'none';
-                
-                card.appendChild(deleteCheckbox);
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+                card.style.display = 'none';
+                console.log(deleteCheckbox.name + " silinmek üzere işaretlendi.");
+            } else {
+                const idInput = card.querySelector('input[type="hidden"][name$="-id"]');
+                if (idInput && !idInput.value) {
+                     card.remove();
+                } else {
+                    alert("Bir hata oluştu, sayfa yenileniyor...");
+                    location.reload();
+                }
             }
-
-            deleteCheckbox.checked = true;
-            card.style.display = 'none';
-            
             updateCount();
         }
 

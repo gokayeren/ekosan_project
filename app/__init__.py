@@ -340,6 +340,18 @@ class SliderGroupView(ModelView):
         if name == 'delete': return True
         return False
 
+    def update_model(self, form, model):
+        print("--- GÜNCELLEME İSTEĞİ GELDİ ---")
+
+        for key, value in request.form.items():
+            if 'DELETE' in key or 'id' in key:
+                print(f"Gelen Veri -> {key}: {value}")
+
+        for item in form.items:
+            print(f"Item ID: {item.id.data} | Silinecek mi?: {item.DELETE.data}")
+            
+        return super(SliderGroupView, self).update_model(form, model)
+
 class ServiceView(ModelView):
     list_template = 'admin/service_list.html'
     create_template = 'admin/service_form.html'

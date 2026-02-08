@@ -315,9 +315,9 @@ class SliderItemInline(InlineFormAdmin):
         return False
 
 class SliderGroupView(ModelView):
-    list_template = 'admin/custom_list.html'
-    create_template = 'admin/slider_form.html'
-    edit_template = 'admin/slider_form.html'
+    # list_template = 'admin/custom_list.html'   <-- KAPAT (Başına # koy)
+    # create_template = 'admin/slider_form.html' <-- KAPAT
+    # edit_template = 'admin/slider_form.html'   <-- KAPAT
 
     column_list = ('name', 'group_key', 'item_count')
     column_labels = {

@@ -200,19 +200,25 @@
             const card = document.getElementById(cardId);
             if (!card) return;
 
-            const deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            let deleteCheckbox = card.querySelector('input[type="checkbox"][name$="-DELETE"]');
 
-            if (deleteCheckbox) {
-                deleteCheckbox.checked = true;
-                card.style.display = 'none';
-            } else {
-                const idInput = card.querySelector('input[type="hidden"][name$="-id"]');
-                if (idInput && !idInput.value) {
-                     card.remove();
-                } else {
-                    console.error("Silme hatası: DELETE checkbox bulunamadı.");
-                }
+            if (!deleteCheckbox) {
+                console.warn("DELETE checkbox HTML'de bulunamadı, dinamik oluşturuluyor...");
+
+                const parts = cardId.split('-');
+                const index = parts[parts.length - 1];
+
+                deleteCheckbox = document.createElement('input');
+                deleteCheckbox.type = 'checkbox';
+                deleteCheckbox.name = `items-${index}-DELETE`; 
+                deleteCheckbox.style.display = 'none';
+                
+                card.appendChild(deleteCheckbox);
             }
+
+            deleteCheckbox.checked = true;
+            card.style.display = 'none';
+            
             updateCount();
         }
 

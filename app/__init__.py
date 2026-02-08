@@ -315,6 +315,7 @@ class SliderItemInline(InlineFormAdmin):
         return False
 
 class SliderGroupView(ModelView):
+    batch_actions = None
     list_template = 'admin/custom_list.html'
     create_template = 'admin/slider_form.html'
     edit_template = 'admin/slider_form.html'
@@ -335,20 +336,9 @@ class SliderGroupView(ModelView):
 
     column_formatters = {'item_count': _item_count}
 
-    batch_actions = None
-    
     def is_action_allowed(self, name):
         if name == 'delete': return True
         return False
-    
-    def on_model_change(self, form, model, is_created):
-        print("--- FORM VERİSİ GELİYOR ---")
-        for key, value in request.form.items():
-            if 'DELETE' in key:
-                print(f"SİLME İSTEĞİ TESPİT EDİLDİ: {key} = {value}")
-        
-        print("---------------------------")
-        return super(SliderGroupView, self).on_model_change(form, model, is_created)
 
 class ServiceView(ModelView):
     list_template = 'admin/service_list.html'

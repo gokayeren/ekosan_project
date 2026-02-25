@@ -156,12 +156,13 @@
                         {% for item in service.slider_group_2.items %}
                         <div class="swiper-slide h-auto">
                             <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col overflow-hidden group/card">
-                                <div class="aspect-square bg-slate-50 overflow-hidden relative">
+                                
+                                <div class="w-full bg-slate-50 overflow-hidden relative flex items-center justify-center">
                                     <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                         alt="{{ item.title }}" 
-                                         class="w-full h-full object-contain p-6 group-hover/card:scale-110 transition-transform duration-500">
+                                        alt="{{ item.title }}" 
+                                        class="w-full h-auto object-contain p-2 sm:p-4 group-hover/card:scale-105 transition-transform duration-500">
                                 </div>
-                                <div class="p-6 text-center mt-auto border-t border-slate-50">
+                                <div class="p-4 sm:p-6 text-center mt-auto border-t border-slate-50">
                                     <h4 class="font-bold text-slate-900 text-lg mb-2">{{ item.title }}</h4>
                                     {% if item.description %}
                                     <p class="text-slate-500 text-xs leading-relaxed line-clamp-3">

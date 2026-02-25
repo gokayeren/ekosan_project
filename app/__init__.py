@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from config import Config
@@ -488,6 +489,17 @@ def create_app(config_class=Config):
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
     admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
+
+    upload_path = op.join(op.dirname(__file__), 'static', 'uploads')
+
+    if not os.path.exists(upload_path):
+        os.makedirs(upload_path)
+        
+    admin.add_view(FileAdmin(
+        upload_path, 
+        '/static/uploads/', 
+        name='Medya Yönetimi'
+    ))
 
     from app.main import main
     app.register_blueprint(main)

@@ -508,7 +508,6 @@ def create_app(config_class=Config):
     def render_markdown(text):
         if text is None:
             return ""
-        # nl2br uzantısı enter tuşuna basılan yerleri <br> yapar
         return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
 
     @app.context_processor

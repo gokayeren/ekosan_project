@@ -467,6 +467,9 @@ class FaqGroupView(ModelView):
     def is_action_allowed(self, name): 
         if name == 'delete': return True
         return False
+    
+class CustomFileAdmin(FileAdmin):
+    list_template = 'admin/custom_media_list.html'
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -491,16 +494,15 @@ def create_app(config_class=Config):
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
 
     upload_path = op.join(op.dirname(__file__), 'static', 'uploads')
-
+    
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
-        
-    admin.add_view(FileAdmin(
+
+    admin.add_view(CustomFileAdmin(
         upload_path, 
         '/static/uploads/', 
         name='Medya Yönetimi',
-        endpoint='medya_yonetimi',
-        list_template='admin/custom_media_list.html'
+        endpoint='medya_yonetimi'
     ))
 
     from app.main import main

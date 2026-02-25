@@ -482,6 +482,11 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     admin.init_app(app)
 
+    upload_path = op.join(op.dirname(__file__), 'static', 'uploads')
+    
+    if not os.path.exists(upload_path):
+        os.makedirs(upload_path)
+
     admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar"))
     admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
@@ -490,23 +495,17 @@ def create_app(config_class=Config):
     admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
     admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
     admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
-    admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
-    admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
-    admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
-    admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
-    admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
-
-    upload_path = op.join(op.dirname(__file__), 'static', 'uploads')
-    
-    if not os.path.exists(upload_path):
-        os.makedirs(upload_path)
-
     admin.add_view(CustomFileAdmin(
         upload_path, 
         '/static/uploads/', 
         name='Medya Yönetimi',
         endpoint='medya_yonetimi'
     ))
+    admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
+    admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
+    admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
+    admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
+    admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
 
     from app.main import main
     app.register_blueprint(main)

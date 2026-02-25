@@ -498,7 +498,9 @@ def create_app(config_class=Config):
     admin.add_view(FileAdmin(
         upload_path, 
         '/static/uploads/', 
-        name='Medya Yönetimi'
+        name='Medya Yönetimi',
+        endpoint='medya_yonetimi',
+        list_template='admin/custom_media_list.html'
     ))
 
     from app.main import main

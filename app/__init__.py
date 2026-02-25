@@ -470,6 +470,9 @@ class FaqGroupView(ModelView):
     
 class CustomFileAdmin(FileAdmin):
     list_template = 'admin/custom_media_list.html'
+    can_upload = False
+    can_mkdir = False
+    can_rename = False
 
 def create_app(config_class=Config):
     app = Flask(__name__)

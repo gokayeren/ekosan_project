@@ -568,44 +568,44 @@ def create_app(config_class=Config):
             click.echo(f"Bir hata oluştu: {e}")
 
     @app.cli.command("delete-admin")
-        @click.argument("username")
-        def delete_admin(username):
-            try:
-                user = AdminUser.query.filter_by(username=username).first()
-                if not user:
-                    click.echo(f"Hata: '{username}' adında bir kullanıcı bulunamadı.")
-                    return
+    @click.argument("username")
+    def delete_admin(username):
+        try:
+            user = AdminUser.query.filter_by(username=username).first()
+            if not user:
+                click.echo(f"Hata: '{username}' adında bir kullanıcı bulunamadı.")
+                return
 
-                admin_count = AdminUser.query.count()
-                if admin_count <= 1:
-                    click.echo("Hata: Sistemdeki TEK yöneticiyi silemezsiniz! Önce başka bir yönetici ekleyin.")
-                    return
+            admin_count = AdminUser.query.count()
+            if admin_count <= 1:
+                click.echo("Hata: Sistemdeki TEK yöneticiyi silemezsiniz! Önce başka bir yönetici ekleyin.")
+                return
 
-                db.session.delete(user)
-                db.session.commit()
-                click.echo(f"Başarılı: '{username}' kullanıcısı sistemden tamamen silindi.")
-            except Exception as e:
-                db.session.rollback()
-                click.echo(f"Bir hata oluştu: {e}")
+            db.session.delete(user)
+            db.session.commit()
+            click.echo(f"Başarılı: '{username}' kullanıcısı sistemden tamamen silindi.")
+        except Exception as e:
+            db.session.rollback()
+            click.echo(f"Bir hata oluştu: {e}")
 
     @app.cli.command("list-admins")
-        def list_admins():
-            try:
-                users = AdminUser.query.all()
-                if not users:
-                    click.echo("Sistemde henüz hiçbir yönetici bulunmuyor.")
-                    return
+    def list_admins():
+        try:
+            users = AdminUser.query.all()
+            if not users:
+                click.echo("Sistemde henüz hiçbir yönetici bulunmuyor.")
+                return
 
-                click.echo("==============================")
-                click.echo("   SİSTEMDEKİ YÖNETİCİLER")
-                click.echo("==============================")
-                for user in users:
-                    click.echo(f" ID: {user.id} | Kullanıcı Adı: {user.username}")
-                click.echo("==============================")
-                click.echo(f"Toplam: {len(users)} yönetici")
+            click.echo("==============================")
+            click.echo("   SİSTEMDEKİ YÖNETİCİLER")
+            click.echo("==============================")
+            for user in users:
+                click.echo(f" ID: {user.id} | Kullanıcı Adı: {user.username}")
+            click.echo("==============================")
+            click.echo(f"Toplam: {len(users)} yönetici")
                 
-            except Exception as e:
-                click.echo(f"Bir hata oluştu: {e}")
+        except Exception as e:
+            click.echo(f"Bir hata oluştu: {e}")
 
     path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
     if not os.path.exists(path):

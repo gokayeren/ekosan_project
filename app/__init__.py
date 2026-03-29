@@ -262,8 +262,6 @@ class GetofferView(ProtectedModelView):
         return super(GetofferView, self).index_view()
 
 class FormFieldInline(InlineFormAdmin):
-    def __init__(self):
-        super(FormFieldInline, self).__init__(FormField)
     form_args = {'id': {'widget': HiddenField()}}
     form_label = 'Form Alanı'
     form_columns = ('id', 'label', 'name', 'field_type', 'is_required', 'placeholder', 'options', 'order')

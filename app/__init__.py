@@ -299,10 +299,15 @@ class FormSubmissionView(ProtectedModelView):
             html_content = '<ul style="list-style:none; padding:0; margin:0;">'
             for key, value in data_dict.items():
                 readable_key = key.replace('_', ' ').capitalize()
-                html_content += f'<li><strong>{readable_key}:</strong> {value}</li>'
+
+                import html
+                safe_value = html.escape(str(value)).replace('\n', '<br>')
+                
+                html_content += f'<li style="margin-bottom: 8px;"><strong>{readable_key}:</strong><br><span style="color: #64748b;">{safe_value}</span></li>'
             html_content += '</ul>'
             return Markup(html_content)
-        except: return model.submission_data
+        except: 
+            return model.submission_data
 
     column_formatters = {'submission_data': _format_data}
 
@@ -561,6 +566,46 @@ def create_app(config_class=Config):
         except Exception as e:
             db.session.rollback()
             click.echo(f"Bir hata oluştu: {e}")
+
+    @app.cli.command("delete-admin")
+        @click.argument("username")
+        def delete_admin(username):
+            try:
+                user = AdminUser.query.filter_by(username=username).first()
+                if not user:
+                    click.echo(f"Hata: '{username}' adında bir kullanıcı bulunamadı.")
+                    return
+
+                admin_count = AdminUser.query.count()
+                if admin_count <= 1:
+                    click.echo("Hata: Sistemdeki TEK yöneticiyi silemezsiniz! Önce başka bir yönetici ekleyin.")
+                    return
+
+                db.session.delete(user)
+                db.session.commit()
+                click.echo(f"Başarılı: '{username}' kullanıcısı sistemden tamamen silindi.")
+            except Exception as e:
+                db.session.rollback()
+                click.echo(f"Bir hata oluştu: {e}")
+
+    @app.cli.command("list-admins")
+        def list_admins():
+            try:
+                users = AdminUser.query.all()
+                if not users:
+                    click.echo("Sistemde henüz hiçbir yönetici bulunmuyor.")
+                    return
+
+                click.echo("==============================")
+                click.echo("   SİSTEMDEKİ YÖNETİCİLER")
+                click.echo("==============================")
+                for user in users:
+                    click.echo(f" ID: {user.id} | Kullanıcı Adı: {user.username}")
+                click.echo("==============================")
+                click.echo(f"Toplam: {len(users)} yönetici")
+                
+            except Exception as e:
+                click.echo(f"Bir hata oluştu: {e}")
 
     path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
     if not os.path.exists(path):

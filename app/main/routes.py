@@ -93,7 +93,14 @@ def submit_contact_form():
         return redirect(request.referrer or url_for('main.contact'))
 
     try:
-        data = request.form.to_dict()
+        data = {}
+        for key in request.form:
+            values = request.form.getlist(key)
+            if len(values) > 1:
+                data[key] = ", ".join(values)
+            else:
+                data[key] = values[0]
+
         data.pop('form_id', None)
         data.pop('kvkk', None)
         data.pop('csrf_token', None)
@@ -115,7 +122,8 @@ def submit_contact_form():
 
                 payload['_subject'] = f"Yeni Mesaj: {form_obj.title} - {request.host}"
                 payload['_captcha'] = "false"
-                payload['_template'] = "table"
+                
+                payload['_template'] = "box" 
 
                 for key, value in data.items():
                     if 'mail' in key.lower() or 'e-posta' in key.lower():

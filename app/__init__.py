@@ -53,7 +53,7 @@ class SettingsView(ProtectedModelView):
     edit_template = 'admin/header_settings.html' 
     create_template = 'admin/header_settings.html'
 
-    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -136,8 +136,9 @@ class HomeConfigView(ProtectedModelView):
     edit_template = 'admin/home_config.html'
     create_template = 'admin/home_config.html'
 
-    path = op.join(op.dirname(__file__), 'static', 'uploads')
-    if not os.path.exists(path): os.makedirs(path)
+    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     form_extra_fields = {
         'hero_image': ImageUploadField('Hero Görseli', base_path=path, url_relative_path='uploads/'),
@@ -194,8 +195,9 @@ class ReferencesView(ProtectedModelView):
     edit_template = 'admin/references_config.html'
     create_template = 'admin/references_config.html'
 
-    path = op.join(op.dirname(__file__), 'static', 'uploads')
-    if not os.path.exists(path): os.makedirs(path)
+    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     form_extra_fields = {
         'parallax_image': ImageUploadField('Parallax Görseli', base_path=path, url_relative_path='uploads/')
@@ -316,7 +318,7 @@ class SliderItemInline(InlineFormAdmin):
         }
     }
 
-    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -439,7 +441,7 @@ class ServiceView(ProtectedModelView):
         }
     }
 
-    path = op.join(op.dirname(__file__), 'static', 'uploads')
+    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -562,10 +564,9 @@ def create_app(config_class=Config):
             db.session.rollback()
             click.echo(f"Bir hata oluştu: {e}")
 
-    upload_path = op.join(op.dirname(__file__), 'static', 'uploads')
-    
-    if not os.path.exists(upload_path):
-        os.makedirs(upload_path)
+    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar"))
     admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
@@ -576,7 +577,7 @@ def create_app(config_class=Config):
     admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
     admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
     admin.add_view(CustomFileAdmin(
-        upload_path, 
+        path, 
         '/static/uploads/', 
         name='Medya Yönetimi',
         endpoint='medya_yonetimi'

@@ -1,11 +1,33 @@
+# --- YÜKLENEN MEDYA DOSYALARI (HAYATİ ÖNEM TAŞIR) ---
+# Bunları eklemezsek admin panelinden yüklenen resimler git pull yapınca ezilir!
+static/uploads/
+app/static/uploads/
+
+# --- ÇEVRE DEĞİŞKENLERİ VE GİZLİ BİLGİLER ---
+.env
+
+# --- PYTHON VE SANAL ORTAM ---
 venv/
-V001/
 env/
+V001/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# --- FLASK VE LOKAL VERİTABANI ---
 instance/
-.pytest_cache/
 *.sqlite3
 *.db
+*.sqlite
+
+# --- İŞLETİM SİSTEMİ VE EDİTÖR ÇÖPLERİ ---
 .DS_Store
-.env
+.vscode/
+.idea/
+Thumbs.db
+
+# --- TEST VE LOG DOSYALARI ---
+.pytest_cache/
+.coverage
+*.log

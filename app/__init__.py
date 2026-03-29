@@ -28,7 +28,7 @@ class MyAdminIndexView(AdminIndexView):
 
     @expose('/')
     def index(self):
-        return redirect(url_for('settingsview.index_view'))
+        return redirect(url_for('settings.index_view'))
 
 class ProtectedModelView(ModelView):
     def is_accessible(self):
@@ -616,7 +616,7 @@ def create_app(config_class=Config):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar"))
+    admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar", endpoint='settings'))
     admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
     admin.add_view(HomeConfigView(HomeConfig, db.session, name="Anasayfa İçerik"))
@@ -636,7 +636,7 @@ def create_app(config_class=Config):
     admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
 
-    admin.add_link(MenuLink(name='Çıkış Yap', category='Admin', url='/logout'))
+    admin.add_link(MenuLink(name='Çıkış Yap', url='/logout'))
 
     from app.main import main
     app.register_blueprint(main)

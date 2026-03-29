@@ -9,6 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
+from flask_admin.menu import MenuLink
 from config import Config
 from wtforms import BooleanField, HiddenField
 import json
@@ -24,6 +25,10 @@ class MyAdminIndexView(AdminIndexView):
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login', next=request.url))
+
+    @expose('/')
+    def index(self):
+        return redirect(url_for('settingsview.index_view'))
 
 class ProtectedModelView(ModelView):
     def is_accessible(self):
@@ -630,6 +635,8 @@ def create_app(config_class=Config):
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))
     admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
+
+    admin.add_link(MenuLink(name='Çıkış Yap', category='Admin', url='/logout'))
 
     from app.main import main
     app.register_blueprint(main)

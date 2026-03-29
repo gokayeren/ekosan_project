@@ -1,6 +1,7 @@
 import os
 import os.path as op
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, url_for, request, render_template, flash
+from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_admin import Admin, AdminIndexView, expose
@@ -17,9 +18,23 @@ import markdown
 db = SQLAlchemy()
 migrate = Migrate()
 
+class MyAdminIndexView(AdminIndexView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
+class ProtectedModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
 admin = Admin(
     name='Ekosan Panel',
-    index_view=AdminIndexView(name='Genel Bakış', url='/admin')
+    index_view=MyAdminIndexView(name='Genel Bakış', url='/admin')
 )
 admin.base_template = 'admin/master.html'
 
@@ -27,10 +42,10 @@ from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
     Contact, Getoffer, Form, FormField, FormSubmission,
-    FaqGroup, FaqItem
+    FaqGroup, FaqItem, AdminUser
 )
 
-class SettingsView(ModelView):
+class SettingsView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -60,7 +75,7 @@ class SettingsView(ModelView):
             return redirect(url)
         return super(SettingsView, self).index_view()
 
-class FooterView(ModelView):
+class FooterView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -94,7 +109,7 @@ class FooterView(ModelView):
             return redirect(url)
         return super(FooterView, self).index_view()
 
-class MenuView(ModelView):
+class MenuView(ProtectedModelView):
     list_template = 'admin/menu_list.html'
     create_template = 'admin/menu_form.html'
     edit_template = 'admin/menu_form.html'
@@ -113,7 +128,7 @@ class MenuView(ModelView):
             model.url = "#"
         return super(MenuView, self).on_model_change(form, model, is_created)
 
-class HomeConfigView(ModelView):
+class HomeConfigView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -148,7 +163,7 @@ class HomeConfigView(ModelView):
             return redirect(url)
         return super(HomeConfigView, self).index_view()
 
-class CorporateView(ModelView):
+class CorporateView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -171,7 +186,7 @@ class CorporateView(ModelView):
             return redirect(url)
         return super(CorporateView, self).index_view()
 
-class ReferencesView(ModelView):
+class ReferencesView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -196,7 +211,7 @@ class ReferencesView(ModelView):
             return redirect(url)
         return super(ReferencesView, self).index_view()
 
-class ContactView(ModelView):
+class ContactView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -225,7 +240,7 @@ class ContactView(ModelView):
             return redirect(url)
         return super(ContactView, self).index_view()
 
-class GetofferView(ModelView):
+class GetofferView(ProtectedModelView):
     can_delete = False
     def can_create(self):
         return self.model.query.count() == 0
@@ -245,6 +260,9 @@ class GetofferView(ModelView):
         return super(GetofferView, self).index_view()
 
 class FormFieldInline(InlineFormAdmin):
+    def __init__(self):
+        super(FormFieldInline, self).__init__(FormField)
+    form_args = {'id': {'widget': HiddenField()}}
     form_label = 'Form Alanı'
     form_columns = ('id', 'label', 'name', 'field_type', 'is_required', 'placeholder', 'options', 'order')
     column_labels = {
@@ -252,7 +270,7 @@ class FormFieldInline(InlineFormAdmin):
         'options': 'Seçenekler', 'is_required': 'Zorunlu'
     }
 
-class FormBuilderView(ModelView):
+class FormBuilderView(ProtectedModelView):
     list_template = 'admin/form_list.html'
     create_template = 'admin/form_builder.html'
     edit_template = 'admin/form_builder.html'
@@ -263,7 +281,7 @@ class FormBuilderView(ModelView):
     batch_actions = None
     def is_action_allowed(self, name): return False
 
-class FormSubmissionView(ModelView):
+class FormSubmissionView(ProtectedModelView):
     can_create = False
     can_edit = False
     can_delete = True
@@ -315,7 +333,7 @@ class SliderItemInline(InlineFormAdmin):
         if name == 'delete': return True
         return False
 
-class SliderGroupView(ModelView):
+class SliderGroupView(ProtectedModelView):
     list_template = 'admin/custom_list.html'
     create_template = 'admin/slider_form.html'
     edit_template = 'admin/slider_form.html'
@@ -356,7 +374,7 @@ class SliderGroupView(ModelView):
 
         return super(SliderGroupView, self).on_model_change(form, model, is_created)
 
-class ServiceView(ModelView):
+class ServiceView(ProtectedModelView):
     list_template = 'admin/service_list.html'
     create_template = 'admin/service_form.html'
     edit_template = 'admin/service_form.html'
@@ -437,6 +455,7 @@ class ServiceView(ModelView):
         return False
     
 class FaqItemInline(InlineFormAdmin):
+    form_args = {'id': {'widget': HiddenField()}}
     form_label = 'Soru & Cevap'
     form_columns = ('id', 'question', 'answer', 'order', 'is_active')
     form_widget_args = {
@@ -448,7 +467,7 @@ class FaqItemInline(InlineFormAdmin):
     batch_actions = None
     def is_action_allowed(self, name): return False
 
-class FaqGroupView(ModelView):
+class FaqGroupView(ProtectedModelView):
     list_template = 'admin/faq_list.html'
     create_template = 'admin/faq_form.html'
     edit_template = 'admin/faq_form.html'
@@ -474,13 +493,74 @@ class CustomFileAdmin(FileAdmin):
     can_mkdir = False
     can_rename = False
 
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return AdminUser.query.get(int(user_id))
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if current_user.is_authenticated:
+            return redirect(url_for('admin.index'))
+        
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            user = AdminUser.query.filter_by(username=username).first()
+            
+            if user and user.check_password(password):
+                login_user(user)
+                return redirect(request.args.get('next') or url_for('admin.index'))
+            
+            flash('Hatalı kullanıcı adı veya şifre!', 'danger')
+        
+        return render_template('admin/login.html')
+
+    @app.route('/logout')
+    def logout():
+        logout_user()
+        return redirect(url_for('login'))
+
     admin.init_app(app)
+
+    import click
+    from flask.cli import with_appcontext
+
+    @app.cli.command("create-admin")
+    @click.argument("username")
+    @click.argument("password")
+    def create_admin(username, password):
+        try:
+            user_exists = AdminUser.query.filter_by(username=username).first()
+            if user_exists:
+                click.echo(f"Hata: '{username}' adında bir kullanıcı zaten mevcut.")
+                return
+
+            new_user = AdminUser(username=username)
+            new_user.set_password(password) 
+            
+            db.session.add(new_user)
+            db.session.commit()
+            click.echo(f"Başarılı: '{username}' kullanıcısı oluşturuldu. Artık panele giriş yapabilirsiniz.")
+        except Exception as e:
+            db.session.rollback()
+            click.echo(f"Bir hata oluştu: {e}")
 
     upload_path = op.join(op.dirname(__file__), 'static', 'uploads')
     
@@ -543,7 +623,6 @@ def create_app(config_class=Config):
 
         from app.models import FaqGroup
         def get_faq(key):
-            """Verilen key'e sahip SSS grubunun sorularını döndürür."""
             try:
                 group = FaqGroup.query.filter_by(group_key=key).first()
                 if group: return group.items

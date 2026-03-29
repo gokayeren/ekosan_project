@@ -636,7 +636,7 @@ def create_app(config_class=Config):
     admin.add_view(FaqGroupView(FaqGroup, db.session, name="SSS Yönetimi", category="Sıkça Sorulan Sorular"))
     admin.add_view(ServiceView(Service, db.session, name="Hizmetler", category="Hizmet Yönetimi"))
 
-    admin.add_link(MenuLink(name='Çıkış Yap', url='/logout'))
+    admin.add_link(MenuLink(name='Çıkış Yap', url='/logout', icon_type='fa', icon_value='fa-sign-out-alt'))
 
     from app.main import main
     app.register_blueprint(main)

@@ -66,8 +66,8 @@ class SettingsView(ProtectedModelView):
     create_template = 'admin/header_settings.html'
 
     form_extra_fields = {
-        'logo_path': ImageUploadField('Site Logosu', base_path=STATIC_DIR, url_relative_path='uploads/'),
-        'favicon_path': ImageUploadField('Favicon', base_path=STATIC_DIR, url_relative_path='uploads/')
+        'logo_path': ImageUploadField('Site Logosu', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'favicon_path': ImageUploadField('Favicon', base_path=UPLOAD_PATH, url_relative_path='uploads/')
     }
 
     form_columns = (
@@ -145,9 +145,9 @@ class HomeConfigView(ProtectedModelView):
     create_template = 'admin/home_config.html'
 
     form_extra_fields = {
-        'hero_image': ImageUploadField('Hero Görseli', base_path=STATIC_DIR, url_relative_path='uploads/'),
-        'parallax_image': ImageUploadField('Parallax Görseli', base_path=STATIC_DIR, url_relative_path='uploads/'),
-        'cta_image': ImageUploadField('Uzman Resmi', base_path=STATIC_DIR, url_relative_path='uploads/')
+        'hero_image': ImageUploadField('Hero Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'parallax_image': ImageUploadField('Parallax Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'cta_image': ImageUploadField('Uzman Resmi', base_path=UPLOAD_PATH, url_relative_path='uploads/')
     }
 
     form_columns = (
@@ -200,7 +200,7 @@ class ReferencesView(ProtectedModelView):
     create_template = 'admin/references_config.html'
 
     form_extra_fields = {
-        'parallax_image': ImageUploadField('Parallax Görseli', base_path=STATIC_DIR, url_relative_path='uploads/')
+        'parallax_image': ImageUploadField('Parallax Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/')
     }
 
     form_columns = ('hero_slider', 'presentation_title', 'corporate_slider', 'personal_slider', 'parallax_image', 'parallax_title')
@@ -322,7 +322,7 @@ class SliderItemInline(InlineFormAdmin):
     }
 
     form_extra_fields = {
-        'image_path': ImageUploadField('Resim Dosyası', base_path=STATIC_DIR, url_relative_path='uploads/'),
+        'image_path': ImageUploadField('Resim Dosyası', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
         'DELETE': BooleanField('Sil')
     }
 
@@ -437,8 +437,8 @@ class ServiceView(ProtectedModelView):
     }
 
     form_extra_fields = {
-        'image_path': ImageUploadField('Liste Görseli', base_path=STATIC_DIR, url_relative_path='uploads/'),
-        'detail_image_path': ImageUploadField('Detay Sayfa Görseli', base_path=STATIC_DIR, url_relative_path='uploads/')
+        'image_path': ImageUploadField('Liste Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'detail_image_path': ImageUploadField('Detay Sayfa Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/')
     }
 
     batch_actions = None
@@ -482,9 +482,9 @@ class FaqGroupView(ProtectedModelView):
     
 class CustomFileAdmin(FileAdmin):
     list_template = 'admin/custom_media_list.html'
-    can_upload = False
-    can_mkdir = False
-    can_rename = False
+    can_upload = True
+    can_mkdir = True
+    can_rename = True
 
     def is_accessible(self):
         return current_user.is_authenticated

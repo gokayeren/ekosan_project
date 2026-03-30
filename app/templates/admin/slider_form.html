@@ -53,12 +53,7 @@
     {% endwith %}
 
     <form id="sliderForm" action="" method="POST" enctype="multipart/form-data" class="w-full pb-32">
-        {% if form.errors %}
-            <div style="background-color: #990000; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; font-weight: bold;">
-                SİSTEMİN GİZLEDİĞİ HATA BURADA:<br>
-                {{ form.errors }}
-            </div>
-        {% endif %}
+
         {{ form.csrf_token }}
 
         {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}

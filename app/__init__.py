@@ -19,6 +19,13 @@ import markdown
 db = SQLAlchemy()
 migrate = Migrate()
 
+BASE_DIR = op.abspath(op.dirname(__file__))
+STATIC_DIR = op.join(BASE_DIR, 'static')
+UPLOAD_PATH = op.join(STATIC_DIR, 'uploads')
+
+if not os.path.exists(UPLOAD_PATH):
+    os.makedirs(UPLOAD_PATH)
+
 class MyAdminIndexView(AdminIndexView):
     def is_accessible(self):
         return current_user.is_authenticated
@@ -58,13 +65,9 @@ class SettingsView(ProtectedModelView):
     edit_template = 'admin/header_settings.html' 
     create_template = 'admin/header_settings.html'
 
-    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     form_extra_fields = {
-        'logo_path': ImageUploadField('Site Logosu', base_path=path, url_relative_path='uploads/'),
-        'favicon_path': ImageUploadField('Favicon', base_path=path, url_relative_path='uploads/')
+        'logo_path': ImageUploadField('Site Logosu', base_path=STATIC_DIR, url_relative_path='uploads/'),
+        'favicon_path': ImageUploadField('Favicon', base_path=STATIC_DIR, url_relative_path='uploads/')
     }
 
     form_columns = (
@@ -141,14 +144,10 @@ class HomeConfigView(ProtectedModelView):
     edit_template = 'admin/home_config.html'
     create_template = 'admin/home_config.html'
 
-    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     form_extra_fields = {
-        'hero_image': ImageUploadField('Hero Görseli', base_path=path, url_relative_path='uploads/'),
-        'parallax_image': ImageUploadField('Parallax Görseli', base_path=path, url_relative_path='uploads/'),
-        'cta_image': ImageUploadField('Uzman Resmi', base_path=path, url_relative_path='uploads/')
+        'hero_image': ImageUploadField('Hero Görseli', base_path=STATIC_DIR, url_relative_path='uploads/'),
+        'parallax_image': ImageUploadField('Parallax Görseli', base_path=STATIC_DIR, url_relative_path='uploads/'),
+        'cta_image': ImageUploadField('Uzman Resmi', base_path=STATIC_DIR, url_relative_path='uploads/')
     }
 
     form_columns = (
@@ -200,12 +199,8 @@ class ReferencesView(ProtectedModelView):
     edit_template = 'admin/references_config.html'
     create_template = 'admin/references_config.html'
 
-    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     form_extra_fields = {
-        'parallax_image': ImageUploadField('Parallax Görseli', base_path=path, url_relative_path='uploads/')
+        'parallax_image': ImageUploadField('Parallax Görseli', base_path=STATIC_DIR, url_relative_path='uploads/')
     }
 
     form_columns = ('hero_slider', 'presentation_title', 'corporate_slider', 'personal_slider', 'parallax_image', 'parallax_title')
@@ -326,16 +321,8 @@ class SliderItemInline(InlineFormAdmin):
         }
     }
 
-    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     form_extra_fields = {
-        'image_path': ImageUploadField(
-            'Resim Dosyası',
-            base_path=path,
-            url_relative_path='uploads/'
-        ),
+        'image_path': ImageUploadField('Resim Dosyası', base_path=STATIC_DIR, url_relative_path='uploads/'),
         'DELETE': BooleanField('Sil')
     }
 
@@ -449,13 +436,9 @@ class ServiceView(ProtectedModelView):
         }
     }
 
-    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     form_extra_fields = {
-        'image_path': ImageUploadField('Liste Görseli', base_path=path, url_relative_path='uploads/'),
-        'detail_image_path': ImageUploadField('Detay Sayfa Görseli', base_path=path, url_relative_path='uploads/')
+        'image_path': ImageUploadField('Liste Görseli', base_path=STATIC_DIR, url_relative_path='uploads/'),
+        'detail_image_path': ImageUploadField('Detay Sayfa Görseli', base_path=STATIC_DIR, url_relative_path='uploads/')
     }
 
     batch_actions = None
@@ -612,10 +595,6 @@ def create_app(config_class=Config):
         except Exception as e:
             click.echo(f"Bir hata oluştu: {e}")
 
-    path = os.environ.get('UPLOAD_PATH', op.join(op.dirname(__file__), 'static', 'uploads'))
-    if not os.path.exists(path):
-        os.makedirs(path)
-
     admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar", endpoint='settings'))
     admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
@@ -624,12 +603,7 @@ def create_app(config_class=Config):
     admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
     admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
     admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
-    admin.add_view(CustomFileAdmin(
-        path, 
-        '/static/uploads/', 
-        name='Medya Yönetimi',
-        endpoint='medya_yonetimi'
-    ))
+    admin.add_view(CustomFileAdmin(UPLOAD_PATH, '/static/uploads/', name='Medya Yönetimi', endpoint='medya_yonetimi'))
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))

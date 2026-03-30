@@ -16,7 +16,7 @@ services:
     networks:
       - ekosan_net
     volumes:
-      - app_uploads:/app/static/uploads
+      - app_uploads:/app/app/static/uploads
     restart: unless-stopped
     ports:
       - "5005:5000"

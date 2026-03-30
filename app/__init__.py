@@ -603,7 +603,7 @@ def create_app(config_class=Config):
     admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
     admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
     admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
-    admin.add_view(CustomFileAdmin(UPLOAD_PATH, '/static/uploads/', name='Medya Yönetimi', endpoint='medya_yonetimi'))
+    admin.add_view(CustomFileAdmin(STATIC_DIR, '/static/', name='Medya Yönetimi', endpoint='medya_yonetimi'))
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
     admin.add_view(SliderGroupView(SliderGroup, db.session, name="Slider Yönetimi", category="Sliderlar"))

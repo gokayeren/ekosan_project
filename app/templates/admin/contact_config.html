@@ -153,5 +153,35 @@
             </div>
         </div>
 
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-cyan-900/20 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                    <i class="fa fa-map"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-200 text-sm">Harita Linkleri ve Adres Görselleri</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Navigasyon linkleri ve mağaza/depo görselleri</p>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Mağaza Navigasyon Linki</label>
+                    {{ form.store_map_link(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-cyan-500 transition-colors", placeholder="Google Maps navigasyon linki") }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Depo Navigasyon Linki</label>
+                    {{ form.storage_map_link(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-cyan-500 transition-colors", placeholder="Google Maps navigasyon linki") }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Mağaza Görseli</label>
+                    {{ form.shop_image(class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[10px] file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700 cursor-pointer") }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Depo Görseli</label>
+                    {{ form.storage_image(class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[10px] file:bg-slate-800 file:text-cyan-400 hover:file:bg-slate-700 cursor-pointer") }}
+                </div>
+            </div>
+        </div>
+
     </form>
 {% endblock %}

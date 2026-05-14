@@ -80,25 +80,21 @@
     </div>
 </div>
 
-<section class="flex justify-center py-12 border-b border-gray-100 relative overflow-hidden bg-white">
+<section class="flex justify-center py-12 md:py-16 border-b border-gray-100 relative overflow-hidden bg-white">
     
-    <div class="absolute top-0 right-0 p-10 opacity-5 pointer-events-none select-none">
-        <i class="fa fa-video text-9xl text-gray-900"></i>
-    </div>
-
     <div class="container px-4 relative z-10">
         <div class="flex flex-col justify-center gap-2">
-            <h2 class="text-center text-lg font-black text-gray-900 leading-tight tracking-tight">
+            <h2 class="text-center text-2xl md:text-3xl font-black text-gray-900 leading-tight tracking-tight uppercase">
                 {{ home_config.presentation_title }}
             </h2>
-            <p class="text-center text-sm text-gray-500 leading-tight tracking-tight font-light">
+            <p class="text-center text-base md:text-lg text-gray-500 leading-relaxed tracking-tight font-light">
                 {{ home_config.presentation_subtitle }}
             </p>
             <div class="flex flex-col justify-center gap-2 mt-4">
-                <a href="{{ home_config.presentation_action_url or '#' }}" 
+                <button type="button" data-video-url="{{ home_config.presentation_action_url or '' }}" onclick="openVideoModal(this.dataset.videoUrl)"
                     class="m-auto btn btn-square w-16 h-16 bg-blue-600 hover:bg-blue-500 text-white border-none font-bold shadow-md shadow-blue-900/20 rounded-full transition-transform hover:scale-110 active:scale-95 flex items-center justify-center">
                     <i class="fa fa-play text-xl pl-1"></i>
-                </a>
+                </button>
                 {% if home_config.presentation_action_text %}
                 <span class="text-center text-blue-600 font-bold tracking-widest text-xs uppercase mt-2">
                     {{ home_config.presentation_action_text }}
@@ -115,10 +111,12 @@
     </div>
     <div class="container mx-auto px-4 max-w-7xl relative z-10">
 
-        <div class="flex flex-col justify-center gap-4 mb-10">
-            <span class="text-start text-orange-600 font-bold tracking-[0.25em] text-sm uppercase">
-                {{ home_config.features_title }}
-            </span>
+        <div class="flex flex-col items-center justify-center gap-3 mb-10 text-center">
+            <span class="text-orange-600 font-bold tracking-[0.35em] text-xs uppercase">{{ home_config.features_title }}</span>
+            <h2 class="text-3xl md:text-4xl text-gray-700 uppercase tracking-tight">
+                <span class="font-black text-gray-900">NELER</span> <span class="font-light">YAPARIZ?</span>
+            </h2>
+            <div class="w-24 h-px bg-gray-300"></div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-6">
@@ -154,7 +152,7 @@
                             </span>
                         </div>
 
-                        <div class="bg-gray-900/90 backdrop-blur-sm border-t border-white/10 p-4 pt-5 z-10 w-full lg:translate-y-full lg:group-hover:translate-y-0 transition-transform duration-500">
+                        <div class="bg-gray-900/90 backdrop-blur-sm border-t border-white/10 p-4 pt-5 z-10 w-full transition-transform duration-500">
                             <p class="text-gray-300 text-xs leading-relaxed line-clamp-2 font-medium">
                                 {{ service.description|striptags }}
                             </p>
@@ -209,7 +207,36 @@
     </div>
 </section>
 
+<div id="videoModal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/80 p-4">
+    <div class="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+        <button type="button" onclick="closeVideoModal()" class="absolute right-3 top-3 z-10 w-10 h-10 rounded-full bg-white/90 text-gray-900 hover:bg-white"><i class="fa fa-times"></i></button>
+        <iframe id="videoModalFrame" class="w-full h-full" src="" title="Tanıtım Filmi" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+</div>
+
 <script>
+    function getYoutubeEmbedUrl(url) {
+        if (!url) return '';
+        const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^&?\/]+)/);
+        return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0` : url;
+    }
+    function openVideoModal(url) {
+        const modal = document.getElementById('videoModal');
+        const frame = document.getElementById('videoModalFrame');
+        if (!modal || !frame || !url) return;
+        frame.src = getYoutubeEmbedUrl(url);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    function closeVideoModal() {
+        const modal = document.getElementById('videoModal');
+        const frame = document.getElementById('videoModalFrame');
+        if (!modal || !frame) return;
+        frame.src = '';
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         const section = document.getElementById('parallax-section');
         const bg = document.getElementById('parallax-bg');

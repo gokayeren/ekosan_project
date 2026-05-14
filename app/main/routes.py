@@ -1,5 +1,8 @@
 import requests
 import json
+import os
+import smtplib
+from email.message import EmailMessage
 from flask import render_template, request, redirect, url_for, flash, current_app, abort
 from app import db
 from app.main import main
@@ -118,35 +121,48 @@ def submit_contact_form():
         if form_obj.recipient_email:
             try:
                 target_email = form_obj.recipient_email
-                payload = data.copy()
-
-                payload['_subject'] = f"Yeni Mesaj: {form_obj.title} - {request.host}"
-                payload['_captcha'] = "false"
-                
-                payload['_template'] = "box" 
-
+                subject = f"Yeni Mesaj: {form_obj.title} - {request.host}"
+                body_lines = [f"{key}: {value}" for key, value in data.items()]
+                body = "\n".join(body_lines)
+                reply_to = None
                 for key, value in data.items():
-                    if 'mail' in key.lower() or 'e-posta' in key.lower():
-                        payload['_replyto'] = value
+                    key_lower = key.lower()
+                    if 'mail' in key_lower or 'e-posta' in key_lower or 'email' in key_lower:
+                        reply_to = value
                         break
-                
-                headers = {
-                    'User-Agent': 'Ekosan-Flask-App',
-                    'Referer': request.url
-                }
 
-                response = requests.post(
-                    f"https://formsubmit.co/{target_email}", 
-                    data=payload, 
-                    headers=headers,
-                    timeout=10
-                )
+                smtp_host = os.environ.get('SMTP_HOST')
+                smtp_user = os.environ.get('SMTP_USER')
+                smtp_pass = os.environ.get('SMTP_PASSWORD')
+                smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+                smtp_from = os.environ.get('SMTP_FROM') or smtp_user or target_email
 
-                if response.status_code == 200:
-                    current_app.logger.info(f"Mail başarıyla gönderildi: {target_email}")
+                if smtp_host and smtp_user and smtp_pass:
+                    msg = EmailMessage()
+                    msg['Subject'] = subject
+                    msg['From'] = smtp_from
+                    msg['To'] = target_email
+                    if reply_to:
+                        msg['Reply-To'] = reply_to
+                    msg.set_content(body)
+                    with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as smtp:
+                        smtp.starttls()
+                        smtp.login(smtp_user, smtp_pass)
+                        smtp.send_message(msg)
+                    current_app.logger.info(f"SMTP mail başarıyla gönderildi: {target_email}")
                 else:
-                    current_app.logger.error(f"Mail gönderme hatası: {response.text}")
-                
+                    payload = data.copy()
+                    payload['_subject'] = subject
+                    payload['_captcha'] = "false"
+                    payload['_template'] = "box"
+                    if reply_to:
+                        payload['_replyto'] = reply_to
+                    headers = {'User-Agent': 'Ekosan-Flask-App', 'Accept': 'application/json', 'Referer': request.url}
+                    response = requests.post(f"https://formsubmit.co/ajax/{target_email}", data=payload, headers=headers, timeout=10)
+                    if response.status_code in (200, 201):
+                        current_app.logger.info(f"FormSubmit mail isteği başarılı: {target_email}")
+                    else:
+                        current_app.logger.error(f"Mail gönderme hatası ({response.status_code}): {response.text}")
             except Exception as mail_error:
                 current_app.logger.error(f"Mail sunucusu hatası: {mail_error}")
         

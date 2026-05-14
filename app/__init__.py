@@ -177,7 +177,7 @@ class CorporateView(ProtectedModelView):
     create_template = 'admin/corporate_config.html'
 
     form_columns = (
-        'hero_slider', 'presentation_slider', 'presentation_title',
+        'hero_slider', 'presentation_slider', 'presentation_title', 'presentation_subtitle',
         'howeare', 'whatwedo', 'whyus',
         'card01_title', 'card01_subtitle', 'card02_title', 'card02_subtitle',
         'card03_title', 'card03_subtitle', 'card04_title', 'card04_subtitle'
@@ -203,7 +203,7 @@ class ReferencesView(ProtectedModelView):
         'parallax_image': ImageUploadField('Parallax Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/')
     }
 
-    form_columns = ('hero_slider', 'presentation_title', 'corporate_slider', 'personal_slider', 'parallax_image', 'parallax_title')
+    form_columns = ('hero_slider', 'presentation_title', 'presentation_subtitle', 'corporate_slider', 'personal_slider', 'parallax_image', 'parallax_title')
 
     @expose('/')
     def index_view(self):
@@ -221,10 +221,16 @@ class ContactView(ProtectedModelView):
     edit_template = 'admin/contact_config.html'
     create_template = 'admin/contact_config.html'
 
+    form_extra_fields = {
+        'shop_image': ImageUploadField('Mağaza Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'storage_image': ImageUploadField('Depo Görseli', base_path=UPLOAD_PATH, url_relative_path='uploads/')
+    }
+
     form_columns = (
         'hero_slider', 'contact_form', 'contact_info_title',
         'shop_id', 'shop_id_date', 'tax_id', 'phone', 'wa', 'email',
-        'workhours', 'location_shop', 'location_storage'
+        'workhours', 'location_shop', 'location_storage',
+        'store_map_link', 'storage_map_link', 'shop_image', 'storage_image'
     )
     
     column_labels = {

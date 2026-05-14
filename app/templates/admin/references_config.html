@@ -38,6 +38,28 @@
             {{ f() }}
         {% endfor %}
 
+
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-sky-900/20 border border-sky-500/20 flex items-center justify-center text-sky-400">
+                    <i class="fa fa-heading"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-200 text-sm">Üst Başlık Alanı</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Referans sayfası ana başlık ve alt başlık</p>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Sayfa Başlığı</label>
+                    {{ form.presentation_title(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm font-bold text-slate-200 focus:outline-none focus:border-sky-500 transition-colors") }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Alt Başlık</label>
+                    {{ form.presentation_subtitle(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-sky-500 transition-colors", rows="3") }}
+                </div>
+            </div>
+        </div>
         <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
             <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
                 <div class="w-8 h-8 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">

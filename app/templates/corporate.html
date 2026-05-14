@@ -70,27 +70,32 @@
     </div>
 </div>
 
-<section class="flex justify-center py-12 border-b border-gray-100 relative overflow-hidden">
+<section class="flex justify-center py-10 md:py-12 border-b border-gray-100 relative overflow-hidden">
 
     <div class="container px-4">
         <div class="flex flex-col justify-center gap-2">
-            <h2 class="text-center text-lg font-black text-gray-900 leading-tight tracking-tight">
+            <h2 class="text-center text-2xl md:text-3xl font-black text-gray-900 leading-tight tracking-tight uppercase">
                 {{ corporate.presentation_title }}
             </h2>
+            {% if corporate.presentation_subtitle %}
+            <p class="text-center text-base md:text-lg text-gray-500 leading-relaxed font-light max-w-3xl mx-auto">
+                {{ corporate.presentation_subtitle }}
+            </p>
+            {% endif %}
         </div>
     </div>
 </section>
 
 <section class="py-12 overflow-hidden">
     <div class="container mx-auto px-4 max-w-7xl">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-14 items-start">
 
-            <div class="md:col-span-6 lg:col-span-5 relative">
+            <div class="md:col-span-6 lg:col-span-6 relative">
 
                 {% set presentation_key = corporate.presentation_slider.group_key if corporate.presentation_slider else None %}
                 {% set presentation_items = get_slider(presentation_key) if presentation_key else [] %}
 
-                <div id="corporateSlider" class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-200 aspect-[4/3] group bg-gray-100">
+                <div id="corporateSlider" class="relative rounded-2xl overflow-hidden shadow-2xl shadow-gray-200 aspect-[4/3] md:aspect-[5/4] group bg-gray-100">
 
                     {% if presentation_items %}
                         {% for item in presentation_items %}
@@ -114,6 +119,8 @@
                 </div>
 
                 {% if presentation_items|length > 1 %}
+                    <button type="button" onclick="changeCorporateSlide(currentCorporateSlideIndex - 1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/90 shadow-lg text-gray-800 hover:bg-white flex items-center justify-center"><i class="fa fa-chevron-left"></i></button>
+                    <button type="button" onclick="changeCorporateSlide(currentCorporateSlideIndex + 1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/90 shadow-lg text-gray-800 hover:bg-white flex items-center justify-center"><i class="fa fa-chevron-right"></i></button>
                     <div class="flex justify-center gap-2 mt-6">
                         {% for item in presentation_items %}
                             <button onclick="changeCorporateSlide({{ loop.index0 }})" 
@@ -126,31 +133,31 @@
 
             </div>
 
-            <div class="md:col-span-6 lg:col-span-7 space-y-6 pl-0 lg:pl-8">
+            <div class="md:col-span-6 lg:col-span-6 space-y-8 pl-0 lg:pl-6">
 
                 <div class="space-y-2">
-                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">
-                        BİZ KİMİZ ?
+                    <h3 class="text-2xl text-gray-800 uppercase tracking-tight inline-flex border-b border-gray-300 pb-1">
+                        <span class="font-light">BİZ</span> <span class="font-black ml-1 text-gray-900">KİMİZ?</span>
                     </h3>
-                    <div class="text-gray-600 leading-relaxed text-sm">
+                    <div class="text-gray-600 leading-relaxed text-base">
                         {{ corporate.howeare|safe }}
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">
-                        NELER YAPARIZ ?
+                    <h3 class="text-2xl text-gray-800 uppercase tracking-tight inline-flex border-b border-gray-300 pb-1">
+                        <span class="font-black text-gray-900">NELER</span> <span class="font-light ml-1">YAPARIZ?</span>
                     </h3>
-                    <div class="text-gray-600 leading-relaxed text-sm">
+                    <div class="text-gray-600 leading-relaxed text-base">
                         {{ corporate.whatwedo|safe }}
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">
-                        NEDEN BİZ ?
+                    <h3 class="text-2xl text-gray-800 uppercase tracking-tight inline-flex border-b border-gray-300 pb-1">
+                        <span class="font-black text-gray-900">NEDEN</span> <span class="font-light ml-1">BİZ?</span>
                     </h3>
-                    <div class="text-gray-600 leading-relaxed text-sm">
+                    <div class="text-gray-600 leading-relaxed text-base">
                         {{ corporate.whyus.replace('.', '.<br>')|safe }}
                     </div>
                 </div>
@@ -310,7 +317,7 @@
 
         const corporateContainer = document.getElementById('corporateSlider');
         if(corporateContainer) {
-            let currentSlideIndex = 0;
+            window.currentCorporateSlideIndex = 0;
             const slides = corporateContainer.querySelectorAll('.slider-slide');
             const dots = document.querySelectorAll('.slider-dot');
             let slideInterval;
@@ -319,7 +326,7 @@
                 if (index >= slides.length) index = 0;
                 if (index < 0) index = slides.length - 1;
                 
-                currentSlideIndex = index;
+                window.currentCorporateSlideIndex = index;
 
                 slides.forEach(slide => {
                     slide.classList.remove('opacity-100', 'z-10');
@@ -345,7 +352,7 @@
             function startAutoSlide() {
                 if(slides.length > 1) {
                     slideInterval = setInterval(() => {
-                        changeCorporateSlide(currentSlideIndex + 1);
+                        changeCorporateSlide(window.currentCorporateSlideIndex + 1);
                     }, 5000); 
                 }
             }

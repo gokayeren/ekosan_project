@@ -8,7 +8,7 @@
 {% set hero_items = get_slider(hero_slider_key) if hero_slider_key else [] %}
 
 <div class="relative w-full h-[200px] lg:h-[300px] bg-neutral-900 overflow-hidden font-sans group">
-    <div class="swiper myHeroSwiper h-full w-full pointer-events-none"> 
+    <div class="swiper myHeroSwiper h-full w-full pointer-events-none">
         <div class="swiper-wrapper">
             {% if hero_items %}
                 {% for item in hero_items %}
@@ -22,16 +22,10 @@
                     </div>
                     <div class="absolute inset-0 z-10 hero-pattern-bold pointer-events-none opacity-20"></div>
                     <div class="absolute inset-0 z-10 bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none"></div>
-                    <div class="relative z-20 container mx-auto px-6 max-w-7xl h-full flex flex-col justify-center item-bottom">
+                    <div class="relative z-20 container mx-auto px-6 max-w-7xl h-full flex flex-col justify-center">
                         <div class="w-full max-w-3xl mt-20">
-                            <div class="text-left">
-                                {% if item.title %}
-                                    <h1 class="text-2xl font-black text-white leading-[1.1] drop-shadow-lg tracking-tight slider-title opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-300">{{ item.title }}</h1>
-                                {% endif %}
-                                {% if item.subtitle %}
-                                    <p class="text-gray-200 text-base text-md font-light leading-relaxed drop-shadow-md max-w-xl slider-subtitle opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-500">{{ item.subtitle }}</p>
-                                {% endif %}
-                            </div>
+                            {% if item.title %}<h1 class="text-2xl md:text-4xl font-black text-white leading-[1.1] drop-shadow-lg tracking-tight slider-title opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-300">{{ item.title }}</h1>{% endif %}
+                            {% if item.subtitle %}<p class="text-gray-200 text-base md:text-lg font-light leading-relaxed drop-shadow-md max-w-xl slider-subtitle opacity-0 -translate-x-12 blur-sm transition-all duration-1000 delay-500">{{ item.subtitle }}</p>{% endif %}
                         </div>
                     </div>
                 </div>
@@ -47,192 +41,114 @@
     </div>
 </div>
 
-<section class="py-16">
+<section class="py-14 md:py-16">
     <div class="container mx-auto px-4 max-w-7xl">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
-
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-start">
             <div>
-                <h2 class="text-2xl md:text-3xl text-gray-800 mb-8 font-light">
-                    <span class="font-bold">İLETİŞİM</span> FORMU
+                <h2 class="text-3xl md:text-4xl text-gray-800 mb-8 font-light uppercase tracking-tight">
+                    <span class="font-extrabold">İLETİŞİM</span> FORMU
                 </h2>
-
                 {% set contact_form = contact.contact_form %}
-
-                <form action="/form-submit" method="POST" class="space-y-4">
-                    
+                <form action="/form-submit" method="POST" class="space-y-4" id="contactDynamicForm">
                     {% if contact_form %}
-                        
                         <input type="hidden" name="form_id" value="{{ contact_form.id }}">
-                        
                         {% for field in contact_form.fields | sort(attribute='order') %}
-                            
+                            {% set field_key = (field.name ~ ' ' ~ field.label)|lower %}
                             <div>
-                                {% if field.field_type in ['text', 'email', 'tel', 'number', 'url'] %}
-                                    <input type="{{ field.field_type }}" 
-                                           name="{{ field.name }}" 
-                                           placeholder="{{ field.label }}{{ ' *' if field.is_required else '' }}" 
-                                           {{ 'required' if field.is_required else '' }}
-                                           class="w-full bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors placeholder-gray-400">
-
-                                {% elif field.field_type == 'textarea' %}
-                                    <textarea name="{{ field.name }}" 
-                                              rows="5" 
-                                              placeholder="{{ field.label }}{{ ' *' if field.is_required else '' }}"
-                                              {{ 'required' if field.is_required else '' }}
-                                              class="w-full bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors placeholder-gray-400 resize-none"></textarea>
-
-                                {% elif field.field_type == 'select' %}
+                                {% if 'ilçe' in field_key or 'ilce' in field_key %}
                                     <div class="relative">
-                                        <select name="{{ field.name }}" {{ 'required' if field.is_required else '' }}
-                                                class="w-full bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors appearance-none cursor-pointer">
+                                        <select id="districtSelect" name="{{ field.name }}" {{ 'required' if field.is_required else '' }} class="w-full bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors appearance-none cursor-pointer">
+                                            <option value="" disabled selected>Önce il seçiniz{{ ' *' if field.is_required else '' }}</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500"><i class="fa fa-chevron-down text-xs"></i></div>
+                                    </div>
+                                {% elif field.field_type == 'select' or field.label|lower == 'il' or field.name|lower == 'il' or 'şehir' in field_key or 'sehir' in field_key %}
+                                    <div class="relative">
+                                        <select id="citySelect" name="{{ field.name }}" {{ 'required' if field.is_required else '' }} class="w-full bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors appearance-none cursor-pointer">
                                             <option value="" disabled selected>{{ field.label }}{{ ' *' if field.is_required else '' }}</option>
-                                            
                                             {% if field.options %}
-                                                {% for option in field.options.split(',') %}
-                                                    <option value="{{ option | trim }}">{{ option | trim }}</option>
+                                                {% for option in field.options.split(',') %}<option value="{{ option | trim }}">{{ option | trim }}</option>{% endfor %}
+                                            {% else %}
+                                                {% for city in ['Adana','Adıyaman','Afyonkarahisar','Ağrı','Amasya','Ankara','Antalya','Artvin','Aydın','Balıkesir','Bilecik','Bingöl','Bitlis','Bolu','Burdur','Bursa','Çanakkale','Çankırı','Çorum','Denizli','Diyarbakır','Edirne','Elazığ','Erzincan','Erzurum','Eskişehir','Gaziantep','Giresun','Gümüşhane','Hakkari','Hatay','Isparta','Mersin','İstanbul','İzmir','Kars','Kastamonu','Kayseri','Kırklareli','Kırşehir','Kocaeli','Konya','Kütahya','Malatya','Manisa','Kahramanmaraş','Mardin','Muğla','Muş','Nevşehir','Niğde','Ordu','Rize','Sakarya','Samsun','Siirt','Sinop','Sivas','Tekirdağ','Tokat','Trabzon','Tunceli','Şanlıurfa','Uşak','Van','Yozgat','Zonguldak','Aksaray','Bayburt','Karaman','Kırıkkale','Batman','Şırnak','Bartın','Ardahan','Iğdır','Yalova','Karabük','Kilis','Osmaniye','Düzce'] %}
+                                                    <option value="{{ city }}">{{ city }}</option>
                                                 {% endfor %}
                                             {% endif %}
                                         </select>
-                                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                            <i class="fa fa-chevron-down text-xs"></i>
-                                        </div>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500"><i class="fa fa-chevron-down text-xs"></i></div>
                                     </div>
+                                {% elif field.field_type == 'textarea' %}
+                                    <textarea name="{{ field.name }}" rows="6" placeholder="{{ field.label }}{{ ' *' if field.is_required else '' }}" {{ 'required' if field.is_required else '' }} class="w-full min-h-[150px] bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors placeholder-gray-400 resize-y"></textarea>
+                                {% else %}
+                                    <input type="{{ 'tel' if 'telefon' in field_key or 'phone' in field_key else field.field_type }}" {% if 'telefon' in field_key or 'phone' in field_key %}inputmode="tel" autocomplete="tel"{% endif %} name="{{ field.name }}" placeholder="{{ field.label }}{{ ' *' if field.is_required else '' }}" {{ 'required' if field.is_required else '' }} class="w-full bg-gray-50 border border-gray-100 text-gray-700 text-sm p-4 rounded focus:outline-none focus:border-blue-500 focus:bg-white transition-colors placeholder-gray-400">
                                 {% endif %}
                             </div>
-
                         {% endfor %}
-
                         <div class="flex items-start gap-3 mt-2">
                             <input type="checkbox" id="kvkk" name="kvkk" required class="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
-                            <label for="kvkk" class="text-xs text-gray-500 cursor-pointer select-none">
-                                <a href="#" class="underline hover:text-blue-600">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum. Ben robot değilim.
-                            </label>
+                            <label for="kvkk" class="text-xs text-gray-500 cursor-pointer select-none"><a href="#" class="underline hover:text-blue-600">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum.</label>
                         </div>
-
-                        <div class="pt-4">
-                            <button type="submit" class="bg-[#0088cc] hover:bg-[#006699] text-white font-bold py-3 px-8 rounded text-sm transition-colors shadow-lg hover:shadow-xl">
-                                {{ contact_form.submit_btn_text or 'Mesajı Gönder' }}
-                            </button>
-                        </div>
-
+                        <div class="pt-4"><button type="submit" class="bg-[#0088cc] hover:bg-[#006699] text-white font-bold py-3 px-8 rounded text-sm transition-colors shadow-lg hover:shadow-xl">{{ contact_form.submit_btn_text or 'Mesajı Gönder' }}</button></div>
                     {% else %}
-                        <div class="p-4 bg-yellow-50 text-yellow-700 rounded text-sm border border-yellow-100">
-                            Yönetim panelinden İletişim Sayfası ayarlarına giderek bir form seçiniz.
-                        </div>
+                        <div class="p-4 bg-yellow-50 text-yellow-700 rounded text-sm border border-yellow-100">Yönetim panelinden İletişim Sayfası ayarlarına giderek bir form seçiniz.</div>
                     {% endif %}
-
                 </form>
             </div>
 
             <div>
-                <h2 class="text-2xl md:text-3xl text-gray-800 mb-8 font-light">
-                    <span class="font-bold">İLETİŞİM</span> BİLGİLERİMİZ
+                <h2 class="text-3xl md:text-4xl text-gray-800 mb-8 font-light uppercase tracking-tight">
+                    <span class="font-extrabold">İLETİŞİM</span> BİLGİLERİMİZ
                 </h2>
-
                 <div class="space-y-6 text-gray-600 text-sm">
-                    <div class="font-bold text-gray-800 uppercase leading-relaxed">
-                        {{ contact.contact_info_title }}
-                    </div>
-
+                    <div class="font-bold text-gray-800 uppercase leading-relaxed">{{ contact.contact_info_title }}</div>
                     <div class="space-y-1 text-xs md:text-sm text-gray-500">
                         <p><span class="font-semibold text-gray-700">TİCARET SİCİL NO:</span> {{ contact.shop_id }}</p>
                         <p><span class="font-semibold text-gray-700">TESCİL TARİHİ:</span> {{ contact.shop_id_date }}</p>
                         <p><span class="font-semibold text-gray-700">VERGİ NO:</span> {{ contact.tax_id }}</p>
                     </div>
-
                     <div class="border-t border-gray-100 my-6"></div>
-
                     <ul class="space-y-4">
                         <li class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center">
-                                <i class="fa fa-phone"></i>
-                            </div>
-                            <span class="text-gray-600 font-medium">Telefon: {{ contact.phone }}</span>
+                            <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center"><i class="fa fa-phone"></i></div>
+                            <a href="tel:{{ contact.phone|replace(' ','')|replace('(','')|replace(')','') }}" class="text-gray-600 font-medium hover:text-[#0088cc] transition-colors">Telefon: {{ contact.phone }}</a>
                         </li>
                         <li class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center">
-                                <i class="fab fa-whatsapp text-lg"></i>
-                            </div>
-                            <span class="text-gray-600 font-medium">Whatsapp: {{ contact.wa }}</span>
+                            <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center"><i class="fab fa-whatsapp text-lg"></i></div>
+                            <a href="https://wa.me/{{ contact.wa|replace(' ','')|replace('+','')|replace('(','')|replace(')','') }}" target="_blank" class="text-gray-600 font-medium hover:text-[#25D366] transition-colors">Whatsapp: {{ contact.wa }}</a>
                         </li>
                         <li class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center">
-                                <i class="fa fa-envelope"></i>
-                            </div>
-                            <span class="text-gray-600 font-medium">Email: {{ contact.email }}</span>
+                            <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center"><i class="fa fa-envelope"></i></div>
+                            <a href="mailto:{{ contact.email }}" class="text-gray-600 font-medium hover:text-[#0088cc] transition-colors">Email: {{ contact.email }}</a>
                         </li>
                     </ul>
-
                     <div class="border-t border-gray-100 my-6"></div>
-
                     <div>
                         <h4 class="font-bold text-gray-800 mb-2">Çalışma Saatlerimiz</h4>
-                        <div class="flex items-center gap-2 text-gray-500 text-xs md:text-sm">
-                            <i class="far fa-clock"></i>
-                            <span>{{ contact.workhours }}</span>
-                        </div>
+                        <div class="flex items-center gap-2 text-gray-500 text-xs md:text-sm"><i class="far fa-clock"></i><span>{{ contact.workhours }}</span></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24 mt-20">
-
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 mt-16 md:mt-20">
             <div class="flex flex-col gap-4">
-                <h3 class="text-2xl text-gray-800">
-                    <span class="font-bold">Mağaza</span> <span class="font-light">Adresimiz</span>
-                </h3>
-                <div class="flex items-start gap-2 text-gray-500 text-sm">
-                    <i class="fa fa-map-marker-alt text-[#0088cc] mt-1"></i>
-                    <p>{{ contact.location_shop }}</p>
+                <h3 class="text-2xl text-gray-800 inline-flex w-fit border-b border-gray-300 pb-1"><span class="font-bold">Mağaza</span> <span class="font-light ml-1">Adresimiz</span></h3>
+                <div class="flex items-start gap-2 text-gray-500 text-sm min-h-[40px]"><i class="fa fa-map-marker-alt text-[#0088cc] mt-1"></i><p>{{ contact.location_shop }}</p></div>
+                <div class="aspect-[16/9] w-full bg-gray-100 overflow-hidden rounded shadow-xl shadow-gray-300/60 relative">
+                    {% if contact.shop_image %}<img src="{{ url_for('static', filename='uploads/' + contact.shop_image) }}" class="w-full h-full object-cover" alt="Mağaza Adresi">{% else %}<div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50"><i class="fa fa-store text-5xl"></i></div>{% endif %}
                 </div>
-                <div class="text-start">
-                    <a href="{{ contact.store_map_link | default('https://www.google.com/maps/search/?api=1&query=' + contact.location_shop) }}" 
-                        target="_blank" 
-                        class="inline-block bg-[#0088cc] text-white text-xs font-bold py-2 px-6 rounded hover:bg-[#006699] transition-colors">
-                        Navigasyonda Aç
-                    </a>
-                </div>
-                <div class="space-y-4">
-                    <div class="aspect-video w-full bg-gray-100 overflow-hidden rounded shadow-md relative">
-                         <iframe 
-                            src="https://maps.google.com/maps?q={{ contact.location_shop }}&hl=tr&z=15&ie=UTF8&iwloc=&output=embed" 
-                            class="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500" 
-                            allowfullscreen="" 
-                            loading="lazy">
-                         </iframe>
-                    </div>
-                </div>
+                <div class="text-start"><a href="{{ contact.store_map_link or ('https://www.google.com/maps/search/?api=1&query=' + contact.location_shop) }}" target="_blank" class="inline-block bg-[#0088cc] text-white text-xs font-bold py-2 px-6 rounded hover:bg-[#006699] transition-colors">Navigasyonda Aç</a></div>
+                <div class="aspect-video w-full bg-gray-100 overflow-hidden rounded shadow-md relative"><iframe src="https://maps.google.com/maps?q={{ contact.location_shop }}&hl=tr&z=17&ie=UTF8&iwloc=&output=embed" class="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500" allowfullscreen="" loading="lazy"></iframe></div>
             </div>
 
             <div class="flex flex-col gap-4">
-                <h3 class="text-2xl text-gray-800">
-                    <span class="font-bold">Depo</span> <span class="font-light">Adresimiz</span>
-                </h3>
-                <div class="flex items-start gap-2 text-gray-500 text-sm">
-                    <i class="fa fa-map-marker-alt text-[#0088cc] mt-1"></i>
-                    <p>{{ contact.location_storage }}</p>
+                <h3 class="text-2xl text-gray-800 inline-flex w-fit border-b border-gray-300 pb-1"><span class="font-bold">Depo</span> <span class="font-light ml-1">Adresimiz</span></h3>
+                <div class="flex items-start gap-2 text-gray-500 text-sm min-h-[40px]"><i class="fa fa-map-marker-alt text-[#0088cc] mt-1"></i><p>{{ contact.location_storage }}</p></div>
+                <div class="aspect-[16/9] w-full bg-gray-100 overflow-hidden rounded shadow-xl shadow-gray-300/60 relative">
+                    {% if contact.storage_image %}<img src="{{ url_for('static', filename='uploads/' + contact.storage_image) }}" class="w-full h-full object-cover" alt="Depo Adresi">{% else %}<div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50"><i class="fa fa-warehouse text-5xl"></i></div>{% endif %}
                 </div>
-                <div class="text-start">
-                    <a href="{{ contact.store_map_link | default('https://www.google.com/maps/search/?api=1&query=' + contact.location_storage) }}" 
-                        target="_blank" 
-                        class="inline-block bg-[#0088cc] text-white text-xs font-bold py-2 px-6 rounded hover:bg-[#006699] transition-colors">
-                        Navigasyonda Aç
-                    </a>
-                </div>
-                <div class="space-y-4">
-                    <div class="aspect-video w-full bg-gray-100 overflow-hidden rounded shadow-md relative">
-                         <iframe 
-                            src="https://maps.google.com/maps?q={{ contact.location_storage }}&hl=tr&z=15&ie=UTF8&iwloc=&output=embed" 
-                            class="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500" 
-                            allowfullscreen="" 
-                            loading="lazy">
-                         </iframe>
-                    </div>
-                </div>
+                <div class="text-start"><a href="{{ contact.storage_map_link or ('https://www.google.com/maps/search/?api=1&query=' + contact.location_storage) }}" target="_blank" class="inline-block bg-[#0088cc] text-white text-xs font-bold py-2 px-6 rounded hover:bg-[#006699] transition-colors">Navigasyonda Aç</a></div>
+                <div class="aspect-video w-full bg-gray-100 overflow-hidden rounded shadow-md relative"><iframe src="https://maps.google.com/maps?q={{ contact.location_storage }}&hl=tr&z=17&ie=UTF8&iwloc=&output=embed" class="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500" allowfullscreen="" loading="lazy"></iframe></div>
             </div>
-
         </div>
     </div>
 </section>
@@ -243,31 +159,45 @@
             spaceBetween: 0,
             effect: "fade",
             fadeEffect: { crossFade: true },
-            speed: 2500, 
+            speed: 2500,
             loop: true,
             allowTouchMove: false,
             autoplay: { delay: 7000, disableOnInteraction: false },
             on: {
                 init: function() { animateSlideContent(this.slides[this.activeIndex]); },
-                slideChangeTransitionStart: function () {
-                    for (let i = 0; i < this.slides.length; i++) resetSlideContent(this.slides[i]);
-                },
+                slideChangeTransitionStart: function () { for (let i = 0; i < this.slides.length; i++) resetSlideContent(this.slides[i]); },
                 slideChangeTransitionEnd: function () { animateSlideContent(this.slides[this.activeIndex]); }
             }
         });
 
         function animateSlideContent(slide) {
             let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
-            elements.forEach(el => {
-                el.classList.remove('opacity-0', '-translate-x-12', 'blur-sm');
-                el.classList.add('opacity-100', 'translate-x-0', 'blur-0');
-            });
+            elements.forEach(el => { el.classList.remove('opacity-0', '-translate-x-12', 'blur-sm'); el.classList.add('opacity-100', 'translate-x-0', 'blur-0'); });
         }
         function resetSlideContent(slide) {
             let elements = slide.querySelectorAll('.slider-title, .slider-subtitle, .slider-btn');
-            elements.forEach(el => {
-                el.classList.remove('opacity-100', 'translate-x-0', 'blur-0');
-                el.classList.add('opacity-0', '-translate-x-12', 'blur-sm');
+            elements.forEach(el => { el.classList.remove('opacity-100', 'translate-x-0', 'blur-0'); el.classList.add('opacity-0', '-translate-x-12', 'blur-sm'); });
+        }
+
+        const citySelect = document.getElementById('citySelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const districtMap = {
+            'Zonguldak': ['Alaplı','Çaycuma','Devrek','Ereğli','Gökçebey','Kilimli','Kozlu','Merkez'],
+            'İstanbul': ['Adalar','Arnavutköy','Ataşehir','Avcılar','Bağcılar','Bahçelievler','Bakırköy','Başakşehir','Bayrampaşa','Beşiktaş','Beykoz','Beylikdüzü','Beyoğlu','Büyükçekmece','Çatalca','Çekmeköy','Esenler','Esenyurt','Eyüpsultan','Fatih','Gaziosmanpaşa','Güngören','Kadıköy','Kağıthane','Kartal','Küçükçekmece','Maltepe','Pendik','Sancaktepe','Sarıyer','Silivri','Sultanbeyli','Sultangazi','Şile','Şişli','Tuzla','Ümraniye','Üsküdar','Zeytinburnu'],
+            'Ankara': ['Altındağ','Çankaya','Etimesgut','Keçiören','Mamak','Polatlı','Pursaklar','Sincan','Yenimahalle'],
+            'İzmir': ['Aliağa','Balçova','Bayraklı','Bornova','Buca','Çeşme','Çiğli','Gaziemir','Karabağlar','Karşıyaka','Konak','Menemen','Narlıdere','Torbalı']
+        };
+        if (citySelect && districtSelect) {
+            citySelect.addEventListener('change', function() {
+                const districts = districtMap[this.value] || [];
+                districtSelect.innerHTML = '<option value="" disabled selected>İlçe seçiniz *</option>';
+                districts.forEach(function(district) {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+                districtSelect.disabled = districts.length === 0;
             });
         }
     });

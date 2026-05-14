@@ -73,19 +73,24 @@
 <section class="flex justify-center py-12 border-b border-gray-100 relative overflow-hidden">
     <div class="container px-4">
         <div class="flex flex-col justify-center gap-2">
-            <h2 class="text-center text-lg font-black text-gray-900 leading-tight tracking-tight">
+            <h2 class="text-center text-2xl md:text-3xl font-black text-gray-900 leading-tight tracking-tight uppercase">
                 {{ references.presentation_title }}
             </h2>
+            {% if references.presentation_subtitle %}
+            <p class="text-center text-base md:text-lg text-gray-500 leading-relaxed font-light max-w-3xl mx-auto">
+                {{ references.presentation_subtitle }}
+            </p>
+            {% endif %}
         </div>
     </div>
 </section>
 
-<section class="py-12 overflow-hidden bg-base-200"> 
+<section class="py-12 overflow-hidden bg-gray-50"> 
     <div class="container mx-auto max-w-7xl px-4"> <div class="flex flex-col gap-6">
 
             <div class="text-center">
-                <h2 class="text-2xl font-bold text-base-content">
-                    Kurumsal Referanslarımız
+                <h2 class="text-3xl md:text-4xl text-gray-700 uppercase tracking-tight inline-flex border-b border-gray-300 pb-2">
+                    <span class="font-light">Kurumsal</span> <span class="font-black text-gray-900 ml-2">Referanslarımız</span>
                 </h2>
             </div>
                 
@@ -94,15 +99,15 @@
 
             {% if corporate_slider_items %}
             
-            <div class="relative w-full mx-auto px-12 md:px-16">
+            <div class="relative w-full mx-auto px-8 md:px-14">
                 
                 <div class="swiper corporateSwiper w-full h-full overflow-hidden rounded-xl"> 
                     <div class="swiper-wrapper">
                         
                         {% for item in corporate_slider_items %}
-                        <div class="swiper-slide h-auto"> <div class="card card-compact w-full bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-base-200">
+                        <div class="swiper-slide h-auto"> <div class="card card-compact w-full bg-white shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
                                 
-                                <figure class="relative h-48 sm:h-56 overflow-hidden">
+                                <figure class="relative h-56 sm:h-64 overflow-hidden">
                                     <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
                                          class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-105" 
                                          alt="{{ item.title or 'Referans Projesi' }}">
@@ -110,13 +115,13 @@
 
                                 <div class="card-body">
                                     {% if item.title %}
-                                        <h2 class="card-title text-sm font-bold text-base-content line-clamp-1">
+                                        <h2 class="card-title text-base font-bold text-gray-900 line-clamp-1">
                                             {{ item.title }}
                                         </h2>
                                     {% endif %}
                                     
                                     {% if item.subtitle %}
-                                        <p class="text-xs text-base-content/70 line-clamp-2">
+                                        <p class="text-sm text-gray-500 line-clamp-2">
                                             {{ item.subtitle }}
                                         </p>
                                     {% endif %}
@@ -132,11 +137,11 @@
 
                 </div>
 
-                <div class="swiper-button-prev-corporate btn btn-circle btn-sm md:btn-md btn-neutral absolute top-36 left-0 z-20 shadow-xl border-2 border-base-100">
+                <div class="swiper-button-prev-corporate btn btn-circle btn-sm md:btn-md bg-gray-900 text-white border-0 absolute top-40 left-0 z-20 shadow-xl border-2 border-base-100">
                     <i class="fa fa-chevron-left text-xs md:text-sm"></i>
                 </div>
                 
-                <div class="swiper-button-next-corporate btn btn-circle btn-sm md:btn-md btn-neutral absolute top-36 right-0 z-20 shadow-xl border-2 border-base-100">
+                <div class="swiper-button-next-corporate btn btn-circle btn-sm md:btn-md bg-gray-900 text-white border-0 absolute top-40 right-0 z-20 shadow-xl border-2 border-base-100">
                     <i class="fa fa-chevron-right text-xs md:text-sm"></i>
                 </div>
 
@@ -151,12 +156,12 @@
     </div>
 </section>
 
-<section class="py-12 overflow-hidden bg-base-200"> 
+<section class="py-12 overflow-hidden bg-gray-50"> 
     <div class="container mx-auto max-w-7xl px-4"> <div class="flex flex-col gap-6">
 
             <div class="text-center">
-                <h2 class="text-2xl font-bold text-base-content">
-                    Bireysel Referanslarımız
+                <h2 class="text-3xl md:text-4xl text-gray-700 uppercase tracking-tight inline-flex border-b border-gray-300 pb-2">
+                    <span class="font-light">Bireysel</span> <span class="font-black text-gray-900 ml-2">Referanslarımız</span>
                 </h2>
             </div>
 
@@ -165,15 +170,15 @@
 
             {% if personal_slider_items %}
             
-            <div class="relative w-full mx-auto px-12 md:px-16">
+            <div class="relative w-full mx-auto px-8 md:px-14">
                 
                 <div class="swiper personalSwiper w-full h-full overflow-hidden rounded-xl"> 
                     <div class="swiper-wrapper">
                         
                         {% for item in personal_slider_items %}
-                        <div class="swiper-slide h-auto"> <div class="card card-compact w-full bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 h-full border border-base-200">
+                        <div class="swiper-slide h-auto"> <div class="card card-compact w-full bg-white shadow-sm hover:shadow-md transition-all duration-300 h-full border border-gray-100">
                                 
-                                <figure class="relative h-48 sm:h-56 overflow-hidden">
+                                <figure class="relative h-56 sm:h-64 overflow-hidden">
                                     <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
                                          class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-105" 
                                          alt="{{ item.title or 'Referans Projesi' }}">
@@ -181,13 +186,13 @@
 
                                 <div class="card-body">
                                     {% if item.title %}
-                                        <h2 class="card-title text-sm font-bold text-base-content line-clamp-1">
+                                        <h2 class="card-title text-base font-bold text-gray-900 line-clamp-1">
                                             {{ item.title }}
                                         </h2>
                                     {% endif %}
                                     
                                     {% if item.subtitle %}
-                                        <p class="text-xs text-base-content/70 line-clamp-2">
+                                        <p class="text-sm text-gray-500 line-clamp-2">
                                             {{ item.subtitle }}
                                         </p>
                                     {% endif %}
@@ -203,11 +208,11 @@
 
                 </div>
 
-                <div class="swiper-button-prev-personal btn btn-circle btn-sm md:btn-md btn-neutral absolute top-36 left-0 z-20 shadow-xl border-2 border-base-100">
+                <div class="swiper-button-prev-personal btn btn-circle btn-sm md:btn-md bg-gray-900 text-white border-0 absolute top-40 left-0 z-20 shadow-xl border-2 border-base-100">
                     <i class="fa fa-chevron-left text-xs md:text-sm"></i>
                 </div>
                 
-                <div class="swiper-button-next-personal btn btn-circle btn-sm md:btn-md btn-neutral absolute top-36 right-0 z-20 shadow-xl border-2 border-base-100">
+                <div class="swiper-button-next-personal btn btn-circle btn-sm md:btn-md bg-gray-900 text-white border-0 absolute top-40 right-0 z-20 shadow-xl border-2 border-base-100">
                     <i class="fa fa-chevron-right text-xs md:text-sm"></i>
                 </div>
 
@@ -371,8 +376,8 @@
         }
 
         var corporateSwiper = new Swiper(".corporateSwiper", {
-            slidesPerView: 1,
-            spaceBetween: 24,
+            slidesPerView: 1.12,
+            spaceBetween: 18,
             loop: true,
             autoplay: {
                 delay: 4000,
@@ -387,19 +392,14 @@
                 clickable: true,
             },
             breakpoints: {
-                640: {
-                    slidesPerView: 2,
-                    spaceBetween: 24,
-                },
-                1024: {
-                    slidesPerView: 3, 
-                    spaceBetween: 32,
-                },
+                640: { slidesPerView: 2, spaceBetween: 24 },
+                1024: { slidesPerView: 3, spaceBetween: 32 },
+                1280: { slidesPerView: 3.2, spaceBetween: 32 },
             },
         });
         var personalSwiper = new Swiper(".personalSwiper", {
-            slidesPerView: 1,
-            spaceBetween: 24,
+            slidesPerView: 1.12,
+            spaceBetween: 18,
             loop: true,
             autoplay: {
                 delay: 5000,
@@ -414,14 +414,9 @@
                 clickable: true,
             },
             breakpoints: {
-                640: {
-                    slidesPerView: 2,
-                    spaceBetween: 24,
-                },
-                1024: {
-                    slidesPerView: 3, 
-                    spaceBetween: 32,
-                },
+                640: { slidesPerView: 2, spaceBetween: 24 },
+                1024: { slidesPerView: 3, spaceBetween: 32 },
+                1280: { slidesPerView: 3.2, spaceBetween: 32 },
             },
         });
     });

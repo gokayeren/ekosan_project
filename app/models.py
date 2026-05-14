@@ -218,6 +218,7 @@ class Corporate(db.Model):
     presentation_slider = db.relationship('SliderGroup', foreign_keys=[presentation_slider_id])
     
     presentation_title = db.Column(db.String(200), default="20 Yıldan Fazla Süredir Bölgemizde Hizmet Veriyoruz.")
+    presentation_subtitle = db.Column(db.Text, default="Projeden uygulamaya kadar anahtar teslim çözümler sunuyoruz.")
     howeare = db.Column(db.Text, default="Ekosan Isı 20 yılı aşkın sektör deneyimiyle Zonguldak...")
     whatwedo = db.Column(db.Text, default="Bölgenin en güvenilir ısıtma soğutma firmlarından biri olarak...")
     whyus = db.Column(db.Text, default="20+ yıllık uzmanlık...")
@@ -240,6 +241,7 @@ class References(db.Model):
     hero_slider = db.relationship('SliderGroup', foreign_keys=[hero_slider_id])
     
     presentation_title = db.Column(db.String(200), default="Isıtma, Soğutma, Güneşten Elektrik...")
+    presentation_subtitle = db.Column(db.Text, default="Tamamlanan kurumsal ve bireysel projelerimizden seçkiler.")
     
     corporate_slider_id = db.Column(db.Integer, db.ForeignKey('slider_groups.id'), nullable=True)
     corporate_slider = db.relationship('SliderGroup', foreign_keys=[corporate_slider_id])
@@ -272,6 +274,10 @@ class Contact(db.Model):
     workhours = db.Column(db.String(200), default="Pazartesi - Cumartesi 09:00 - 19:00")
     location_shop = db.Column(db.String(200), default="Müftü Mag. Erdemir Cad...")
     location_storage = db.Column(db.String(200), default="Soğanlıyörük Köyü Güçbir...")
+    store_map_link = db.Column(db.String(500), nullable=True)
+    storage_map_link = db.Column(db.String(500), nullable=True)
+    shop_image = db.Column(db.String(200), nullable=True)
+    storage_image = db.Column(db.String(200), nullable=True)
 
     def __str__(self):
         return "İletişim Sabit Ayarları"

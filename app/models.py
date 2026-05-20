@@ -179,6 +179,85 @@ class FaqItem(db.Model):
     def __str__(self):
         return self.question
 
+
+class PopupCampaign(db.Model):
+    __tablename__ = 'popup_campaigns'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False, default='Yeni Popup')
+    is_active = db.Column(db.Boolean, default=True)
+    display_type = db.Column(db.String(30), default='popup')  # popup, banner, notification
+    pages = db.Column(db.String(500), default='*')
+    exclude_pages = db.Column(db.String(500), nullable=True)
+    position = db.Column(db.String(30), default='center')
+    delay_seconds = db.Column(db.Integer, default=2)
+    auto_close_seconds = db.Column(db.Integer, default=0)
+    frequency = db.Column(db.String(30), default='once_session')  # always, once_session, once_day, once_week
+
+    title = db.Column(db.String(200), nullable=True)
+    image_url = db.Column(db.String(500), nullable=True)
+    font_family = db.Column(db.String(120), default='Inter, sans-serif')
+    html_content = db.Column(db.Text, nullable=True)
+    button_text = db.Column(db.String(80), nullable=True)
+    button_url = db.Column(db.String(500), nullable=True)
+
+    start_at = db.Column(db.DateTime, nullable=True)
+    end_at = db.Column(db.DateTime, nullable=True)
+    order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def page_tokens(self, value):
+        if not value:
+            return []
+        return [x.strip() for x in value.split(',') if x.strip()]
+
+    def matches_path(self, path):
+        path = path or '/'
+        pages = self.page_tokens(self.pages) or ['*']
+        excluded = self.page_tokens(self.exclude_pages)
+
+        def match(pattern):
+            if pattern == '*':
+                return True
+            if pattern.endswith('*'):
+                return path.startswith(pattern[:-1])
+            return path == pattern
+
+        return any(match(p) for p in pages) and not any(match(p) for p in excluded)
+
+    def is_visible_now(self, path=None):
+        now = datetime.utcnow()
+        if not self.is_active:
+            return False
+        if self.start_at and self.start_at > now:
+            return False
+        if self.end_at and self.end_at < now:
+            return False
+        if path is not None and not self.matches_path(path):
+            return False
+        return True
+
+    def to_frontend_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'type': self.display_type or 'popup',
+            'position': self.position or 'center',
+            'delay': max(self.delay_seconds or 0, 0),
+            'autoClose': max(self.auto_close_seconds or 0, 0),
+            'frequency': self.frequency or 'once_session',
+            'title': self.title or '',
+            'imageUrl': self.image_url or '',
+            'fontFamily': self.font_family or 'Inter, sans-serif',
+            'html': self.html_content or '',
+            'buttonText': self.button_text or '',
+            'buttonUrl': self.button_url or '',
+        }
+
+    def __str__(self):
+        return self.name
+
 class HomeConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     

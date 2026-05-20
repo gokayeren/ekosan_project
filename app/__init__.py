@@ -11,7 +11,7 @@ from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from flask_admin.menu import MenuLink
 from config import Config
-from wtforms import BooleanField, HiddenField
+from wtforms import BooleanField, HiddenField, TextAreaField
 import json
 from markupsafe import Markup
 import markdown
@@ -54,7 +54,7 @@ from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
     Contact, Getoffer, Form, FormField, FormSubmission,
-    FaqGroup, FaqItem, AdminUser
+    FaqGroup, FaqItem, AdminUser, PopupCampaign
 )
 
 class SettingsView(ProtectedModelView):
@@ -486,6 +486,97 @@ class FaqGroupView(ProtectedModelView):
         if name == 'delete': return True
         return False
     
+class PopupCampaignView(ProtectedModelView):
+    list_template = 'admin/custom_list.html'
+    create_template = 'admin/popup_form.html'
+    edit_template = 'admin/popup_form.html'
+
+    column_list = ('order', 'name', 'display_type', 'pages', 'delay_seconds', 'frequency', 'is_active')
+    column_default_sort = ('order', False)
+    form_columns = (
+        'name', 'is_active', 'display_type', 'pages', 'exclude_pages', 'position',
+        'delay_seconds', 'auto_close_seconds', 'frequency', 'title', 'image_url',
+        'font_family', 'html_content', 'button_text', 'button_url',
+        'start_at', 'end_at', 'order'
+    )
+
+    column_labels = {
+        'name': 'Kampanya Adı',
+        'is_active': 'Yayında mı?',
+        'display_type': 'Gösterim Tipi',
+        'pages': 'Görünecek Sayfalar',
+        'exclude_pages': 'Hariç Tutulacak Sayfalar',
+        'position': 'Konum',
+        'delay_seconds': 'Kaç Saniye Sonra',
+        'auto_close_seconds': 'Otomatik Kapanma (sn)',
+        'frequency': 'Gösterim Sıklığı',
+        'title': 'Başlık',
+        'image_url': 'Resim Linki',
+        'font_family': 'Font',
+        'html_content': 'HTML İçerik',
+        'button_text': 'Buton Yazısı',
+        'button_url': 'Buton Linki',
+        'start_at': 'Başlangıç Tarihi',
+        'end_at': 'Bitiş Tarihi',
+        'order': 'Sıralama'
+    }
+
+    form_choices = {
+        'display_type': [
+            ('popup', 'Popup / Modal'),
+            ('banner', 'Banner'),
+            ('notification', 'Bildirim Kutusu')
+        ],
+        'position': [
+            ('center', 'Ortada'),
+            ('top', 'Üst'),
+            ('bottom', 'Alt'),
+            ('top-right', 'Sağ Üst'),
+            ('bottom-right', 'Sağ Alt'),
+            ('bottom-left', 'Sol Alt')
+        ],
+        'frequency': [
+            ('always', 'Her ziyarette göster'),
+            ('once_session', 'Oturumda bir kez'),
+            ('once_day', 'Günde bir kez'),
+            ('once_week', 'Haftada bir kez')
+        ]
+    }
+
+    form_overrides = {
+        'html_content': TextAreaField
+    }
+
+    form_widget_args = {
+        'html_content': {
+            'rows': 14,
+            'class': 'form-control popup-html-editor',
+            'placeholder': '<p>Kısa açıklama...</p>'
+        },
+        'pages': {
+            'placeholder': 'Örn: *, /, /kurumsal, /hizmetler/*'
+        },
+        'exclude_pages': {
+            'placeholder': 'Örn: /iletisim, /teklifal'
+        },
+        'image_url': {
+            'placeholder': 'https://... veya /static/uploads/resim.jpg'
+        }
+    }
+
+    batch_actions = None
+
+    def is_action_allowed(self, name):
+        if name == 'delete':
+            return True
+        return False
+
+    def _type_badge(view, context, model, name):
+        labels = {'popup': 'Popup', 'banner': 'Banner', 'notification': 'Bildirim'}
+        return Markup(f'<span class="badge badge-sm badge-outline">{labels.get(model.display_type, model.display_type)}</span>')
+
+    column_formatters = {'display_type': _type_badge}
+
 class CustomFileAdmin(FileAdmin):
     list_template = 'admin/custom_media_list.html'
     can_upload = True
@@ -609,6 +700,7 @@ def create_app(config_class=Config):
     admin.add_view(ReferencesView(References, db.session, name="Referanslar İçerik"))
     admin.add_view(ContactView(Contact, db.session, name="İletişim Sayfası"))
     admin.add_view(GetofferView(Getoffer, db.session, name="Teklif Sayfası"))
+    admin.add_view(PopupCampaignView(PopupCampaign, db.session, name="Popup / Banner", category="Pazarlama"))
     admin.add_view(CustomFileAdmin(UPLOAD_PATH, '/static/uploads/', name='Medya Yönetimi', endpoint='medya_yonetimi'))
     admin.add_view(FormBuilderView(Form, db.session, name="Form Oluşturucu", category="Form Yönetimi"))
     admin.add_view(FormSubmissionView(FormSubmission, db.session, name="Gelen Başvurular", category="Form Yönetimi"))
@@ -631,10 +723,13 @@ def create_app(config_class=Config):
             settings = SiteSetting.query.first()
             menu = MenuItem.query.filter_by(parent_id=None, is_active=True).order_by(MenuItem.order).all()
             footer = Footer.query.first()
+            active_popups = PopupCampaign.query.order_by(PopupCampaign.order.asc(), PopupCampaign.id.desc()).all()
+            active_popups = [p for p in active_popups if p.is_visible_now(request.path)]
         except:
             settings = None
             menu = []
             footer = None
+            active_popups = []
 
         def get_slider(key):
             try:
@@ -664,7 +759,8 @@ def create_app(config_class=Config):
             footer_settings=footer, 
             get_slider=get_slider,
             get_form=get_form,
-            get_faq=get_faq
+            get_faq=get_faq,
+            active_popups=active_popups
         )
 
     with app.app_context():

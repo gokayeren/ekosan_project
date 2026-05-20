@@ -643,5 +643,114 @@
             });
         });
     </script>
+
+    {% if active_popups %}
+    <div id="ekosan-popup-root" aria-live="polite"></div>
+    <style>
+        .ekosan-ad-layer { position: fixed; inset: 0; z-index: 80; display: none; pointer-events: none; }
+        .ekosan-ad-layer.is-visible { display: flex; }
+        .ekosan-ad-backdrop { position:absolute; inset:0; background: rgba(15, 23, 42, .58); backdrop-filter: blur(7px); pointer-events:auto; }
+        .ekosan-ad-card { pointer-events:auto; position:relative; width:min(92vw, 520px); max-height:86vh; overflow:auto; border-radius:28px; background:rgba(255,255,255,.96); box-shadow:0 28px 90px rgba(15,23,42,.28); border:1px solid rgba(255,255,255,.75); color:#1f2937; animation: ekosanAdIn .36s cubic-bezier(.2,.9,.2,1); }
+        .ekosan-ad-banner { pointer-events:auto; width:min(1120px, calc(100vw - 24px)); margin:12px auto; border-radius:22px; background:rgba(255,255,255,.97); box-shadow:0 18px 50px rgba(15,23,42,.18); border:1px solid rgba(226,232,240,.9); color:#1f2937; animation: ekosanAdIn .32s cubic-bezier(.2,.9,.2,1); }
+        .ekosan-ad-toast { pointer-events:auto; width:min(92vw, 380px); margin:18px; border-radius:22px; background:rgba(255,255,255,.97); box-shadow:0 18px 60px rgba(15,23,42,.24); border:1px solid rgba(226,232,240,.9); color:#1f2937; animation: ekosanAdIn .32s cubic-bezier(.2,.9,.2,1); }
+        .ekosan-ad-close { position:absolute; top:14px; right:14px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:999px; background:rgba(15,23,42,.08); color:#334155; font-size:20px; line-height:1; transition:.2s; z-index:2; }
+        .ekosan-ad-close:hover { background:#232e48; color:#fff; transform: rotate(90deg); }
+        .ekosan-ad-image { width:100%; max-height:230px; object-fit:cover; display:block; }
+        .ekosan-ad-inner { padding:28px; }
+        .ekosan-ad-title { margin:0 42px 12px 0; font-weight:800; font-size:clamp(22px, 3vw, 32px); line-height:1.08; color:#232e48; letter-spacing:-.03em; }
+        .ekosan-ad-content { font-size:15px; line-height:1.72; color:#475569; }
+        .ekosan-ad-content p { margin:0 0 12px; }
+        .ekosan-ad-content a { color:#1877F2; font-weight:700; }
+        .ekosan-ad-button { display:inline-flex; align-items:center; justify-content:center; margin-top:18px; padding:12px 20px; border-radius:999px; background:#1877F2; color:#fff !important; font-weight:800; font-size:14px; box-shadow:0 12px 28px rgba(24,119,242,.26); transition:.2s; }
+        .ekosan-ad-button:hover { transform: translateY(-1px); filter:brightness(.96); }
+        .ekosan-ad-layer[data-position="center"] { align-items:center; justify-content:center; padding:18px; }
+        .ekosan-ad-layer[data-position="top"] { align-items:flex-start; justify-content:center; }
+        .ekosan-ad-layer[data-position="bottom"] { align-items:flex-end; justify-content:center; }
+        .ekosan-ad-layer[data-position="top-right"] { align-items:flex-start; justify-content:flex-end; }
+        .ekosan-ad-layer[data-position="bottom-right"] { align-items:flex-end; justify-content:flex-end; }
+        .ekosan-ad-layer[data-position="bottom-left"] { align-items:flex-end; justify-content:flex-start; }
+        .ekosan-ad-layer[data-kind="banner"] .ekosan-ad-backdrop, .ekosan-ad-layer[data-kind="notification"] .ekosan-ad-backdrop { display:none; }
+        .ekosan-ad-layer[data-kind="banner"] { inset:auto 0 auto 0; }
+        .ekosan-ad-layer[data-kind="banner"][data-position="bottom"] { bottom:0; }
+        .ekosan-ad-layer[data-kind="banner"][data-position="top"] { top:72px; }
+        @keyframes ekosanAdIn { from { opacity:0; transform:translateY(18px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @media (max-width: 640px) { .ekosan-ad-inner{padding:22px;} .ekosan-ad-card{border-radius:22px;} .ekosan-ad-title{font-size:22px;} }
+    </style>
+    <script>
+        window.EKOSAN_POPUPS = [
+            {% for popup in active_popups %}
+                {{ popup.to_frontend_dict()|tojson }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const root = document.getElementById('ekosan-popup-root');
+            if (!root || !Array.isArray(window.EKOSAN_POPUPS)) return;
+
+            const now = Date.now();
+            const limits = {
+                always: 0,
+                once_session: 'session',
+                once_day: 24 * 60 * 60 * 1000,
+                once_week: 7 * 24 * 60 * 60 * 1000
+            };
+
+            const canShow = (campaign) => {
+                const key = 'ekosan-popup-' + campaign.id;
+                if (campaign.frequency === 'always') return true;
+                if (campaign.frequency === 'once_session') return !sessionStorage.getItem(key);
+                const last = Number(localStorage.getItem(key) || 0);
+                const windowMs = limits[campaign.frequency] || 0;
+                return !last || (now - last > windowMs);
+            };
+
+            const markShown = (campaign) => {
+                const key = 'ekosan-popup-' + campaign.id;
+                if (campaign.frequency === 'once_session') sessionStorage.setItem(key, String(now));
+                else if (campaign.frequency !== 'always') localStorage.setItem(key, String(now));
+            };
+
+            const closeLayer = (layer) => {
+                layer.style.opacity = '0';
+                layer.style.transition = 'opacity .2s ease';
+                setTimeout(() => layer.remove(), 220);
+            };
+
+            const createCampaign = (campaign) => {
+                if (!canShow(campaign)) return;
+                const layer = document.createElement('div');
+                layer.className = 'ekosan-ad-layer';
+                layer.dataset.kind = campaign.type || 'popup';
+                layer.dataset.position = campaign.position || (campaign.type === 'notification' ? 'bottom-right' : 'center');
+
+                const shellClass = campaign.type === 'banner' ? 'ekosan-ad-banner' : (campaign.type === 'notification' ? 'ekosan-ad-toast' : 'ekosan-ad-card');
+                layer.innerHTML = `
+                    <div class="ekosan-ad-backdrop" data-close="1"></div>
+                    <div class="${shellClass}" style="font-family:${campaign.fontFamily || 'Inter, sans-serif'}">
+                        <button class="ekosan-ad-close" type="button" aria-label="Kapat" data-close="1">×</button>
+                        ${campaign.imageUrl ? `<img class="ekosan-ad-image" src="${campaign.imageUrl}" alt="">` : ''}
+                        <div class="ekosan-ad-inner">
+                            ${campaign.title ? `<h2 class="ekosan-ad-title">${campaign.title}</h2>` : ''}
+                            ${campaign.html ? `<div class="ekosan-ad-content">${campaign.html}</div>` : ''}
+                            ${(campaign.buttonText && campaign.buttonUrl) ? `<a class="ekosan-ad-button" href="${campaign.buttonUrl}">${campaign.buttonText}</a>` : ''}
+                        </div>
+                    </div>
+                `;
+                root.appendChild(layer);
+                setTimeout(() => {
+                    layer.classList.add('is-visible');
+                    markShown(campaign);
+                }, Math.max(Number(campaign.delay || 0), 0) * 1000);
+                layer.addEventListener('click', function(e){ if (e.target.dataset.close) closeLayer(layer); });
+                if (Number(campaign.autoClose || 0) > 0) {
+                    setTimeout(() => closeLayer(layer), (Number(campaign.delay || 0) + Number(campaign.autoClose || 0)) * 1000);
+                }
+            };
+
+            window.EKOSAN_POPUPS.forEach(createCampaign);
+        });
+    </script>
+    {% endif %}
+
 </body>
 </html>

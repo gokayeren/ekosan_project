@@ -3,301 +3,423 @@
 {% block content_title %}{% endblock %}
 
 {% block head_css %}
-    {{ super() }}
-    <style>
-        .inline-field-list { display: flex; flex-direction: column; gap: 1rem; }
-        
-        .inline-field {
-            background: #0f172a;
-            border: 1px solid #1e293b;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 1rem;
-            align-items: end;
-        }
+{{ super() }}
+<style>
+    .inline-field-list { display: flex; flex-direction: column; gap: .875rem; }
+    .field-card {
+        overflow: hidden;
+        background: #0b1325;
+        border: 1px solid #24324a;
+        border-radius: .75rem;
+        transition: border-color .2s;
+    }
+    .field-card:focus-within { border-color: #6366f1; }
+    .field-card.is-deleted { display: none; }
+    .field-card-header {
+        min-height: 48px;
+        padding: .65rem 1rem;
+        border-bottom: 1px solid #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .field-card-title {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        min-width: 0;
+        color: #e2e8f0;
+        font-size: .8rem;
+        font-weight: 700;
+    }
+    .field-title-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .field-number {
+        width: 26px;
+        height: 26px;
+        flex: 0 0 26px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(139, 92, 246, .14);
+        border: 1px solid rgba(139, 92, 246, .28);
+        color: #c4b5fd;
+        font: 700 .7rem ui-monospace, monospace;
+    }
+    .field-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: .9rem;
+        padding: 1rem;
+        align-items: end;
+    }
+    .field-control { grid-column: span 12; min-width: 0; }
+    .field-control > label:first-child {
+        display: block;
+        margin-bottom: .38rem;
+        color: #94a3b8;
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .055em;
+        text-transform: uppercase;
+    }
+    .field-control .form-control {
+        display: block;
+        width: 100%;
+        min-height: 40px;
+        padding: .55rem .75rem;
+        background: #020617;
+        border: 1px solid #334155;
+        border-radius: .45rem;
+        color: #e2e8f0;
+        font-size: .82rem;
+        outline: none;
+    }
+    .field-control textarea.form-control { resize: vertical; }
+    .field-control .form-control:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, .12);
+    }
+    .field-name .form-control {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: #93c5fd;
+    }
+    .field-checkbox {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+        padding: 0 .7rem;
+        background: #020617;
+        border: 1px solid #334155;
+        border-radius: .45rem;
+        cursor: pointer;
+    }
+    .field-checkbox input { width: 17px; height: 17px; accent-color: #6366f1; }
+    .field-checkbox span { color: #cbd5e1; font-size: .78rem; }
+    .field-delete-input { display: none !important; }
+    .inline-remove-field {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #f87171;
+        background: rgba(239, 68, 68, .08);
+        border: 1px solid rgba(239, 68, 68, .22);
+        border-radius: .45rem;
+        cursor: pointer;
+        transition: .2s;
+    }
+    .inline-remove-field:hover { color: white; background: #dc2626; border-color: #ef4444; }
+    .field-helper { margin-top: .35rem; color: #64748b; font-size: .62rem; line-height: 1.35; }
+    .field-error { margin-top: .35rem; color: #f87171; font-size: .68rem; }
 
-        .inline-field legend {
-            grid-column: span 12;
-            border-bottom: 1px solid #1e293b;
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.5rem;
-            font-weight: 700; color: #e2e8f0; font-size: 0.85rem;
-            display: flex; justify-content: space-between; align-items: center;
-            text-transform: uppercase; letter-spacing: 0.05em;
-        }
-        .inline-field legend small { display: none; }
-
-        .inline-remove-field {
-            color: #ef4444; background: rgba(239, 68, 68, 0.1);
-            width: 28px; height: 28px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 4px; cursor: pointer; text-decoration: none;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            transition: all 0.2s;
-        }
-        .inline-remove-field:hover { background: #7f1d1d; color: white; border-color: #ef4444; }
-
-        .inline-field .form-group { grid-column: span 12; }
-        @media (min-width: 1024px) {
-            .inline-field .form-group:nth-of-type(2) { grid-column: span 3; }
-            .inline-field .form-group:nth-of-type(3) { grid-column: span 3; }
-            .inline-field .form-group:nth-of-type(4) { grid-column: span 2; }
-            .inline-field .form-group:nth-of-type(5) { grid-column: span 1; }
-            .inline-field .form-group:nth-of-type(6) { grid-column: span 3; }
-            .inline-field .form-group:nth-of-type(7) { grid-column: span 11; }
-            .inline-field .form-group:nth-of-type(8) { grid-column: span 1; }
-        }
-
-        .inline-field label { 
-            display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8;
-            text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.05em;
-        }
-        .inline-field .form-control { 
-            display: block; width: 100%; padding: 0.5rem 0.75rem; 
-            background-color: #020617;
-            border: 1px solid #334155;
-            border-radius: 0.375rem; color: #e2e8f0; font-size: 0.875rem;
-            transition: border-color 0.15s ease-in-out;
-        }
-        .inline-field .form-control:focus { border-color: #3b82f6; outline: none; }
-        
-        .inline-field input[type="checkbox"] { 
-            appearance: none; width: 20px; height: 20px; margin-top: 5px; cursor: pointer;
-            background-color: #020617; border: 1px solid #334155; border-radius: 4px;
-            display: grid; place-content: center;
-        }
-        .inline-field input[type="checkbox"]::before {
-            content: ""; width: 12px; height: 12px; transform: scale(0);
-            background-color: #3b82f6; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-            transition: 0.1s transform ease-in-out;
-        }
-        .inline-field input[type="checkbox"]:checked { border-color: #3b82f6; }
-        .inline-field input[type="checkbox"]:checked::before { transform: scale(1); }
-        
-        .inline-field input[type="hidden"] { display: none; }
-    </style>
+    @media (min-width: 768px) {
+        .field-label { grid-column: span 7; }
+        .field-name { grid-column: span 5; }
+        .field-type { grid-column: span 4; }
+        .field-placeholder { grid-column: span 8; }
+        .field-options { grid-column: span 8; }
+        .field-required, .field-order { grid-column: span 2; }
+    }
+    @media (min-width: 1280px) {
+        .field-label { grid-column: span 5; }
+        .field-name { grid-column: span 4; }
+        .field-type { grid-column: span 3; }
+        .field-placeholder { grid-column: span 5; }
+        .field-options { grid-column: span 5; }
+        .field-required, .field-order { grid-column: span 1; }
+    }
+</style>
 {% endblock %}
 
 {% block body %}
-    
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <h2 class="text-xl font-bold text-slate-100 tracking-tight">Form Düzenleyici</h2>
-            <p class="text-xs text-slate-500 mt-1">İletişim formlarını ve alanlarını dinamik olarak yönetin.</p>
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+        <h2 class="text-xl font-bold text-slate-100 tracking-tight">Form Düzenleyici</h2>
+        <p class="text-xs text-slate-500 mt-1">Form ayarlarını ve kullanıcıya gösterilecek alanları yönetin.</p>
+    </div>
+    <button type="submit" form="formEditor" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 gap-2 shadow-lg shadow-blue-900/20">
+        <i class="fa fa-save"></i> Değişiklikleri Kaydet
+    </button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for category, message in messages %}
+                <div class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
+                    <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
         </div>
-        <div>
-            <button type="submit" form="formEditor" class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0 gap-2 shadow-lg shadow-blue-900/20">
-                <i class="fa fa-save"></i> Değişiklikleri Kaydet
-            </button>
+    {% endif %}
+{% endwith %}
+
+<form id="formEditor" action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
+    {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
+    {% for f in form if f.type == 'HiddenField' and f.name != 'csrf_token' %}{{ f() }}{% endfor %}
+
+    <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+        <div class="px-5 sm:px-6 py-4 border-b border-slate-800 flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <i class="fa fa-clipboard-check"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-200 text-sm">Genel Ayarlar</h3>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wide">Başlık, kimlik ve bildirimler</p>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Form Başlığı</label>
+                {{ form.title(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600") }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Form ID (Key)</label>
+                {{ form.form_key(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors placeholder-slate-600") }}
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">E-posta (Bildirim Alıcısı)</label>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    {{ form.recipient_email(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600", id="target-email-input") }}
+                    <button type="button" id="btn-activate-mail" class="btn btn-sm bg-amber-600 hover:bg-amber-500 text-white border-0 gap-2 h-10 px-5 rounded font-medium shadow-lg shadow-amber-900/20 sm:flex-none" title="Bu adresi FormSubmit servisinde aktive et">
+                        <i class="fa fa-paper-plane"></i> Aktive Et
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1.5">
+                    <i class="fa fa-info-circle text-indigo-400"></i> Bu adres ilk kez kullanılıyorsa aktivasyon e-postasını onaylayın.
+                </p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Gönder Buton Yazısı</label>
+                {{ form.submit_btn_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600") }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Başarı Mesajı</label>
+                {{ form.success_message(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors h-10 resize-none placeholder-slate-600") }}
+            </div>
         </div>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="mb-6 space-y-2">
-                {% for category, message in messages %}
-                    <div class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm {{ 'bg-green-900/20 text-green-400 border-green-900/50' if category == 'success' else 'bg-blue-900/20 text-blue-400 border-blue-900/50' }}">
-                         <i class="fa {{ 'fa-check-circle' if category == 'success' else 'fa-info-circle' }}"></i>
-                        <span>{{ message }}</span>
+    <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
+        <div class="px-4 sm:px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-purple-900/20 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                    <i class="fa fa-layer-group"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-200 text-sm">Form Alanları</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Dinamik alan yönetimi</p>
+                </div>
+            </div>
+            <button type="button" id="manuel-add-btn" class="btn btn-sm bg-purple-600 hover:bg-purple-500 text-white border-0 gap-2 shadow-lg shadow-purple-900/20">
+                <i class="fa fa-plus"></i> Yeni Alan Ekle
+            </button>
+        </div>
+
+        <div class="p-3 sm:p-5 bg-[#0f172a]">
+            <div id="fields-container" class="inline-field-list">
+                {% for subfield in form.fields %}
+                    {% set field = subfield.form %}
+                    <div class="field-card" data-auto-name="{{ 'true' if not field.name.data else 'false' }}">
+                        {% for hidden in field if hidden.type == 'HiddenField' %}{{ hidden() }}{% endfor %}
+                        <input type="checkbox" class="field-delete-input" name="del-{{ subfield.id }}" id="del-{{ subfield.id }}" tabindex="-1">
+
+                        <div class="field-card-header">
+                            <div class="field-card-title">
+                                <span class="field-number">{{ loop.index }}</span>
+                                <span class="field-title-text">{{ field.label.data or 'Adsız alan' }}</span>
+                            </div>
+                            <button type="button" class="inline-remove-field" title="Alanı sil" aria-label="Alanı sil"><i class="fa fa-times"></i></button>
+                        </div>
+
+                        <div class="field-grid">
+                            <div class="field-control field-label">
+                                <label for="{{ field.label.id }}">Etiket</label>
+                                {{ field.label(class="form-control field-label-input", placeholder="Örn. Adınız Soyadınız") }}
+                                {% for error in field.label.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                            </div>
+                            <div class="field-control field-name">
+                                <label for="{{ field.name.id }}">Sistem adı</label>
+                                {{ field.name(class="form-control field-name-input", placeholder="adiniz_soyadiniz", autocomplete="off") }}
+                                <p class="field-helper">Etiketten otomatik oluşur; entegrasyon gerekiyorsa değiştirilebilir.</p>
+                                {% for error in field.name.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                            </div>
+                            <div class="field-control field-type">
+                                <label for="{{ field.field_type.id }}">Alan tipi</label>
+                                {{ field.field_type(class="form-control field-type-select") }}
+                                {% for error in field.field_type.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                            </div>
+                            <div class="field-control field-placeholder">
+                                <label for="{{ field.placeholder.id }}">İpucu metni</label>
+                                {{ field.placeholder(class="form-control", placeholder="Kullanıcıya gösterilecek kısa ipucu") }}
+                            </div>
+                            <div class="field-control field-options" {% if field.field_type.data != 'select' %}hidden{% endif %}>
+                                <label for="{{ field.options.id }}">Seçenekler</label>
+                                {{ field.options(class="form-control", rows="1", placeholder="Seçenekleri virgülle ayırın") }}
+                            </div>
+                            <div class="field-control field-required">
+                                <label>Zorunluluk</label>
+                                <label class="field-checkbox">
+                                    {{ field.is_required() }}
+                                    <span>Zorunlu</span>
+                                </label>
+                            </div>
+                            <div class="field-control field-order">
+                                <label for="{{ field.order.id }}">Sıra</label>
+                                {{ field.order(class="form-control", min="0") }}
+                            </div>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
-        {% endif %}
-    {% endwith %}
-
-    <form id="formEditor" action="" method="POST" enctype="multipart/form-data" class="w-full pb-20">
-        {% if form.csrf_token %}{{ form.csrf_token }}{% endif %}
-        {% for f in form if f.type == 'HiddenField' %}{{ f() }}{% endfor %}
-
-        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
-            <div class="px-6 py-4 border-b border-slate-800 flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-indigo-900/20 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                    <i class="fa fa-clipboard-check"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-slate-200 text-sm">Genel Ayarlar</h3>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-wide">Başlık, ID ve Bildirimler</p>
-                </div>
-            </div>
-            
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Form Başlığı</label>
-                        {{ form.title(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600") }}
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Form ID (Key)</label>
-                        {{ form.form_key(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono transition-colors placeholder-slate-600") }}
-                    </div>
-                </div>
-
-                <div class="col-span-1 md:col-span-2">
-                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">E-Posta (Bildirim Alıcısı)</label>
-                    <div class="flex gap-2">
-                        {{ form.recipient_email(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600", id="target-email-input") }}
-                        
-                        <button type="button" id="btn-activate-mail" class="btn btn-sm bg-amber-600 hover:bg-amber-500 text-white border-0 gap-2 h-auto px-5 rounded font-medium shadow-lg shadow-amber-900/20" title="Bu mail adresini FormSubmit servisinde aktive et">
-                            <i class="fa fa-paper-plane"></i> Aktive Et
-                        </button>
-                    </div>
-                    <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1.5">
-                        <i class="fa fa-info-circle text-indigo-400"></i> Bu e-postayı ilk kez kullanıyorsanız, butona tıklayıp aktivasyonu tamamlayın.
-                    </p>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Gönder Buton Yazısı</label>
-                    {{ form.submit_btn_text(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600") }}
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Başarı Mesajı</label>
-                    {{ form.success_message(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors h-10 resize-none placeholder-slate-600") }}
-                </div>
-            </div>
         </div>
+    </div>
+</form>
 
-        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6 shadow-sm">
-            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-purple-900/20 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                        <i class="fa fa-layer-group"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-200 text-sm">Form Alanları</h3>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Dinamik Alan Yönetimi</p>
-                    </div>
+<script>
+$(document).ready(function() {
+    function makeSystemName(value) {
+        return (value || '')
+            .trim()
+            .toLocaleLowerCase('tr-TR')
+            .replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+            .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '');
+    }
+
+    $('#manuel-add-btn').on('click', function() {
+        var indexes = $('[name^="fields-"][name$="-label"]').map(function() {
+            var match = this.name.match(/^fields-(\d+)-label$/);
+            return match ? Number(match[1]) : -1;
+        }).get();
+        var newIndex = indexes.length ? Math.max.apply(null, indexes) + 1 : 0;
+        var visibleOrder = $('.field-card:not(.is-deleted)').length + 1;
+
+        var html = `
+        <div class="field-card" data-auto-name="true">
+            <input type="hidden" name="fields-${newIndex}-id" id="fields-${newIndex}-id" value="">
+            <input type="hidden" name="fields-${newIndex}-csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+            <input type="checkbox" class="field-delete-input" name="del-fields-${newIndex}" id="del-fields-${newIndex}" tabindex="-1">
+            <div class="field-card-header">
+                <div class="field-card-title">
+                    <span class="field-number">${visibleOrder}</span>
+                    <span class="field-title-text">Yeni alan</span>
                 </div>
-                <button type="button" id="manuel-add-btn" class="btn btn-sm bg-purple-600 hover:bg-purple-500 text-white border-0 gap-2 shadow-lg shadow-purple-900/20 transition-all">
-                    <i class="fa fa-plus"></i> Yeni Alan Ekle
-                </button>
+                <button type="button" class="inline-remove-field" title="Alanı sil" aria-label="Alanı sil"><i class="fa fa-times"></i></button>
             </div>
-            
-            <div class="p-6 bg-[#0f172a]">
-                <div id="fields-container" class="inline-field-list">
-                    {% for subfield in form.fields %}
-                        {{ subfield()|safe }}
-                    {% endfor %}
+            <div class="field-grid">
+                <div class="field-control field-label">
+                    <label for="fields-${newIndex}-label">Etiket</label>
+                    <input class="form-control field-label-input" name="fields-${newIndex}-label" id="fields-${newIndex}-label" type="text" required placeholder="Örn. Adınız Soyadınız">
                 </div>
-            </div>
-        </div>
-
-    </form>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            
-            $('#manuel-add-btn').on('click', function(e) {
-                e.preventDefault();
-                
-                var newIndex = $('.inline-field').length;
-                console.log("Yeni kutu ekleniyor. ID:", newIndex);
-
-                var manuelHtml = `
-                <div class="inline-field">
-                    <input type="hidden" name="fields-${newIndex}-id" id="fields-${newIndex}-id" value="">
-                    <input type="hidden" name="fields-${newIndex}-csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
-                    
-                    <legend>Yeni Alan <a href="javascript:void(0)" class="inline-remove-field" title="Alanı Sil"><i class="fa fa-times"></i></a></legend>
-
-                    <div class="form-group">
-                        <label>Etiket (Label)</label>
-                        <input class="form-control" name="fields-${newIndex}-label" id="fields-${newIndex}-label" type="text" required placeholder="Görünen İsim">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sistem Adı (Name)</label>
-                        <input class="form-control" name="fields-${newIndex}-name" id="fields-${newIndex}-name" type="text" required placeholder="ornek_alan_adi">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tip</label>
-                        <input class="form-control" name="fields-${newIndex}-field_type" id="fields-${newIndex}-field_type" type="text" value="text" list="typeList" placeholder="Seçiniz...">
-                        <datalist id="typeList">
-                            <option value="text">
-                            <option value="email">
-                            <option value="textarea">
-                            <option value="tel">
-                            <option value="select">
-                        </datalist>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Zorunlu?</label>
+                <div class="field-control field-name">
+                    <label for="fields-${newIndex}-name">Sistem adı</label>
+                    <input class="form-control field-name-input" name="fields-${newIndex}-name" id="fields-${newIndex}-name" type="text" required placeholder="adiniz_soyadiniz" autocomplete="off">
+                    <p class="field-helper">Etiketten otomatik oluşur; entegrasyon gerekiyorsa değiştirilebilir.</p>
+                </div>
+                <div class="field-control field-type">
+                    <label for="fields-${newIndex}-field_type">Alan tipi</label>
+                    <select class="form-control field-type-select" name="fields-${newIndex}-field_type" id="fields-${newIndex}-field_type">
+                        <option value="text">Kısa metin</option>
+                        <option value="email">E-posta</option>
+                        <option value="tel">Telefon</option>
+                        <option value="textarea">Uzun metin</option>
+                        <option value="select">Seçim kutusu</option>
+                    </select>
+                </div>
+                <div class="field-control field-placeholder">
+                    <label for="fields-${newIndex}-placeholder">İpucu metni</label>
+                    <input class="form-control" name="fields-${newIndex}-placeholder" id="fields-${newIndex}-placeholder" type="text" placeholder="Kullanıcıya gösterilecek kısa ipucu">
+                </div>
+                <div class="field-control field-options" hidden>
+                    <label for="fields-${newIndex}-options">Seçenekler</label>
+                    <textarea class="form-control" name="fields-${newIndex}-options" id="fields-${newIndex}-options" rows="1" placeholder="Seçenekleri virgülle ayırın"></textarea>
+                </div>
+                <div class="field-control field-required">
+                    <label>Zorunluluk</label>
+                    <label class="field-checkbox">
                         <input name="fields-${newIndex}-is_required" id="fields-${newIndex}-is_required" type="checkbox" value="y" checked>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Placeholder</label>
-                        <input class="form-control" name="fields-${newIndex}-placeholder" id="fields-${newIndex}-placeholder" type="text" placeholder="İpucu metni...">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Seçenekler (Sadece select için)</label>
-                        <textarea class="form-control" name="fields-${newIndex}-options" id="fields-${newIndex}-options" rows="1" placeholder="Seçenekleri virgülle ayırın..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sıra</label>
-                        <input class="form-control" name="fields-${newIndex}-order" id="fields-${newIndex}-order" type="number" value="${newIndex + 1}">
-                    </div>
+                        <span>Zorunlu</span>
+                    </label>
                 </div>
-                `;
+                <div class="field-control field-order">
+                    <label for="fields-${newIndex}-order">Sıra</label>
+                    <input class="form-control" name="fields-${newIndex}-order" id="fields-${newIndex}-order" type="number" min="0" value="${visibleOrder}">
+                </div>
+            </div>
+        </div>`;
 
-                $('#fields-container').append(manuelHtml);
-            });
+        $('#fields-container').append(html);
+        $('#fields-container .field-card').last().find('.field-label-input').trigger('focus');
+    });
 
-            $('#btn-activate-mail').on('click', function() {
-                var email = $('#target-email-input').val();
-                var btn = $(this);
-                
-                if (!email || !email.includes('@')) {
-                    alert('Lütfen geçerli bir e-posta adresi giriniz.');
-                    return;
-                }
+    $(document).on('input', '.field-label-input', function() {
+        var card = $(this).closest('.field-card');
+        var nameInput = card.find('.field-name-input');
+        card.find('.field-title-text').text($(this).val().trim() || 'Yeni alan');
+        if (card.attr('data-auto-name') === 'true' || !nameInput.val()) {
+            nameInput.val(makeSystemName($(this).val()));
+        }
+    });
 
-                if(!confirm(email + ' adresine aktivasyon maili gönderilecek. Devam edilsin mi?')) {
-                    return;
-                }
+    $(document).on('input', '.field-name-input', function() {
+        $(this).closest('.field-card').attr('data-auto-name', 'false');
+    });
 
-                var originalText = btn.html();
-                btn.html('<i class="fa fa-spinner fa-spin"></i>');
-                btn.prop('disabled', true);
+    $(document).on('change', '.field-type-select', function() {
+        $(this).closest('.field-card').find('.field-options').prop('hidden', this.value !== 'select');
+    });
 
-                $.ajax({
-                    url: "https://formsubmit.co/" + email,
-                    method: "POST",
-                    dataType: "json",
-                    accepts: "application/json",
-                    data: {
-                        _subject: "Form Aktivasyon",
-                        _captcha: "false",
-                        message: "Form altyapısını aktif etmek için gelen maili onaylayın."
-                    },
-                    success: function(response) {
-                        alert('Başarılı! Lütfen ' + email + ' adresine gelen maili onaylayın.');
-                        btn.html(originalText);
-                        btn.prop('disabled', false);
-                    },
-                    error: function(xhr) {
-                        alert('İstek gönderildi. Lütfen gelen kutunuzu kontrol edin.');
-                        btn.html(originalText);
-                        btn.prop('disabled', false);
-                    }
-                });
-            });
+    $(document).on('click', '.inline-remove-field', function() {
+        if (!confirm('Bu alanı silmek istediğinize emin misiniz?')) return;
+        var card = $(this).closest('.field-card');
+        var deleteInput = card.find('.field-delete-input');
+        if (deleteInput.length) {
+            deleteInput.prop('checked', true);
+            card.addClass('is-deleted');
+        } else {
+            card.remove();
+        }
+    });
 
-            $(document).on('click', '.inline-remove-field', function() {
-                if(confirm('Bu alanı silmek istediğinize emin misiniz?')) {
-                    $(this).closest('.inline-field').remove();
-                }
-            });
+    $('#btn-activate-mail').on('click', function() {
+        var email = $('#target-email-input').val();
+        var btn = $(this);
+        if (!email || !email.includes('@')) {
+            alert('Lütfen geçerli bir e-posta adresi giriniz.');
+            return;
+        }
+        if (!confirm(email + ' adresine aktivasyon e-postası gönderilecek. Devam edilsin mi?')) return;
 
+        var originalText = btn.html();
+        btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+        $.ajax({
+            url: 'https://formsubmit.co/' + email,
+            method: 'POST',
+            dataType: 'json',
+            accepts: 'application/json',
+            data: {
+                _subject: 'Form Aktivasyon',
+                _captcha: 'false',
+                message: 'Form altyapısını aktif etmek için gelen e-postayı onaylayın.'
+            },
+            complete: function() {
+                alert('İstek gönderildi. Lütfen gelen kutunuzu kontrol edin.');
+                btn.html(originalText).prop('disabled', false);
+            }
         });
-    </script>
+    });
+});
+</script>
 {% endblock %}

@@ -4,6 +4,102 @@
     {{ super() }}
 {% endblock %}
 
+{% block head_css %}
+    {{ super() }}
+    <style>
+        .admin-pagination .pagination {
+            display: flex !important;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: .35rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .admin-pagination .pagination > li { display: block; margin: 0; }
+        .admin-pagination .pagination > li > a,
+        .admin-pagination .pagination > li > span {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 .65rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #334155;
+            border-radius: .5rem;
+            background: #0f172a;
+            color: #94a3b8;
+            font-size: .78rem;
+            text-decoration: none;
+            transition: .18s;
+        }
+        .admin-pagination .pagination > li > a:hover {
+            border-color: #3b82f6;
+            background: rgba(37, 99, 235, .14);
+            color: #bfdbfe;
+        }
+        .admin-pagination .pagination > .active > a,
+        .admin-pagination .pagination > .active > span {
+            border-color: #2563eb;
+            background: #2563eb;
+            color: white;
+        }
+        .admin-pagination .pagination > .disabled > a,
+        .admin-pagination .pagination > .disabled > span {
+            opacity: .38;
+            pointer-events: none;
+        }
+        .submission-row { cursor: pointer; }
+        .submission-row:focus { outline: 2px solid #3b82f6; outline-offset: -2px; }
+        .submission-modal[hidden] { display: none !important; }
+        .submission-modal { position: fixed; inset: 0; z-index: 100; padding: 1rem; display: grid; place-items: center; }
+        .submission-modal-backdrop { position: absolute; inset: 0; background: rgba(2, 6, 23, .82); backdrop-filter: blur(5px); }
+        .submission-modal-panel {
+            position: relative;
+            width: min(760px, 100%);
+            max-height: min(88vh, 850px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            background: #0f172a;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+        }
+        .submission-modal-body { overflow-y: auto; overscroll-behavior: contain; }
+        .submission-detail {
+            padding: .85rem 1rem;
+            border: 1px solid #1e293b;
+            border-radius: .65rem;
+            background: #0b1120;
+        }
+        .submission-detail-label {
+            margin-bottom: .35rem;
+            color: #818cf8;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .055em;
+            text-transform: uppercase;
+            overflow-wrap: anywhere;
+        }
+        .submission-detail-value {
+            color: #e2e8f0;
+            font-size: .88rem;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        @media (max-width: 640px) {
+            .submission-modal { padding: 0; align-items: end; }
+            .submission-modal-panel { width: 100%; max-height: 94vh; border-radius: 1rem 1rem 0 0; }
+            .admin-pagination .pagination > li > a,
+            .admin-pagination .pagination > li > span { min-width: 34px; height: 34px; padding: 0 .5rem; }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="bg-[#0f172a] rounded-xl border border-slate-800 overflow-hidden shadow-2xl mb-10">
 
@@ -64,7 +160,16 @@
                 
                 <tbody class="divide-y divide-slate-800/50 text-sm">
                 {% for row in data %}
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
+                    <tr class="hover:bg-slate-800/30 transition-colors group {% if admin_view.is_submission_view %}submission-row{% endif %}"
+                        {% if admin_view.is_submission_view %}
+                        tabindex="0"
+                        role="button"
+                        aria-label="Başvuruyu görüntüle"
+                        data-submission="{{ row.submission_data|e }}"
+                        data-form="{{ row.form.title|e if row.form else 'Form başvurusu' }}"
+                        data-created="{{ row.created_at.strftime('%d.%m.%Y %H:%M') if row.created_at else '' }}"
+                        data-ip="{{ row.ip_address or '-' }}"
+                        {% endif %}>
 
                         {% for c, name in list_columns %}
                             <td class="px-6 py-4 align-middle {% if c == 'id' or c == 'order' %}text-center{% endif %}">
@@ -91,9 +196,21 @@
                                     {% endif %}
 
                                 {% elif c == 'submission_data' %}
-                                    <div class="text-slate-300 text-xs leading-relaxed max-w-md line-clamp-2">
-                                        {{ get_value(row, c) | striptags }} 
-                                    </div>
+                                    {% if admin_view.is_submission_view %}
+                                        <button type="button" class="submission-open text-left group/message max-w-md">
+                                            <span class="inline-flex items-center gap-2 text-blue-400 group-hover/message:text-blue-300 text-xs font-semibold">
+                                                <i class="fa fa-eye"></i>
+                                                Başvuruyu görüntüle
+                                            </span>
+                                            <span class="block mt-1 text-slate-500 text-[11px] line-clamp-1">
+                                                Tüm mesaj ve alan bilgileri
+                                            </span>
+                                        </button>
+                                    {% else %}
+                                        <div class="text-slate-300 text-xs leading-relaxed max-w-md line-clamp-2">
+                                            {{ get_value(row, c) | striptags }}
+                                        </div>
+                                    {% endif %}
 
                                 {% elif c == 'created_at' %}
                                     <div class="flex items-center gap-2 text-slate-400 font-mono text-xs whitespace-nowrap">
@@ -156,12 +273,33 @@
             </table>
             
             {% if num_pages > 1 %}
-            <div class="p-4 border-t border-slate-800 bg-[#0b1120] flex justify-center">
+            <div class="admin-pagination p-4 border-t border-slate-800 bg-[#0b1120] flex justify-center">
                 {{ lib.pager(page, num_pages, pager_url) }}
             </div>
             {% endif %}
         </div>
     </div>
+
+    {% if admin_view.is_submission_view %}
+    <div id="submission-modal" class="submission-modal" hidden aria-hidden="true">
+        <button type="button" class="submission-modal-backdrop" data-modal-close aria-label="Pencereyi kapat"></button>
+        <section class="submission-modal-panel" role="dialog" aria-modal="true" aria-labelledby="submission-modal-title">
+            <header class="px-4 sm:px-6 py-4 border-b border-slate-800 flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Gelen başvuru</p>
+                    <h2 id="submission-modal-title" class="mt-1 text-base sm:text-lg font-bold text-slate-100 truncate">Başvuru detayları</h2>
+                    <p id="submission-modal-meta" class="mt-1 text-[11px] text-slate-500"></p>
+                </div>
+                <button type="button" data-modal-close class="btn btn-ghost btn-sm btn-square text-slate-400 hover:text-white hover:bg-slate-800 flex-none" aria-label="Kapat">
+                    <i class="fa fa-times"></i>
+                </button>
+            </header>
+            <div class="submission-modal-body p-4 sm:p-6">
+                <div id="submission-modal-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+        </section>
+    </div>
+    {% endif %}
 {% endblock %}
 
 {% block actions %}
@@ -169,4 +307,100 @@
 
 {% block tail %}
     {{ super() }}
+    {% if admin_view.is_submission_view %}
+    <script>
+    (function() {
+        var modal = document.getElementById('submission-modal');
+        if (!modal) return;
+
+        var title = document.getElementById('submission-modal-title');
+        var meta = document.getElementById('submission-modal-meta');
+        var fields = document.getElementById('submission-modal-fields');
+        var lastTrigger = null;
+
+        function readableKey(key) {
+            return String(key || 'Bilgi')
+                .replace(/[_-]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .replace(/(^|\s)\S/g, function(letter) { return letter.toLocaleUpperCase('tr-TR'); });
+        }
+
+        function readableValue(value) {
+            if (value === null || value === undefined || value === '') return '—';
+            if (typeof value === 'object') return JSON.stringify(value, null, 2);
+            return String(value);
+        }
+
+        function appendDetail(key, value, fullWidth) {
+            var item = document.createElement('div');
+            item.className = 'submission-detail' + (fullWidth ? ' sm:col-span-2' : '');
+
+            var label = document.createElement('div');
+            label.className = 'submission-detail-label';
+            label.textContent = readableKey(key);
+
+            var content = document.createElement('div');
+            content.className = 'submission-detail-value';
+            content.textContent = readableValue(value);
+
+            item.appendChild(label);
+            item.appendChild(content);
+            fields.appendChild(item);
+        }
+
+        function openModal(row) {
+            lastTrigger = row;
+            title.textContent = row.dataset.form || 'Başvuru detayları';
+            meta.textContent = (row.dataset.created || '') + '  •  IP: ' + (row.dataset.ip || '—');
+            fields.replaceChildren();
+
+            var raw = row.dataset.submission || '';
+            try {
+                var data = JSON.parse(raw);
+                var entries = Object.entries(data);
+                if (!entries.length) appendDetail('Mesaj', 'Başvuru bilgisi bulunamadı.', true);
+                entries.forEach(function(entry) {
+                    var value = readableValue(entry[1]);
+                    appendDetail(entry[0], entry[1], value.length > 80 || value.indexOf('\n') !== -1);
+                });
+            } catch (error) {
+                appendDetail('Mesaj', raw || 'Başvuru bilgisi bulunamadı.', true);
+            }
+
+            modal.hidden = false;
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            modal.querySelector('[data-modal-close]').focus();
+        }
+
+        function closeModal() {
+            modal.hidden = true;
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (lastTrigger) lastTrigger.focus();
+        }
+
+        document.querySelectorAll('.submission-row').forEach(function(row) {
+            row.addEventListener('click', function(event) {
+                if (event.target.closest('form, a[href], button') && !event.target.closest('.submission-open')) return;
+                openModal(row);
+            });
+            row.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openModal(row);
+                }
+            });
+        });
+
+        modal.querySelectorAll('[data-modal-close]').forEach(function(button) {
+            button.addEventListener('click', closeModal);
+        });
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && !modal.hidden) closeModal();
+        });
+    })();
+    </script>
+    {% endif %}
 {% endblock %}

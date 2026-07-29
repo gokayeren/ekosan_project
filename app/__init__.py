@@ -11,7 +11,7 @@ from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from flask_admin.menu import MenuLink
 from config import Config
-from wtforms import BooleanField, HiddenField, TextAreaField
+from wtforms import BooleanField, HiddenField, SelectField, TextAreaField
 from wtforms.validators import Optional, Regexp
 import json
 from markupsafe import Markup
@@ -303,13 +303,28 @@ class GetofferView(ProtectedModelView):
         return super(GetofferView, self).index_view()
 
 class FormFieldInline(InlineFormAdmin):
-    form_args = {'id': {'widget': HiddenField()}}
+    form_args = {
+        'id': {'widget': HiddenField()},
+        'field_type': {
+            'choices': [
+                ('text', 'Kısa metin'),
+                ('email', 'E-posta'),
+                ('tel', 'Telefon'),
+                ('textarea', 'Uzun metin'),
+                ('select', 'Seçim kutusu'),
+            ]
+        }
+    }
+    form_overrides = {'field_type': SelectField}
     form_label = 'Form Alanı'
     form_columns = ('id', 'label', 'name', 'field_type', 'is_required', 'placeholder', 'options', 'order')
     column_labels = {
         'label': 'Etiket', 'name': 'Sistem Adı', 'field_type': 'Tip', 
         'options': 'Seçenekler', 'is_required': 'Zorunlu'
     }
+
+    def is_action_allowed(self, name):
+        return name == 'delete'
 
 class FormBuilderView(ProtectedModelView):
     list_template = 'admin/form_list.html'
@@ -323,6 +338,7 @@ class FormBuilderView(ProtectedModelView):
     def is_action_allowed(self, name): return False
 
 class FormSubmissionView(ProtectedModelView):
+    is_submission_view = True
     can_create = False
     can_edit = False
     can_delete = True

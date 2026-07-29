@@ -26,11 +26,15 @@ Tailwind ve DaisyUI tarayıcıda derlenmez; performans için üretim CSS'i proje
 değişiklik GitHub'a gönderilmeden önce:
 
 ```bash
+python -m pip install -r requirements-dev.txt
 pnpm install --frozen-lockfile
 pnpm run build:css
+python scripts/build_icon_subset.py
+python scripts/build_vendor_assets.py
 ```
 
-Üretilen `app/static/css/site.min.css` dosyası kodla birlikte commit edilir.
+Üretilen `app/static/css/site.min.css`, `app/static/css/icons.min.css`,
+`app/static/fonts/` ve `app/static/vendor/` dosyaları kodla birlikte commit edilir.
 Sunucunun Node.js veya pnpm kurmasına gerek yoktur.
 
 Deploy sırasıyla şunları yapar:

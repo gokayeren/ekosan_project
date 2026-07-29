@@ -5,18 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_settings.site_title if site_settings and site_settings.site_title else 'Ekosan' }}{% endblock %}</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/icons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/site.min.css') }}">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/gh/dixonandmoe/rellax@master/rellax.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/swiper-bundle.min.css') }}">
+    <script defer src="{{ url_for('static', filename='vendor/swiper-bundle.min.js') }}"></script>
 
     {% if site_settings and site_settings.favicon_path %}
         <link rel="shortcut icon" href="{{ url_for('static', filename='uploads/' + site_settings.favicon_path) }}">
@@ -149,7 +142,10 @@
             <div class="navbar-start w-auto">
                 <a href="/" class="flex items-center gap-2 group select-none">
                     {% if site_settings and site_settings.logo_path %}
-                        <img src="{{ url_for('static', filename='uploads/' + site_settings.logo_path) }}" 
+                        <img src="{{ url_for('main.optimized_media', filename=site_settings.logo_path, w=240) }}"
+                                loading="eager"
+                                fetchpriority="high"
+                                decoding="async"
                                 class="h-8 md:h-10 w-auto object-contain opacity-100 transition-transform duration-300" 
                                 alt="{{ site_settings.site_title }}">
                     {% else %}
@@ -340,10 +336,10 @@
                     <div class="absolute bottom-0 right-10 w-64 h-64 bg-gray-100 rounded-full blur-3xl opacity-60 -z-10"></div>
                     
                     {% if home_config.cta_image %}
-                    <img src="{{ url_for('static', filename='uploads/' + home_config.cta_image) }}" 
+                    <img src="{{ url_for('main.optimized_media', filename=home_config.cta_image, w=768) }}"
                         alt="Uzman Desteği" 
                         class="relative z-10 max-h-[450px] object-contain drop-shadow-xl" 
-                        loading="lazy"
+                        loading="lazy" decoding="async"
                     />
                     {% else %}
                     <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?png&fit=crop&q=80&w=600" 
@@ -378,8 +374,10 @@
                             {% for item in partners %}
                                 {% if item.image_path %} 
                                 <div class="swiper-slide flex justify-center items-center h-16">
-                                    <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                        alt="{{ item.title }}" 
+                                    <img src="{{ url_for('main.optimized_media', filename=item.image_path, w=240) }}"
+                                        alt="{{ item.title or 'Çözüm ortağı' }}"
+                                        loading="lazy"
+                                        decoding="async"
                                         class="max-h-10 md:max-h-12 w-auto object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-pointer"
                                         title="{{ item.title }}">
                                 </div>
@@ -420,7 +418,9 @@
                         
                         <a href="/" class="inline-block hover:opacity-80 transition-opacity">
                             {% if site_settings and site_settings.logo_path %}
-                            <img src="{{ url_for('static', filename='uploads/' + site_settings.logo_path) }}" class="h-10 w-auto brightness-0 invert opacity-90" alt="Logo">
+                            <img src="{{ url_for('main.optimized_media', filename=site_settings.logo_path, w=240) }}"
+                                 loading="lazy" decoding="async"
+                                 class="h-10 w-auto brightness-0 invert opacity-90" alt="Logo">
                             {% else %}
                             <span class="font-black text-3xl text-white tracking-tight">EKOSAN</span>
                             {% endif %}

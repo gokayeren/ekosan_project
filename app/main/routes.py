@@ -35,7 +35,7 @@ def optimized_media(filename):
     if not source_path.is_file():
         abort(404)
 
-    allowed_widths = (480, 768, 1200, 1600)
+    allowed_widths = (240, 480, 768, 1200, 1600)
     try:
         requested_width = int(request.args.get("w", 1200))
     except (TypeError, ValueError):
@@ -43,8 +43,9 @@ def optimized_media(filename):
     target_width = min(allowed_widths, key=lambda width: abs(width - requested_width))
 
     source_stat = source_path.stat()
+    webp_quality = 74
     cache_key = hashlib.sha256(
-        f"{source_path.name}:{source_stat.st_mtime_ns}:{source_stat.st_size}:{target_width}".encode()
+        f"{source_path.name}:{source_stat.st_mtime_ns}:{source_stat.st_size}:{target_width}:q{webp_quality}".encode()
     ).hexdigest()[:24]
     cache_dir = upload_root / ".optimized"
     cache_path = cache_dir / f"{cache_key}.webp"
@@ -68,7 +69,7 @@ def optimized_media(filename):
                 optimized_image.save(
                     temp_path,
                     format="WEBP",
-                    quality=80,
+                    quality=webp_quality,
                     method=4
                 )
             os.replace(temp_path, cache_path)

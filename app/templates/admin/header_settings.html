@@ -106,6 +106,66 @@
         <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-amber-900/20 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                        <i class="fa fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-200 text-sm">Google Ölçüm Kodları</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Analytics, Ads & Tag Manager</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <div class="rounded-lg border border-blue-500/20 bg-blue-900/10 px-4 py-3 text-xs leading-relaxed text-slate-400">
+                        <strong class="text-blue-300">Kullanım önceliği:</strong>
+                        Tag Manager kimliği girilirse yalnızca GTM yüklenir; Analytics ve Ads etiketlerini GTM panelinden yönetirsiniz.
+                        GTM boş bırakılırsa aşağıdaki GA4 ve Google Ads kimlikleri doğrudan yüklenir.
+                    </div>
+                </div>
+
+                <div class="col-span-12">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Google Tag Manager</label>
+                    {{ form.google_tag_manager_id(
+                        class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600 transition-colors",
+                        placeholder="GTM-XXXXXXX",
+                        autocomplete="off"
+                    ) }}
+                    {% for error in form.google_tag_manager_id.errors %}
+                        <p class="text-xs text-red-400 mt-2">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="col-span-12 md:col-span-6">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Google Analytics 4</label>
+                    {{ form.google_analytics_id(
+                        class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 placeholder-slate-600 transition-colors",
+                        placeholder="G-XXXXXXXXXX",
+                        autocomplete="off"
+                    ) }}
+                    {% for error in form.google_analytics_id.errors %}
+                        <p class="text-xs text-red-400 mt-2">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="col-span-12 md:col-span-6">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Google Ads</label>
+                    {{ form.google_ads_id(
+                        class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-600 transition-colors",
+                        placeholder="AW-123456789",
+                        autocomplete="off"
+                    ) }}
+                    {% for error in form.google_ads_id.errors %}
+                        <p class="text-xs text-red-400 mt-2">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                         <i class="fa fa-address-card"></i>
                     </div>

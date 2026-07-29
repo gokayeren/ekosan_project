@@ -41,6 +41,9 @@ class SiteSetting(db.Model):
     facebook_url = db.Column(db.String(255), default='https://www.facebook.com/ekosanisi/')
     instagram_url = db.Column(db.String(255), default='https://www.instagram.com/ekosan_isi/')
     youtube_url = db.Column(db.String(255), default='https://www.youtube.com/@ekosanis4077')
+    google_tag_manager_id = db.Column(db.String(32), nullable=True)
+    google_analytics_id = db.Column(db.String(32), nullable=True)
+    google_ads_id = db.Column(db.String(32), nullable=True)
     
     def __str__(self):
         return "Genel Site Ayarları"

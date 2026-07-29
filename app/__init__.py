@@ -12,6 +12,7 @@ from flask_admin.model.form import InlineFormAdmin
 from flask_admin.menu import MenuLink
 from config import Config
 from wtforms import BooleanField, HiddenField, TextAreaField
+from wtforms.validators import Optional, Regexp
 import json
 from markupsafe import Markup
 import markdown
@@ -72,8 +73,42 @@ class SettingsView(ProtectedModelView):
 
     form_columns = (
         'site_title', 'logo_path', 'favicon_path', 'phone_number',
-        'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url'
+        'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url',
+        'google_tag_manager_id', 'google_analytics_id', 'google_ads_id'
     )
+
+    form_args = {
+        'google_tag_manager_id': {
+            'validators': [
+                Optional(),
+                Regexp(r'^GTM-[A-Za-z0-9]+$', message='GTM kimliği GTM-XXXXXXX biçiminde olmalıdır.')
+            ]
+        },
+        'google_analytics_id': {
+            'validators': [
+                Optional(),
+                Regexp(r'^G-[A-Za-z0-9]+$', message='GA4 kimliği G-XXXXXXXXXX biçiminde olmalıdır.')
+            ]
+        },
+        'google_ads_id': {
+            'validators': [
+                Optional(),
+                Regexp(r'^AW-[0-9]+$', message='Google Ads kimliği AW-123456789 biçiminde olmalıdır.')
+            ]
+        }
+    }
+
+    column_labels = {
+        'google_tag_manager_id': 'Google Tag Manager Kimliği',
+        'google_analytics_id': 'Google Analytics 4 Kimliği',
+        'google_ads_id': 'Google Ads Kimliği'
+    }
+
+    def on_model_change(self, form, model, is_created):
+        for field_name in ('google_tag_manager_id', 'google_analytics_id', 'google_ads_id'):
+            value = getattr(model, field_name, None)
+            setattr(model, field_name, value.strip().upper() if value else None)
+        return super().on_model_change(form, model, is_created)
 
     @expose('/')
     def index_view(self):

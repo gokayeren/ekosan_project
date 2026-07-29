@@ -91,15 +91,27 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes slowPanZoom {
-            0% { transform: scale(1) translate(0, 0); }
-            100% { transform: scale(1.15) translate(-2%, -1%); }
+            0% { transform: translate3d(0, 0, 0) scale(1.015); }
+            100% { transform: translate3d(0, 0, 0) scale(1.13); }
         }
         .animate-hero-slow {
-            animation: slowPanZoom 40s linear infinite alternate;
+            animation: slowPanZoom 32s ease-in-out infinite alternate;
+            transform-origin: center center;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            perspective: 1000px;
+            -webkit-perspective: 1000px;
         }
         .will-change-transform {
             will-change: transform;
             backface-visibility: hidden;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .animate-hero-slow {
+                animation: none;
+                transform: scale(1.03);
+            }
         }
     </style>
 </head>

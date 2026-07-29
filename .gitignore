@@ -31,3 +31,14 @@ Thumbs.db
 .pytest_cache/
 .coverage
 *.log
+
+# --- SUNUCUYA ÖZEL ÇALIŞMA VERİLERİ / YEDEKLER ---
+# Bunlar canlı sunucuda kalır; GitHub'a ve Docker imajına gönderilmez.
+backups/
+.deploy.lock
+*.sql
+*.dump
+*.tar.gz
+*.zip
+npm_data/
+npm_letsencrypt/

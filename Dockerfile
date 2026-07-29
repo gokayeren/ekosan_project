@@ -35,7 +35,5 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 5000
 
 # 8. Başlatma Komutu
-# sh -c ile zincirleme komut çalıştırıyoruz.
-# flask db upgrade: Veritabanı tablolarını oluşturur/günceller.
-# gunicorn: Uygulamayı başlatır. "-w 4" 4 işçi çalıştırır (Performans için).
-CMD ["sh", "-c", "flask db upgrade && gunicorn -w 4 --bind 0.0.0.0:5000 run:app"]
+# Migration deploy.sh tarafından, yedek alındıktan sonra kontrollü çalıştırılır.
+CMD ["gunicorn", "-w", "4", "--bind", "0.0.0.0:5000", "run:app"]

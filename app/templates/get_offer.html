@@ -335,17 +335,6 @@
 <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @keyframes slowPanZoom {
-        0% { transform: scale(1) translate(0, 0); }
-        100% { transform: scale(1.15) translate(-2%, -1%); }
-    }
-    .animate-hero-slow {
-        animation: slowPanZoom 40s linear infinite alternate;
-    }
-    .will-change-transform {
-        will-change: transform;
-        backface-visibility: hidden;
-    }
 </style>
 
 <script>

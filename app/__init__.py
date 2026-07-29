@@ -412,9 +412,9 @@ class ServiceView(ProtectedModelView):
     column_labels = {
         'title': 'Sayfa Başlığı',
         'subtitle': 'Üst Alt Başlık (Intro)',
-        'slider_group': '1. Slider Seçimi (Sol/Üst)',
-        'slider_group_2': '2. Slider Seçimi (Orta Alan)',
-        'slider_group_3': '3. Slider Seçimi (Alt Alan)',
+        'slider_group': '1. Slider Seçimi (Ana Görseller)',
+        'slider_group_2': '2. Slider Seçimi (Ürünler)',
+        'slider_group_3': '3. Slider Seçimi (Referanslar)',
         'faq_group': 'Sıkça Sorulan Sorular (SSS)',
         'features_title': 'Sağ Kısım Başlığı',
         'features': 'Sağ Kısım Özellikler (Liste)',

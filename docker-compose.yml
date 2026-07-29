@@ -12,7 +12,8 @@ services:
       - DATABASE_URL=postgresql://ekosan_admin_user:Ekosan.621313.!!@db:5432/ekosandb
       - UPLOAD_PATH=/app/static/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - ekosan_net
     volumes:
@@ -20,6 +21,17 @@ services:
     restart: unless-stopped
     ports:
       - "5005:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- 2. Veritabanı (Postgres) ---
   db:
@@ -34,6 +46,16 @@ services:
     networks:
       - ekosan_net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- 3. Nginx Proxy Manager (Domain Yönetimi) ---
   nginx_proxy:
@@ -49,6 +71,11 @@ services:
       - ./npm_letsencrypt:/etc/letsencrypt  # SSL sertifikalarının saklanması için
     networks:
       - ekosan_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 # --- Kalıcı Depolama Alanları ---
 volumes:

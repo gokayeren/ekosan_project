@@ -60,16 +60,17 @@
             {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start mb-20">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start mb-16 lg:mb-20">
             
             <div class="w-full">
                 {% if service.slider_group and service.slider_group.items %}
                     <div class="swiper serviceDetailSwiper w-full bg-transparent">
                         <div class="swiper-wrapper">
                             {% for item in service.slider_group.items %}
+                            {% if item.image_path %}
                             <div class="swiper-slide rounded-xl overflow-hidden aspect-[4/3] bg-slate-100 shadow-lg border border-slate-100">
                                 <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                     alt="{{ item.title }}" 
+                                     alt="{{ item.title or service.title }}"
                                      class="w-full h-full object-cover">
                                 
                                 {% if item.title %}
@@ -78,10 +79,15 @@
                                 </div>
                                 {% endif %}
                             </div>
+                            {% endif %}
                             {% endfor %}
                         </div>
                         
                         <div class="swiper-pagination"></div>
+                        {% if service.slider_group.items|length > 1 %}
+                        <button type="button" class="service-detail-prev swiper-button-prev" aria-label="Önceki görsel"></button>
+                        <button type="button" class="service-detail-next swiper-button-next" aria-label="Sonraki görsel"></button>
+                        {% endif %}
                     </div>
 
                 {% elif service.image_path %}
@@ -111,14 +117,14 @@
 
                 <div class="flex flex-wrap gap-4 pt-6 mt-auto">
                     {% if service.video_url %}
-                    <a href="{{ service.video_url }}" target="_blank" 
+                    <a href="{{ service.video_url }}" target="_blank" rel="noopener noreferrer"
                        class="btn h-12 px-6 bg-slate-900 hover:bg-blue-600 text-white border-none rounded-lg shadow-md flex items-center gap-3 transition-colors">
                         <i class="fa fa-play text-xs"></i>
                         <span>{{ service.video_btn_text or 'Tanıtım Filmini İzle' }}</span>
                     </a>
                     {% endif %}
 
-                    <a href="{{ url_for('main.contact') }}" 
+                    <a href="{{ url_for('main.getoffer') }}"
                        class="btn h-12 px-6 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-lg shadow-sm flex items-center gap-2">
                         <span>Teklif Al</span>
                         <i class="fa fa-arrow-right text-slate-400"></i>
@@ -154,13 +160,15 @@
                 <div class="swiper multipleSwiper">
                     <div class="swiper-wrapper pb-10">
                         {% for item in service.slider_group_2.items %}
+                        {% if item.image_path %}
                         <div class="swiper-slide h-auto">
                             <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col overflow-hidden group/card">
                                 
-                                <div class="w-full bg-slate-50 overflow-hidden relative flex items-center justify-center">
+                                <div class="w-full aspect-[4/3] bg-slate-50 overflow-hidden relative flex items-center justify-center">
                                     <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                        alt="{{ item.title }}" 
-                                        class="w-full h-auto object-contain p-2 sm:p-4 group-hover/card:scale-105 transition-transform duration-500">
+                                        alt="{{ item.title or service.title }}"
+                                        loading="lazy"
+                                        class="w-full h-full object-contain p-3 sm:p-5 group-hover/card:scale-105 transition-transform duration-500">
                                 </div>
                                 <div class="p-4 sm:p-6 text-center mt-auto border-t border-slate-50">
                                     <h4 class="font-bold text-slate-900 text-lg mb-2">{{ item.title }}</h4>
@@ -175,13 +183,14 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
                 
-                <div class="swiper-button-prev !hidden md:!flex !w-10 !h-10 !bg-white !shadow-lg !rounded-full !text-slate-800 !text-xs after:!text-xs border border-slate-100"></div>
-                <div class="swiper-button-next !hidden md:!flex !w-10 !h-10 !bg-white !shadow-lg !rounded-full !text-slate-800 !text-xs after:!text-xs border border-slate-100"></div>
+                <button type="button" class="swiper-button-prev !flex !w-9 !h-9 md:!w-10 md:!h-10 !bg-white !shadow-lg !rounded-full !text-slate-800 !text-xs after:!text-xs border border-slate-100" aria-label="Önceki ürün"></button>
+                <button type="button" class="swiper-button-next !flex !w-9 !h-9 md:!w-10 md:!h-10 !bg-white !shadow-lg !rounded-full !text-slate-800 !text-xs after:!text-xs border border-slate-100" aria-label="Sonraki ürün"></button>
             </div>
         </div>
         {% endif %}
@@ -198,10 +207,12 @@
                 <div class="swiper multipleSwiper">
                     <div class="swiper-wrapper pb-10">
                         {% for item in service.slider_group_3.items %}
+                        {% if item.image_path %}
                         <div class="swiper-slide h-auto">
                             <div class="rounded-xl overflow-hidden shadow-md relative aspect-video group/ref cursor-pointer">
                                 <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
-                                     alt="{{ item.title }}" 
+                                     alt="{{ item.title or service.title }}"
+                                     loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-700 group-hover/ref:scale-110">
                                 
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6">
@@ -213,13 +224,14 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
                 
-                 <div class="swiper-button-prev !hidden md:!flex !w-10 !h-10 !bg-slate-900 !shadow-lg !rounded-full !text-white !text-xs after:!text-xs border border-slate-700"></div>
-                 <div class="swiper-button-next !hidden md:!flex !w-10 !h-10 !bg-slate-900 !shadow-lg !rounded-full !text-white !text-xs after:!text-xs border border-slate-700"></div>
+                 <button type="button" class="swiper-button-prev !flex !w-9 !h-9 md:!w-10 md:!h-10 !bg-slate-900 !shadow-lg !rounded-full !text-white !text-xs after:!text-xs border border-slate-700" aria-label="Önceki referans"></button>
+                 <button type="button" class="swiper-button-next !flex !w-9 !h-9 md:!w-10 md:!h-10 !bg-slate-900 !shadow-lg !rounded-full !text-white !text-xs after:!text-xs border border-slate-700" aria-label="Sonraki referans"></button>
             </div>
         </div>
         {% endif %}
@@ -259,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function() {
         spaceBetween: 20,
         effect: "fade",
         fadeEffect: { crossFade: true },
-        loop: true,
+        loop: {{ 'true' if service.slider_group and service.slider_group.items|length > 1 else 'false' }},
         autoplay: {
             delay: 5000,
             disableOnInteraction: false,
@@ -267,6 +279,10 @@ document.addEventListener("DOMContentLoaded", function() {
         pagination: {
             el: ".swiper-pagination",
             clickable: true,
+        },
+        navigation: {
+            nextEl: ".service-detail-next",
+            prevEl: ".service-detail-prev",
         },
     });
 
@@ -330,6 +346,30 @@ document.addEventListener("DOMContentLoaded", function() {
         width: 20px;
         border-radius: 10px;
         transition: all 0.3s;
+    }
+
+    .serviceDetailSwiper .swiper-button-prev,
+    .serviceDetailSwiper .swiper-button-next {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        background: rgba(15, 23, 42, 0.88);
+        color: #fff;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+    }
+
+    .serviceDetailSwiper .swiper-button-prev::after,
+    .serviceDetailSwiper .swiper-button-next::after {
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    @media (max-width: 639px) {
+        .serviceDetailSwiper .swiper-button-prev,
+        .serviceDetailSwiper .swiper-button-next {
+            width: 2.25rem;
+            height: 2.25rem;
+        }
     }
 
     .custom-features-list ul { list-style: none; padding: 0; margin: 0; }

@@ -2,6 +2,18 @@
 
 {% block title %}{{ service.meta_title or service.title }} - Ekosan{% endblock %}
 {% block description %}{{ service.meta_description or service.short_description }}{% endblock %}
+{% block head_extra %}
+    {% set service_hero_image = service.detail_image_path or service.image_path %}
+    {% if service_hero_image %}
+    <link rel="preload"
+          as="image"
+          type="image/webp"
+          href="{{ url_for('main.optimized_media', filename=service_hero_image, w=768) }}"
+          imagesrcset="{{ url_for('main.optimized_media', filename=service_hero_image, w=768) }} 768w, {{ url_for('main.optimized_media', filename=service_hero_image, w=1200) }} 1200w, {{ url_for('main.optimized_media', filename=service_hero_image, w=1600) }} 1600w"
+          imagesizes="100vw"
+          fetchpriority="high">
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 
@@ -9,12 +21,22 @@
 
     <div class="absolute inset-0 z-0">
         {% if service.detail_image_path %}
-            <img src="{{ url_for('static', filename='uploads/' + service.detail_image_path) }}" 
-                 class="w-full h-full object-cover animate-hero-slow" 
+            <img src="{{ url_for('main.optimized_media', filename=service.detail_image_path, w=1200) }}"
+                 srcset="{{ url_for('main.optimized_media', filename=service.detail_image_path, w=768) }} 768w, {{ url_for('main.optimized_media', filename=service.detail_image_path, w=1200) }} 1200w, {{ url_for('main.optimized_media', filename=service.detail_image_path, w=1600) }} 1600w"
+                 sizes="100vw"
+                 fetchpriority="high"
+                 loading="eager"
+                 decoding="async"
+                 class="w-full h-full object-cover animate-hero-slow"
                  alt="{{ service.title }}">
         {% elif service.image_path %}
-            <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
-                 class="w-full h-full object-cover animate-hero-slow blur-sm" 
+            <img src="{{ url_for('main.optimized_media', filename=service.image_path, w=1200) }}"
+                 srcset="{{ url_for('main.optimized_media', filename=service.image_path, w=768) }} 768w, {{ url_for('main.optimized_media', filename=service.image_path, w=1200) }} 1200w, {{ url_for('main.optimized_media', filename=service.image_path, w=1600) }} 1600w"
+                 sizes="100vw"
+                 fetchpriority="high"
+                 loading="eager"
+                 decoding="async"
+                 class="w-full h-full object-cover animate-hero-slow blur-sm"
                  alt="{{ service.title }}">
         {% else %}
             <div class="w-full h-full bg-neutral-800"></div>
@@ -69,7 +91,12 @@
                             {% for item in service.slider_group.items %}
                             {% if item.image_path %}
                             <div class="swiper-slide rounded-xl overflow-hidden aspect-[4/3] bg-slate-100 shadow-lg border border-slate-100">
-                                <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                <img src="{{ url_for('main.optimized_media', filename=item.image_path, w=768) }}"
+                                     srcset="{{ url_for('main.optimized_media', filename=item.image_path, w=480) }} 480w, {{ url_for('main.optimized_media', filename=item.image_path, w=768) }} 768w, {{ url_for('main.optimized_media', filename=item.image_path, w=1200) }} 1200w"
+                                     sizes="(min-width: 1024px) 50vw, 100vw"
+                                     loading="{{ 'eager' if loop.first else 'lazy' }}"
+                                     fetchpriority="{{ 'high' if loop.first else 'low' }}"
+                                     decoding="async"
                                      alt="{{ item.title or service.title }}"
                                      class="w-full h-full object-cover">
                                 
@@ -92,8 +119,12 @@
 
                 {% elif service.image_path %}
                     <div class="rounded-xl overflow-hidden shadow-lg border border-slate-100 aspect-[4/3] bg-slate-100">
-                         <img src="{{ url_for('static', filename='uploads/' + service.image_path) }}" 
-                              class="w-full h-full object-cover" 
+                         <img src="{{ url_for('main.optimized_media', filename=service.image_path, w=768) }}"
+                              srcset="{{ url_for('main.optimized_media', filename=service.image_path, w=480) }} 480w, {{ url_for('main.optimized_media', filename=service.image_path, w=768) }} 768w, {{ url_for('main.optimized_media', filename=service.image_path, w=1200) }} 1200w"
+                              sizes="(min-width: 1024px) 50vw, 100vw"
+                              loading="eager"
+                              decoding="async"
+                              class="w-full h-full object-cover"
                               alt="{{ service.title }}">
                     </div>
                 {% endif %}
@@ -165,9 +196,12 @@
                             <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col overflow-hidden group/card">
                                 
                                 <div class="w-full aspect-[4/3] bg-slate-50 overflow-hidden relative flex items-center justify-center">
-                                    <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                    <img src="{{ url_for('main.optimized_media', filename=item.image_path, w=480) }}"
+                                        srcset="{{ url_for('main.optimized_media', filename=item.image_path, w=480) }} 480w, {{ url_for('main.optimized_media', filename=item.image_path, w=768) }} 768w"
+                                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                                         alt="{{ item.title or service.title }}"
                                         loading="lazy"
+                                        decoding="async"
                                         class="w-full h-full object-contain p-3 sm:p-5 group-hover/card:scale-105 transition-transform duration-500">
                                 </div>
                                 <div class="p-4 sm:p-6 text-center mt-auto border-t border-slate-50">
@@ -210,9 +244,12 @@
                         {% if item.image_path %}
                         <div class="swiper-slide h-auto">
                             <div class="rounded-xl overflow-hidden shadow-md relative aspect-video group/ref cursor-pointer">
-                                <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" 
+                                <img src="{{ url_for('main.optimized_media', filename=item.image_path, w=768) }}"
+                                     srcset="{{ url_for('main.optimized_media', filename=item.image_path, w=480) }} 480w, {{ url_for('main.optimized_media', filename=item.image_path, w=768) }} 768w"
+                                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                                      alt="{{ item.title or service.title }}"
                                      loading="lazy"
+                                     decoding="async"
                                      class="w-full h-full object-cover transition-transform duration-700 group-hover/ref:scale-110">
                                 
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6">

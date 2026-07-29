@@ -2,8 +2,12 @@ import requests
 import json
 import os
 import smtplib
+import hashlib
+import uuid
+from pathlib import Path
 from email.message import EmailMessage
-from flask import render_template, request, redirect, url_for, flash, current_app, abort
+from flask import render_template, request, redirect, url_for, flash, current_app, abort, send_file
+from PIL import Image, ImageOps, UnidentifiedImageError
 from app import db
 from app.main import main
 from app.models import (
@@ -15,6 +19,75 @@ def get_shared_data():
     home_config = HomeConfig.query.first() or HomeConfig()
     services = Service.query.filter_by(is_active=True).order_by(Service.order.asc()).all()
     return home_config, services
+
+
+@main.route("/media/<path:filename>")
+def optimized_media(filename):
+    """Serve a cached WebP derivative without modifying the uploaded original."""
+    upload_root = (Path(current_app.static_folder) / "uploads").resolve()
+    source_path = (upload_root / filename).resolve()
+
+    try:
+        source_path.relative_to(upload_root)
+    except ValueError:
+        abort(404)
+
+    if not source_path.is_file():
+        abort(404)
+
+    allowed_widths = (480, 768, 1200, 1600)
+    try:
+        requested_width = int(request.args.get("w", 1200))
+    except (TypeError, ValueError):
+        requested_width = 1200
+    target_width = min(allowed_widths, key=lambda width: abs(width - requested_width))
+
+    source_stat = source_path.stat()
+    cache_key = hashlib.sha256(
+        f"{source_path.name}:{source_stat.st_mtime_ns}:{source_stat.st_size}:{target_width}".encode()
+    ).hexdigest()[:24]
+    cache_dir = upload_root / ".optimized"
+    cache_path = cache_dir / f"{cache_key}.webp"
+
+    if not cache_path.exists():
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        temp_path = cache_dir / f".{cache_key}-{uuid.uuid4().hex}.tmp"
+        try:
+            with Image.open(source_path) as source_image:
+                optimized_image = ImageOps.exif_transpose(source_image)
+                if optimized_image.width > target_width:
+                    target_height = max(1, round(optimized_image.height * target_width / optimized_image.width))
+                    optimized_image = optimized_image.resize(
+                        (target_width, target_height),
+                        Image.Resampling.LANCZOS
+                    )
+
+                if optimized_image.mode not in ("RGB", "RGBA"):
+                    optimized_image = optimized_image.convert("RGBA" if "transparency" in optimized_image.info else "RGB")
+
+                optimized_image.save(
+                    temp_path,
+                    format="WEBP",
+                    quality=80,
+                    method=4
+                )
+            os.replace(temp_path, cache_path)
+        except (UnidentifiedImageError, OSError):
+            if temp_path.exists():
+                temp_path.unlink()
+            response = send_file(source_path, conditional=True, max_age=86400)
+            response.cache_control.public = True
+            return response
+
+    response = send_file(
+        cache_path,
+        mimetype="image/webp",
+        conditional=True,
+        max_age=31536000
+    )
+    response.cache_control.public = True
+    response.cache_control.immutable = True
+    return response
 
 @main.route("/")
 def index():

@@ -95,7 +95,7 @@ if [ -z "$(docker compose images -q app 2>/dev/null)" ]; then
 fi
 
 docker compose run -T --rm --no-deps --entrypoint sh app -c \
-    'exec tar -czf - -C /app/app/static/uploads .' >"${UPLOAD_TEMP}"
+    'exec tar --exclude="./.optimized" -czf - -C /app/app/static/uploads .' >"${UPLOAD_TEMP}"
 
 if [ ! -s "${UPLOAD_TEMP}" ] || ! tar -tzf "${UPLOAD_TEMP}" >/dev/null; then
     echo "HATA: Medya yedeği doğrulanamadı." >&2
@@ -111,6 +111,10 @@ trim_backups "uploads" "tar.gz"
 
 # Yalnızca bu klasörde yarım kalmış, bir günden eski geçici yedekleri temizler.
 find "${BACKUP_DIR}" -maxdepth 1 -type f -name '*.tmp' -mtime +1 -delete
+
+# Yeniden üretilebilir görsel türevleri yedeklenmez ve 30 gün kullanılmazsa silinir.
+docker compose run -T --rm --no-deps --entrypoint sh app -c \
+    'if [ -d /app/app/static/uploads/.optimized ]; then find /app/app/static/uploads/.optimized -maxdepth 1 -type f -mtime +30 -delete; fi'
 
 echo "Yedekleme tamamlandı:"
 echo "  ${DB_FINAL}"

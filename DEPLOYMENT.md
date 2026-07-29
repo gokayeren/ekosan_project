@@ -19,6 +19,20 @@ Sonraki güncellemelerde tek komut yeterlidir:
 bash deploy.sh
 ```
 
+## Stil dosyasını güncelleme
+
+Tailwind ve DaisyUI tarayıcıda derlenmez; performans için üretim CSS'i projede
+önceden oluşturulur. Şablonlarda yeni Tailwind sınıfları kullanıldığında,
+değişiklik GitHub'a gönderilmeden önce:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm run build:css
+```
+
+Üretilen `app/static/css/site.min.css` dosyası kodla birlikte commit edilir.
+Sunucunun Node.js veya pnpm kurmasına gerek yoktur.
+
 Deploy sırasıyla şunları yapar:
 
 1. PostgreSQL ve yüklenen medya dosyalarının yedeğini alır.

@@ -42,3 +42,5 @@ backups/
 *.zip
 npm_data/
 npm_letsencrypt/
+node_modules/
+npm-debug.log*

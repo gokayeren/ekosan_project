@@ -752,6 +752,9 @@ def create_app(config_class=Config):
             return ""
         return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
 
+    from app.utils import normalize_whatsapp_number
+    app.add_template_filter(normalize_whatsapp_number, 'whatsapp_number')
+
     @app.context_processor
     def inject_global_data():
         try:

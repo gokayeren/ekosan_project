@@ -113,7 +113,7 @@
                         </li>
                         <li class="flex items-center gap-4">
                             <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center"><i class="fab fa-whatsapp text-lg"></i></div>
-                            <a href="https://wa.me/{{ contact.wa|replace(' ','')|replace('+','')|replace('(','')|replace(')','') }}" target="_blank" class="text-gray-600 font-medium hover:text-[#25D366] transition-colors">Whatsapp: {{ contact.wa }}</a>
+                            <a href="https://wa.me/{{ contact.wa|whatsapp_number }}" target="_blank" rel="noopener noreferrer" class="text-gray-600 font-medium hover:text-[#25D366] transition-colors">Whatsapp: {{ contact.wa }}</a>
                         </li>
                         <li class="flex items-center gap-4">
                             <div class="w-8 h-8 rounded-full bg-[#e6f4f9] text-[#0088cc] flex items-center justify-center"><i class="fa fa-envelope"></i></div>

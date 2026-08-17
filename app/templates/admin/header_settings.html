@@ -2,6 +2,37 @@
 
 {% block content_title %}{% endblock %}
 
+{% block head_css %}
+    {{ super() }}
+    <style>
+        #smtp-settings[hidden],
+        #formsubmit-help[hidden] { display: none !important; }
+
+        .select2-container--open .select2-dropdown {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background: #020617 !important;
+            border: 1px solid #475569 !important;
+            border-radius: .375rem;
+            color: #e2e8f0 !important;
+        }
+        .select2-container--default .select2-results__option {
+            background: #0f172a;
+            color: #cbd5e1 !important;
+        }
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background: #0369a1 !important;
+            color: #fff !important;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     
     <div class="mb-6 flex items-center justify-between">
@@ -305,6 +336,10 @@
                 formsubmit.hidden = isSmtp;
             };
             provider.addEventListener('change', sync);
+            if (window.jQuery) {
+                window.jQuery(provider).on('select2:select select2:clear', sync);
+            }
+            window.addEventListener('load', sync);
             sync();
         }());
     </script>

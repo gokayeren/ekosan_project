@@ -1,7 +1,7 @@
 import unittest
 
 from app import create_app, db
-from app.models import Service, SliderGroup, SliderItem
+from app.models import Service, SiteSetting, SliderGroup, SliderItem
 
 
 class TestConfig:
@@ -42,6 +42,7 @@ class ServicePageRegressionTests(unittest.TestCase):
                 slider_group_3_id=references.id,
                 is_active=True
             ))
+            db.session.add(SiteSetting(product_detail_enabled=False))
             db.session.commit()
 
     @classmethod
@@ -53,6 +54,7 @@ class ServicePageRegressionTests(unittest.TestCase):
         response = self.client.get('/hizmetler/akilli-ev')
         self.assertEqual(response.status_code, 200)
         self.assertIn('Akıllı Ev Ürünü'.encode(), response.data)
+        self.assertNotIn('Ürünü İncele'.encode(), response.data)
 
     def test_reference_youtube_opens_with_privacy_enhanced_embed(self):
         response = self.client.get('/hizmetler/akilli-ev')
@@ -63,11 +65,27 @@ class ServicePageRegressionTests(unittest.TestCase):
         with self.app.app_context():
             item = SliderItem.query.filter_by(title='Test Ürünü').one()
             item_id = item.id
+            settings = SiteSetting.query.first()
+            settings.product_detail_enabled = True
+            db.session.commit()
 
         response = self.client.get(f'/urunler/{item_id}/test-urunu')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'BreadcrumbList', response.data)
         self.assertIn(b'Product', response.data)
+
+        with self.app.app_context():
+            settings = SiteSetting.query.first()
+            settings.product_detail_enabled = False
+            db.session.commit()
+
+    def test_product_page_is_404_while_feature_is_disabled(self):
+        with self.app.app_context():
+            item = SliderItem.query.filter_by(title='Test Ürünü').one()
+            item_id = item.id
+
+        response = self.client.get(f'/urunler/{item_id}/test-urunu')
+        self.assertEqual(response.status_code, 404)
 
 
 if __name__ == '__main__':

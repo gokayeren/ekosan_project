@@ -59,10 +59,13 @@ def apply_public_seo_headers(response):
     try:
         settings = SiteSetting.query.first()
         index_service_pages = settings.seo_index_service_pages if settings else True
+        product_detail_enabled = settings.product_detail_enabled if settings else False
         is_html = response.content_type and response.content_type.startswith('text/html')
         indexable_endpoints = {'main.index'}
         if index_service_pages:
-            indexable_endpoints.update({'main.service_detail', 'main.product_detail'})
+            indexable_endpoints.add('main.service_detail')
+            if product_detail_enabled:
+                indexable_endpoints.add('main.product_detail')
         if request.endpoint not in indexable_endpoints and is_html:
             response.headers['X-Robots-Tag'] = 'noindex, follow'
     except Exception:
@@ -97,7 +100,7 @@ def sitemap_xml():
         indexed_services = Service.query.filter_by(is_active=True).all()
         for service in indexed_services:
             urls.append(f'{canonical_root}/hizmetler/{service.slug}')
-            if service.slider_group_2:
+            if settings and settings.product_detail_enabled and service.slider_group_2:
                 urls.extend(
                     f'{canonical_root}/urunler/{item.id}/{slugify(item.title)}'
                     for item in service.slider_group_2.items if item.title
@@ -357,7 +360,8 @@ def service_detail(slug):
             } for faq in active_faqs]
         })
 
-    if service.slider_group_2:
+    settings = SiteSetting.query.first()
+    if settings and settings.product_detail_enabled and service.slider_group_2:
         for item in service.slider_group_2.items:
             if not item.title:
                 continue
@@ -386,6 +390,10 @@ def service_detail(slug):
 
 @main.route('/urunler/<int:item_id>/<string:slug>')
 def product_detail(item_id, slug):
+    settings = SiteSetting.query.first()
+    if not settings or not settings.product_detail_enabled:
+        abort(404)
+
     home_config, services = get_shared_data()
     item = SliderItem.query.get_or_404(item_id)
     service = Service.query.filter_by(

@@ -9,7 +9,8 @@
     {% set canonical_root = (site_settings.seo_canonical_url if site_settings and site_settings.seo_canonical_url else 'https://ekosanmuhendislik.com').rstrip('/') %}
     {% set canonical_path = '/' if request.path == '/' else request.path %}
     {% set index_service_pages = site_settings.seo_index_service_pages if site_settings else true %}
-    {% set page_indexable = request.endpoint == 'main.index' or (index_service_pages and request.endpoint in ('main.service_detail', 'main.product_detail')) %}
+    {% set product_detail_enabled = site_settings.product_detail_enabled if site_settings else false %}
+    {% set page_indexable = request.endpoint == 'main.index' or (index_service_pages and request.endpoint == 'main.service_detail') or (index_service_pages and product_detail_enabled and request.endpoint == 'main.product_detail') %}
     <link rel="canonical" href="{{ canonical_root }}{{ canonical_path }}">
     <meta name="robots" content="{{ 'index, follow, max-image-preview:large' if page_indexable else 'noindex, follow' }}">
     <meta name="googlebot" content="{{ 'index, follow, max-image-preview:large' if page_indexable else 'noindex, follow' }}">

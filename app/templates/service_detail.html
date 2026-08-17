@@ -209,10 +209,10 @@
                                 </div>
                                 <div class="p-4 sm:p-6 text-center mt-auto border-t border-slate-50">
                                     <h4 class="font-bold text-slate-900 text-lg mb-2 min-h-[3.5rem] flex items-center justify-center">
-                                        {% if item.title %}
+                                        {% if item.title and site_settings and site_settings.product_detail_enabled %}
                                         <a href="{{ url_for('main.product_detail', item_id=item.id, slug=item.title|slugify) }}" class="hover:text-blue-600 transition-colors">{{ item.title }}</a>
                                         {% else %}
-                                        <span>{{ service.title }} Ürünü</span>
+                                        <span>{{ item.title or (service.title ~ ' Ürünü') }}</span>
                                         {% endif %}
                                     </h4>
                                     {% if item.description %}
@@ -222,7 +222,7 @@
                                     {% endif %}
                                     {% if item.btn_text and item.btn_link %}
                                         <a href="{{ item.btn_link }}" class="btn btn-sm btn-outline mt-4 w-full">{{ item.btn_text }}</a>
-                                    {% elif item.title %}
+                                    {% elif item.title and site_settings and site_settings.product_detail_enabled %}
                                         <a href="{{ url_for('main.product_detail', item_id=item.id, slug=item.title|slugify) }}" class="btn btn-sm btn-outline mt-4 w-full">Ürünü İncele</a>
                                     {% endif %}
                                 </div>

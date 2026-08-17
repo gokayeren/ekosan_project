@@ -91,6 +91,7 @@ class SettingsView(ProtectedModelView):
         'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url',
         'google_tag_manager_id', 'google_analytics_id', 'google_ads_id',
         'seo_canonical_url', 'seo_default_description', 'seo_index_service_pages',
+        'product_detail_enabled',
         'form_notification_provider', 'smtp_host', 'smtp_port', 'smtp_user',
         'smtp_password', 'smtp_from', 'smtp_use_ssl'
     )
@@ -123,6 +124,7 @@ class SettingsView(ProtectedModelView):
         'seo_canonical_url': 'Ana (Canonical) Site Adresi',
         'seo_default_description': 'Varsayılan SEO Açıklaması',
         'seo_index_service_pages': 'Hizmet ve Ürün Sayfalarını İndeksle',
+        'product_detail_enabled': 'Ürün İnceleme Sayfalarını Etkinleştir',
         'form_notification_provider': 'Form Bildirim Sağlayıcısı',
         'smtp_host': 'SMTP Sunucusu', 'smtp_port': 'SMTP Portu',
         'smtp_user': 'SMTP Kullanıcı Adı', 'smtp_password': 'SMTP Parolası',
@@ -177,6 +179,7 @@ class SettingsView(ProtectedModelView):
             request.form.get('seo_default_description') or ''
         ).strip() or None
         settings.seo_index_service_pages = request.form.get('seo_index_service_pages') in ('y', '1', 'true', 'on')
+        settings.product_detail_enabled = request.form.get('product_detail_enabled') in ('y', '1', 'true', 'on')
         try:
             db.session.commit()
         except Exception:

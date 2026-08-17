@@ -96,6 +96,13 @@
                         <span class="block mt-1 text-xs text-slate-500">Ana sayfayla birlikte hizmet detaylarını sitemap'e ekler. İletişim, teklif, kurumsal ve referans sayfaları noindex kalır.</span>
                     </span>
                 </label>
+                <label class="col-span-12 flex items-start gap-3 px-4 py-3 rounded border border-slate-700 bg-[#020617] cursor-pointer">
+                    {{ form.product_detail_enabled(class="toggle toggle-sm toggle-secondary mt-0.5") }}
+                    <span>
+                        <span class="block text-sm font-semibold text-slate-200">Ürün inceleme sayfalarını etkinleştir</span>
+                        <span class="block mt-1 text-xs text-slate-500">Kapalıyken ürün kartları bağlantısız görünür; inceleme butonları, detay URL’leri ve ürün sitemap kayıtları devre dışı kalır.</span>
+                    </span>
+                </label>
                 <div class="col-span-12 flex justify-end">
                     <button type="submit" form="settingsForm" formaction="{{ url_for('.save_seo') }}" formmethod="post" class="btn btn-sm bg-violet-600 hover:bg-violet-500 text-white border-0 gap-2 px-5">
                         <i class="fa fa-save"></i> SEO Ayarlarını Kaydet

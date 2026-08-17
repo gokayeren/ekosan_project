@@ -52,6 +52,7 @@ class SiteSetting(db.Model):
     )
     seo_homepage_only = db.Column(db.Boolean, nullable=False, default=True)
     seo_index_service_pages = db.Column(db.Boolean, nullable=False, default=True)
+    product_detail_enabled = db.Column(db.Boolean, nullable=False, default=False)
     form_notification_provider = db.Column(db.String(20), nullable=False, default='formsubmit')
     smtp_host = db.Column(db.String(255), nullable=True)
     smtp_port = db.Column(db.Integer, nullable=True, default=587)

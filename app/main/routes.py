@@ -39,7 +39,11 @@ def send_submission_notification(target_email, subject, body, reply_to=None, for
         response = requests.post(
             f"https://formsubmit.co/ajax/{target_email}",
             data=payload,
-            headers={'User-Agent': 'Ekosan-Flask-App', 'Accept': 'application/json'},
+            headers={
+                'User-Agent': 'Ekosan-Flask-App',
+                'Accept': 'application/json',
+                'Referer': request.url,
+            },
             timeout=10,
         )
         if response.status_code not in (200, 201):

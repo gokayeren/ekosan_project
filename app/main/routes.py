@@ -11,11 +11,12 @@ from xml.sax.saxutils import escape as xml_escape
 from urllib.parse import urlsplit
 from flask import render_template, request, redirect, url_for, flash, current_app, abort, send_file, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
+from slugify import slugify
 from app import db
 from app.main import main
 from app.models import (
     HomeConfig, Corporate, References, Contact, Getoffer,
-    Service, Form, FormSubmission, SiteSetting
+    Service, SliderItem, Form, FormSubmission, SiteSetting
 )
 
 def get_shared_data():
@@ -57,9 +58,12 @@ def apply_public_seo_headers(response):
     """Mirror page-level noindex rules in the HTTP headers."""
     try:
         settings = SiteSetting.query.first()
-        homepage_only = settings.seo_homepage_only if settings else True
+        index_service_pages = settings.seo_index_service_pages if settings else True
         is_html = response.content_type and response.content_type.startswith('text/html')
-        if homepage_only and request.endpoint != 'main.index' and is_html:
+        indexable_endpoints = {'main.index'}
+        if index_service_pages:
+            indexable_endpoints.update({'main.service_detail', 'main.product_detail'})
+        if request.endpoint not in indexable_endpoints and is_html:
             response.headers['X-Robots-Tag'] = 'noindex, follow'
     except Exception:
         pass
@@ -89,17 +93,15 @@ def sitemap_xml():
     canonical_root = get_canonical_root()
     urls = [f'{canonical_root}/']
 
-    if settings and not settings.seo_homepage_only:
-        urls.extend([
-            f'{canonical_root}/kurumsal',
-            f'{canonical_root}/referanslar',
-            f'{canonical_root}/iletisim',
-            f'{canonical_root}/teklifal'
-        ])
-        urls.extend(
-            f'{canonical_root}/hizmetler/{service.slug}'
-            for service in Service.query.filter_by(is_active=True).all()
-        )
+    if not settings or settings.seo_index_service_pages:
+        indexed_services = Service.query.filter_by(is_active=True).all()
+        for service in indexed_services:
+            urls.append(f'{canonical_root}/hizmetler/{service.slug}')
+            if service.slider_group_2:
+                urls.extend(
+                    f'{canonical_root}/urunler/{item.id}/{slugify(item.title)}'
+                    for item in service.slider_group_2.items if item.title
+                )
 
     entries = ''.join(
         f'<url><loc>{xml_escape(url)}</loc></url>'
@@ -346,6 +348,21 @@ def service_detail(slug):
             } for faq in active_faqs]
         })
 
+    if service.slider_group_2:
+        for item in service.slider_group_2.items:
+            if not item.title:
+                continue
+            product_schema = {
+                '@type': 'Product',
+                '@id': f'{canonical_root}/urunler/{item.id}/{slugify(item.title)}#product',
+                'name': item.title,
+                'description': item.subtitle or f'{service.title} ürün çözümü',
+                'url': f'{canonical_root}/urunler/{item.id}/{slugify(item.title)}'
+            }
+            if item.image_path:
+                product_schema['image'] = f'{canonical_root}/static/uploads/{item.image_path}'
+            schema_graph.append(product_schema)
+
     service_schema = {
         '@context': 'https://schema.org',
         '@graph': schema_graph
@@ -356,6 +373,43 @@ def service_detail(slug):
                            service_schema=service_schema,
                            home_config=home_config,
                            services=services)
+
+
+@main.route('/urunler/<int:item_id>/<string:slug>')
+def product_detail(item_id, slug):
+    home_config, services = get_shared_data()
+    item = SliderItem.query.get_or_404(item_id)
+    service = Service.query.filter_by(
+        slider_group_2_id=item.group_id,
+        is_active=True
+    ).first_or_404()
+    expected_slug = slugify(item.title or f'urun-{item.id}')
+    if slug != expected_slug:
+        return redirect(url_for('main.product_detail', item_id=item.id, slug=expected_slug), code=301)
+
+    canonical_root = get_canonical_root()
+    product_url = f'{canonical_root}/urunler/{item.id}/{expected_slug}'
+    product_schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        '@id': f'{product_url}#product',
+        'name': item.title,
+        'description': item.subtitle or f'{service.title} ürün çözümü',
+        'url': product_url,
+        'category': service.title,
+        'isRelatedTo': {'@id': f'{canonical_root}/hizmetler/{service.slug}#service'}
+    }
+    if item.image_path:
+        product_schema['image'] = f'{canonical_root}/static/uploads/{item.image_path}'
+
+    return render_template(
+        'product_detail.html',
+        item=item,
+        service=service,
+        product_schema=product_schema,
+        home_config=home_config,
+        services=services
+    )
 
 @main.route('/form-submit', methods=['POST'])
 def submit_contact_form():

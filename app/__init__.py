@@ -20,6 +20,7 @@ from markupsafe import Markup
 import markdown
 import requests
 from sqlalchemy import inspect as sa_inspect
+from slugify import slugify
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -89,7 +90,7 @@ class SettingsView(ProtectedModelView):
         'site_title', 'logo_path', 'favicon_path', 'phone_number',
         'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url',
         'google_tag_manager_id', 'google_analytics_id', 'google_ads_id',
-        'seo_canonical_url', 'seo_default_description', 'seo_homepage_only',
+        'seo_canonical_url', 'seo_default_description', 'seo_index_service_pages',
         'form_notification_provider', 'smtp_host', 'smtp_port', 'smtp_user',
         'smtp_password', 'smtp_from', 'smtp_use_ssl'
     )
@@ -121,7 +122,7 @@ class SettingsView(ProtectedModelView):
         'google_ads_id': 'Google Ads Kimliği',
         'seo_canonical_url': 'Ana (Canonical) Site Adresi',
         'seo_default_description': 'Varsayılan SEO Açıklaması',
-        'seo_homepage_only': 'Yalnızca Ana Sayfayı İndeksle',
+        'seo_index_service_pages': 'Hizmet ve Ürün Sayfalarını İndeksle',
         'form_notification_provider': 'Form Bildirim Sağlayıcısı',
         'smtp_host': 'SMTP Sunucusu', 'smtp_port': 'SMTP Portu',
         'smtp_user': 'SMTP Kullanıcı Adı', 'smtp_password': 'SMTP Parolası',
@@ -158,6 +159,34 @@ class SettingsView(ProtectedModelView):
             url = url_for('.edit_view', id=first_setting.id)
             return redirect(url)
         return super(SettingsView, self).index_view()
+
+    @expose('/save-seo', methods=['POST'])
+    def save_seo(self):
+        """Save SEO controls independently from unrelated settings validation."""
+        settings = self.model.query.first()
+        if not settings:
+            settings = SiteSetting()
+            db.session.add(settings)
+
+        canonical_url = (request.form.get('seo_canonical_url') or '').strip()
+        if canonical_url and not canonical_url.startswith(('http://', 'https://')):
+            canonical_url = f'https://{canonical_url}'
+
+        settings.seo_canonical_url = canonical_url.rstrip('/') or 'https://ekosanmuhendislik.com'
+        settings.seo_default_description = (
+            request.form.get('seo_default_description') or ''
+        ).strip() or None
+        settings.seo_index_service_pages = request.form.get('seo_index_service_pages') in ('y', '1', 'true', 'on')
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception('SEO ayarlari kaydedilemedi')
+            flash('SEO ayarları kaydedilemedi. Lütfen tekrar deneyin.', 'danger')
+            return redirect(url_for('.edit_view', id=settings.id))
+
+        flash('SEO ve indeksleme ayarları kaydedildi.', 'success')
+        return redirect(url_for('.edit_view', id=settings.id))
 
 class FooterView(ProtectedModelView):
     can_delete = False
@@ -847,6 +876,7 @@ def create_app(config_class=Config):
         return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
 
     app.add_template_filter(format_turkey_datetime, 'turkey_datetime')
+    app.add_template_filter(slugify, 'slugify')
 
     from app.utils import normalize_whatsapp_number
     app.add_template_filter(normalize_whatsapp_number, 'whatsapp_number')

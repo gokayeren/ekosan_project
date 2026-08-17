@@ -51,6 +51,7 @@ class SiteSetting(db.Model):
         default='Kdz. Ereğli ve çevresinde ısı pompası, klima, kombi, güneş enerjisi ve verimli iklimlendirme çözümleri.'
     )
     seo_homepage_only = db.Column(db.Boolean, nullable=False, default=True)
+    seo_index_service_pages = db.Column(db.Boolean, nullable=False, default=True)
     form_notification_provider = db.Column(db.String(20), nullable=False, default='formsubmit')
     smtp_host = db.Column(db.String(255), nullable=True)
     smtp_port = db.Column(db.Integer, nullable=True, default=587)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}{{ service.meta_title or service.title }} - Ekosan{% endblock %}
-{% block description %}{{ service.meta_description or service.short_description }}{% endblock %}
+{% block title %}{{ service.meta_title or (service.title ~ ' | Kdz. Ereğli - Ekosan Isı') }}{% endblock %}
+{% block description %}{{ service.meta_description or service.short_description or (service.title ~ ' için Kdz. Ereğli, Alaplı, Akçakoca ve Zonguldak bölgesinde keşif, projelendirme ve uygulama hizmetleri.') }}{% endblock %}
 {% block head_extra %}
     <script type="application/ld+json">{{ service_schema | tojson }}</script>
     {% set service_hero_image = service.detail_image_path or service.image_path %}
@@ -193,7 +193,7 @@
                     <div class="swiper-wrapper pb-10">
                         {% for item in service.slider_group_2.items %}
                         {% if item.image_path %}
-                        <div class="swiper-slide h-auto">
+                        <div class="swiper-slide h-auto" id="product-{{ item.id }}">
                             <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col overflow-hidden group/card">
                                 
                                 <div class="w-full aspect-[4/3] bg-slate-50 overflow-hidden relative flex items-center justify-center">
@@ -206,7 +206,9 @@
                                         class="w-full h-full object-contain p-3 sm:p-5 group-hover/card:scale-105 transition-transform duration-500">
                                 </div>
                                 <div class="p-4 sm:p-6 text-center mt-auto border-t border-slate-50">
-                                    <h4 class="font-bold text-slate-900 text-lg mb-2">{{ item.title }}</h4>
+                                    <h4 class="font-bold text-slate-900 text-lg mb-2">
+                                        <a href="{{ url_for('main.product_detail', item_id=item.id, slug=item.title|slugify) }}" class="hover:text-blue-600 transition-colors">{{ item.title }}</a>
+                                    </h4>
                                     {% if item.description %}
                                     <p class="text-slate-500 text-xs leading-relaxed line-clamp-3">
                                         {{ item.description }}
@@ -214,6 +216,8 @@
                                     {% endif %}
                                     {% if item.btn_text and item.btn_link %}
                                         <a href="{{ item.btn_link }}" class="btn btn-sm btn-outline mt-4 w-full">{{ item.btn_text }}</a>
+                                    {% else %}
+                                        <a href="{{ url_for('main.product_detail', item_id=item.id, slug=item.title|slugify) }}" class="btn btn-sm btn-outline mt-4 w-full">Ürünü İncele</a>
                                     {% endif %}
                                 </div>
                             </div>

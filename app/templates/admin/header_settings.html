@@ -90,12 +90,17 @@
                     {{ form.seo_default_description(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-violet-500 h-20 resize-none", maxlength="320") }}
                 </div>
                 <label class="col-span-12 flex items-start gap-3 px-4 py-3 rounded border border-slate-700 bg-[#020617] cursor-pointer">
-                    {{ form.seo_homepage_only(class="toggle toggle-sm toggle-secondary mt-0.5") }}
+                    {{ form.seo_index_service_pages(class="toggle toggle-sm toggle-secondary mt-0.5") }}
                     <span>
-                        <span class="block text-sm font-semibold text-slate-200">Yalnızca ana sayfayı indeksle</span>
-                        <span class="block mt-1 text-xs text-slate-500">Açıkken diğer herkese açık sayfalara noindex uygulanır ve sitemap yalnızca ana sayfayı içerir.</span>
+                        <span class="block text-sm font-semibold text-slate-200">Hizmet ve ürün sayfalarını indeksle</span>
+                        <span class="block mt-1 text-xs text-slate-500">Ana sayfayla birlikte hizmet detaylarını sitemap'e ekler. İletişim, teklif, kurumsal ve referans sayfaları noindex kalır.</span>
                     </span>
                 </label>
+                <div class="col-span-12 flex justify-end">
+                    <button type="submit" form="settingsForm" formaction="{{ url_for('.save_seo') }}" formmethod="post" class="btn btn-sm bg-violet-600 hover:bg-violet-500 text-white border-0 gap-2 px-5">
+                        <i class="fa fa-save"></i> SEO Ayarlarını Kaydet
+                    </button>
+                </div>
             </div>
         </div>
 

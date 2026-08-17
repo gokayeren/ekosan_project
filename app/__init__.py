@@ -1,5 +1,7 @@
 import os
 import os.path as op
+from datetime import timezone
+from zoneinfo import ZoneInfo
 from flask import Flask, redirect, url_for, request, render_template, flash
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
@@ -24,6 +26,15 @@ migrate = Migrate()
 BASE_DIR = op.abspath(op.dirname(__file__))
 STATIC_DIR = op.join(BASE_DIR, 'static')
 UPLOAD_PATH = op.join(STATIC_DIR, 'uploads')
+ISTANBUL_TZ = ZoneInfo('Europe/Istanbul')
+
+
+def format_turkey_datetime(value):
+    if not value:
+        return ''
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(ISTANBUL_TZ).strftime('%d.%m.%Y %H:%M')
 
 if not os.path.exists(UPLOAD_PATH):
     os.makedirs(UPLOAD_PATH)
@@ -385,7 +396,13 @@ class FormSubmissionView(ProtectedModelView):
         except: 
             return model.submission_data
 
-    column_formatters = {'submission_data': _format_data}
+    def _format_created_at(view, context, model, name):
+        return format_turkey_datetime(model.created_at)
+
+    column_formatters = {
+        'submission_data': _format_data,
+        'created_at': _format_created_at
+    }
 
 class SliderItemInline(InlineFormAdmin):
     form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'order')
@@ -786,6 +803,8 @@ def create_app(config_class=Config):
         if text is None:
             return ""
         return markdown.markdown(text, extensions=['nl2br', 'fenced_code'])
+
+    app.add_template_filter(format_turkey_datetime, 'turkey_datetime')
 
     from app.utils import normalize_whatsapp_number
     app.add_template_filter(normalize_whatsapp_number, 'whatsapp_number')

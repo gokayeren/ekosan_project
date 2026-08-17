@@ -167,7 +167,7 @@
                         aria-label="Başvuruyu görüntüle"
                         data-submission="{{ row.submission_data|e }}"
                         data-form="{{ row.form.title|e if row.form else 'Form başvurusu' }}"
-                        data-created="{{ row.created_at.strftime('%d.%m.%Y %H:%M') if row.created_at else '' }}"
+                        data-created="{{ row.created_at | turkey_datetime }}"
                         data-ip="{{ row.ip_address or '-' }}"
                         {% endif %}>
 

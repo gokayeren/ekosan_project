@@ -7,7 +7,9 @@ import uuid
 from pathlib import Path
 from datetime import datetime
 from email.message import EmailMessage
-from flask import render_template, request, redirect, url_for, flash, current_app, abort, send_file
+from xml.sax.saxutils import escape as xml_escape
+from urllib.parse import urlsplit
+from flask import render_template, request, redirect, url_for, flash, current_app, abort, send_file, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
 from app import db
 from app.main import main
@@ -20,6 +22,121 @@ def get_shared_data():
     home_config = HomeConfig.query.first() or HomeConfig()
     services = Service.query.filter_by(is_active=True).order_by(Service.order.asc()).all()
     return home_config, services
+
+
+def get_canonical_root():
+    settings = SiteSetting.query.first()
+    configured_url = settings.seo_canonical_url if settings else None
+    return (configured_url or 'https://ekosanmuhendislik.com').rstrip('/')
+
+
+@main.before_request
+def redirect_public_aliases_to_canonical():
+    """Consolidate www and secondary domains without breaking local health checks."""
+    canonical_root = get_canonical_root()
+    canonical_parts = urlsplit(canonical_root)
+    current_host = (request.host.split(':', 1)[0] or '').lower()
+    canonical_host = (canonical_parts.hostname or '').lower()
+    local_hosts = {'127.0.0.1', 'localhost', '::1'}
+
+    if (
+        request.method in ('GET', 'HEAD')
+        and current_host
+        and canonical_host
+        and current_host not in local_hosts
+        and current_host != canonical_host
+    ):
+        target = f'{canonical_root}{request.path}'
+        if request.query_string:
+            target = f'{target}?{request.query_string.decode("utf-8", errors="ignore")}'
+        return redirect(target, code=301)
+
+
+@main.after_request
+def apply_public_seo_headers(response):
+    """Mirror page-level noindex rules in the HTTP headers."""
+    try:
+        settings = SiteSetting.query.first()
+        homepage_only = settings.seo_homepage_only if settings else True
+        is_html = response.content_type and response.content_type.startswith('text/html')
+        if homepage_only and request.endpoint != 'main.index' and is_html:
+            response.headers['X-Robots-Tag'] = 'noindex, follow'
+    except Exception:
+        pass
+    return response
+
+
+@main.route('/robots.txt')
+def robots_txt():
+    canonical_root = get_canonical_root()
+    content = "\n".join([
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin/',
+        'Disallow: /login',
+        'Disallow: /logout',
+        'Disallow: /form-submit',
+        '',
+        f'Sitemap: {canonical_root}/sitemap.xml',
+        ''
+    ])
+    return Response(content, mimetype='text/plain')
+
+
+@main.route('/sitemap.xml')
+def sitemap_xml():
+    settings = SiteSetting.query.first()
+    canonical_root = get_canonical_root()
+    urls = [f'{canonical_root}/']
+
+    if settings and not settings.seo_homepage_only:
+        urls.extend([
+            f'{canonical_root}/kurumsal',
+            f'{canonical_root}/referanslar',
+            f'{canonical_root}/iletisim',
+            f'{canonical_root}/teklifal'
+        ])
+        urls.extend(
+            f'{canonical_root}/hizmetler/{service.slug}'
+            for service in Service.query.filter_by(is_active=True).all()
+        )
+
+    entries = ''.join(
+        f'<url><loc>{xml_escape(url)}</loc></url>'
+        for url in urls
+    )
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f'{entries}</urlset>'
+    )
+    return Response(xml, mimetype='application/xml')
+
+
+@main.route('/llms.txt')
+def llms_txt():
+    settings = SiteSetting.query.first() or SiteSetting()
+    services = Service.query.filter_by(is_active=True).order_by(Service.order.asc()).all()
+    lines = [
+        '# Ekosan Isı',
+        '',
+        settings.seo_default_description or 'Kdz. Ereğli merkezli ısıtma, soğutma ve enerji çözümleri firması.',
+        '',
+        '## Temel bilgiler',
+        f'- Resmî site: {get_canonical_root()}/',
+        f'- Telefon: {settings.phone_number or "03723124838"}',
+        f'- E-posta: {settings.email_address or "bilgi@ekosanmuhendislik.com"}',
+        f'- Adres: {settings.address or "Karadeniz Ereğli, Zonguldak"}',
+        '',
+        '## Hizmetler'
+    ]
+    for service in services:
+        summary = service.short_description or service.subtitle or ''
+        lines.append(f'- {service.title}: {summary}'.rstrip())
+    lines.extend(['', 'Bu dosya yapay zekâ sistemlerinin firma bilgilerini doğru yorumlamasına yardımcı olmak için hazırlanmıştır.', ''])
+    response = Response('\n'.join(lines), mimetype='text/plain')
+    response.headers['X-Robots-Tag'] = 'noindex'
+    return response
 
 
 def send_submission_notification(target_email, subject, body, reply_to=None, form_data=None):
@@ -202,9 +319,41 @@ def getoffer():
 def service_detail(slug):
     home_config, services = get_shared_data()
     service = Service.query.filter_by(slug=slug, is_active=True).first_or_404()
+    canonical_root = get_canonical_root()
+    schema_graph = [{
+        '@type': 'Service',
+        '@id': f'{canonical_root}/hizmetler/{service.slug}#service',
+        'name': service.title,
+        'description': service.meta_description or service.short_description or service.subtitle or '',
+        'url': f'{canonical_root}/hizmetler/{service.slug}',
+        'provider': {'@id': f'{canonical_root}/#business'},
+        'areaServed': ['Karadeniz Ereğli', 'Alaplı', 'Akçakoca', 'Zonguldak']
+    }]
+
+    active_faqs = []
+    if service.faq_group:
+        active_faqs = [faq for faq in service.faq_group.items if faq.is_active]
+    if active_faqs:
+        schema_graph.append({
+            '@type': 'FAQPage',
+            'mainEntity': [{
+                '@type': 'Question',
+                'name': faq.question,
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': faq.answer
+                }
+            } for faq in active_faqs]
+        })
+
+    service_schema = {
+        '@context': 'https://schema.org',
+        '@graph': schema_graph
+    }
 
     return render_template('service_detail.html',
                            service=service,
+                           service_schema=service_schema,
                            home_config=home_config,
                            services=services)
 

@@ -44,6 +44,13 @@ class SiteSetting(db.Model):
     google_tag_manager_id = db.Column(db.String(32), nullable=True)
     google_analytics_id = db.Column(db.String(32), nullable=True)
     google_ads_id = db.Column(db.String(32), nullable=True)
+    seo_canonical_url = db.Column(db.String(255), nullable=False, default='https://ekosanmuhendislik.com')
+    seo_default_description = db.Column(
+        db.String(320),
+        nullable=True,
+        default='Kdz. Ereğli ve çevresinde ısı pompası, klima, kombi, güneş enerjisi ve verimli iklimlendirme çözümleri.'
+    )
+    seo_homepage_only = db.Column(db.Boolean, nullable=False, default=True)
     form_notification_provider = db.Column(db.String(20), nullable=False, default='formsubmit')
     smtp_host = db.Column(db.String(255), nullable=True)
     smtp_port = db.Column(db.Integer, nullable=True, default=587)

@@ -3,6 +3,7 @@
 {% block title %}{{ service.meta_title or service.title }} - Ekosan{% endblock %}
 {% block description %}{{ service.meta_description or service.short_description }}{% endblock %}
 {% block head_extra %}
+    <script type="application/ld+json">{{ service_schema | tojson }}</script>
     {% set service_hero_image = service.detail_image_path or service.image_path %}
     {% if service_hero_image %}
     <link rel="preload"

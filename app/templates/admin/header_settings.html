@@ -68,6 +68,40 @@
         <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-violet-900/20 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                        <i class="fa fa-magnifying-glass-chart"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-200 text-sm">SEO ve İndeksleme</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Canonical, arama sonuçları ve yapay zekâ keşfi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12 rounded-lg border border-violet-500/20 bg-violet-900/10 px-4 py-3 text-xs leading-relaxed text-slate-400">
+                    İki domain aynı içeriği gösteriyorsa ana domaini burada seçin. Canonical etiketi ve sitemap yalnızca bu adresi kaynak olarak gösterecektir.
+                </div>
+                <div class="col-span-12">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Ana (Canonical) Site Adresi</label>
+                    {{ form.seo_canonical_url(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-violet-500", placeholder="https://ekosanmuhendislik.com") }}
+                </div>
+                <div class="col-span-12">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Varsayılan SEO Açıklaması</label>
+                    {{ form.seo_default_description(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-violet-500 h-20 resize-none", maxlength="320") }}
+                </div>
+                <label class="col-span-12 flex items-start gap-3 px-4 py-3 rounded border border-slate-700 bg-[#020617] cursor-pointer">
+                    {{ form.seo_homepage_only(class="toggle toggle-sm toggle-secondary mt-0.5") }}
+                    <span>
+                        <span class="block text-sm font-semibold text-slate-200">Yalnızca ana sayfayı indeksle</span>
+                        <span class="block mt-1 text-xs text-slate-500">Açıkken diğer herkese açık sayfalara noindex uygulanır ve sitemap yalnızca ana sayfayı içerir.</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded bg-blue-900/20 border border-blue-500/20 flex items-center justify-center text-blue-400">
                         <i class="fa fa-globe"></i>
                     </div>

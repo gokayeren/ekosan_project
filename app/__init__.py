@@ -89,6 +89,7 @@ class SettingsView(ProtectedModelView):
         'site_title', 'logo_path', 'favicon_path', 'phone_number',
         'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url',
         'google_tag_manager_id', 'google_analytics_id', 'google_ads_id',
+        'seo_canonical_url', 'seo_default_description', 'seo_homepage_only',
         'form_notification_provider', 'smtp_host', 'smtp_port', 'smtp_user',
         'smtp_password', 'smtp_from', 'smtp_use_ssl'
     )
@@ -118,6 +119,9 @@ class SettingsView(ProtectedModelView):
         'google_tag_manager_id': 'Google Tag Manager Kimliği',
         'google_analytics_id': 'Google Analytics 4 Kimliği',
         'google_ads_id': 'Google Ads Kimliği',
+        'seo_canonical_url': 'Ana (Canonical) Site Adresi',
+        'seo_default_description': 'Varsayılan SEO Açıklaması',
+        'seo_homepage_only': 'Yalnızca Ana Sayfayı İndeksle',
         'form_notification_provider': 'Form Bildirim Sağlayıcısı',
         'smtp_host': 'SMTP Sunucusu', 'smtp_port': 'SMTP Portu',
         'smtp_user': 'SMTP Kullanıcı Adı', 'smtp_password': 'SMTP Parolası',
@@ -135,6 +139,12 @@ class SettingsView(ProtectedModelView):
         for field_name in ('google_tag_manager_id', 'google_analytics_id', 'google_ads_id'):
             value = getattr(model, field_name, None)
             setattr(model, field_name, value.strip().upper() if value else None)
+        canonical_url = (model.seo_canonical_url or '').strip()
+        if canonical_url and not canonical_url.startswith(('http://', 'https://')):
+            canonical_url = f'https://{canonical_url}'
+        model.seo_canonical_url = canonical_url.rstrip('/') or 'https://ekosanmuhendislik.com'
+        if model.seo_default_description:
+            model.seo_default_description = model.seo_default_description.strip()
         if not is_created and not form.smtp_password.data:
             password_history = sa_inspect(model).attrs.smtp_password.history
             if password_history.deleted:

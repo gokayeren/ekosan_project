@@ -2,7 +2,7 @@ import os
 import os.path as op
 from datetime import timezone
 from zoneinfo import ZoneInfo
-from flask import Flask, redirect, url_for, request, render_template, flash
+from flask import Flask, redirect, url_for, request, render_template, flash, current_app
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -18,6 +18,7 @@ from wtforms.validators import Optional, Regexp
 import json
 from markupsafe import Markup
 import markdown
+import requests
 from sqlalchemy import inspect as sa_inspect
 
 db = SQLAlchemy()
@@ -366,6 +367,37 @@ class FormBuilderView(ProtectedModelView):
     inline_models = (FormFieldInline(FormField),)
     batch_actions = None
     def is_action_allowed(self, name): return False
+
+    def after_model_change(self, form, model, is_created):
+        """Persist the form first, then request activation for the saved address."""
+        if request.form.get('activate_email') != '1' or not model.recipient_email:
+            return
+
+        try:
+            form_endpoint = url_for('main.submit_contact_form', _external=True)
+            response = requests.post(
+                f"https://formsubmit.co/ajax/{model.recipient_email.strip()}",
+                data={
+                    '_subject': f'{model.title} - Form Aktivasyonu',
+                    '_captcha': 'false',
+                    'message': 'Bu adres web sitesi form bildirimleri için kaydedildi.'
+                },
+                headers={
+                    'User-Agent': 'Ekosan-Flask-App',
+                    'Accept': 'application/json',
+                    'Referer': form_endpoint
+                },
+                timeout=10
+            )
+            if response.status_code not in (200, 201):
+                raise RuntimeError(f'FormSubmit HTTP {response.status_code}')
+            flash(f'{model.recipient_email} kaydedildi ve aktivasyon isteği gönderildi.', 'success')
+        except Exception as exc:
+            current_app.logger.error(f'FormSubmit activation error: {exc}')
+            flash(
+                f'{model.recipient_email} kaydedildi; ancak aktivasyon isteği gönderilemedi.',
+                'warning'
+            )
 
 class FormSubmissionView(ProtectedModelView):
     is_submission_view = True

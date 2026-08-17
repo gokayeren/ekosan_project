@@ -189,12 +189,12 @@
                 <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">E-posta (Bildirim Alıcısı)</label>
                 <div class="flex flex-col sm:flex-row gap-2">
                     {{ form.recipient_email(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors placeholder-slate-600", id="target-email-input") }}
-                    <button type="button" id="btn-activate-mail" class="btn btn-sm bg-amber-600 hover:bg-amber-500 text-white border-0 gap-2 h-10 px-5 rounded font-medium shadow-lg shadow-amber-900/20 sm:flex-none" title="Bu adresi FormSubmit servisinde aktive et">
-                        <i class="fa fa-paper-plane"></i> Aktive Et
+                    <button type="submit" name="activate_email" value="1" form="formEditor" class="btn btn-sm bg-amber-600 hover:bg-amber-500 text-white border-0 gap-2 h-10 px-5 rounded font-medium shadow-lg shadow-amber-900/20 sm:flex-none" title="Adresi kaydet ve FormSubmit aktivasyonunu başlat">
+                        <i class="fa fa-paper-plane"></i> Kaydet ve Aktive Et
                     </button>
                 </div>
                 <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1.5">
-                    <i class="fa fa-info-circle text-indigo-400"></i> Bu adres ilk kez kullanılıyorsa aktivasyon e-postasını onaylayın.
+                    <i class="fa fa-info-circle text-indigo-400"></i> Adres önce kaydedilir, ardından aynı form adresi için aktivasyon isteği gönderilir.
                 </p>
             </div>
 
@@ -393,33 +393,6 @@ $(document).ready(function() {
         }
     });
 
-    $('#btn-activate-mail').on('click', function() {
-        var email = $('#target-email-input').val();
-        var btn = $(this);
-        if (!email || !email.includes('@')) {
-            alert('Lütfen geçerli bir e-posta adresi giriniz.');
-            return;
-        }
-        if (!confirm(email + ' adresine aktivasyon e-postası gönderilecek. Devam edilsin mi?')) return;
-
-        var originalText = btn.html();
-        btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
-        $.ajax({
-            url: 'https://formsubmit.co/' + email,
-            method: 'POST',
-            dataType: 'json',
-            accepts: 'application/json',
-            data: {
-                _subject: 'Form Aktivasyon',
-                _captcha: 'false',
-                message: 'Form altyapısını aktif etmek için gelen e-postayı onaylayın.'
-            },
-            complete: function() {
-                alert('İstek gönderildi. Lütfen gelen kutunuzu kontrol edin.');
-                btn.html(originalText).prop('disabled', false);
-            }
-        });
-    });
 });
 </script>
 {% endblock %}

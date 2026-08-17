@@ -130,6 +130,7 @@ class SliderItem(db.Model):
     subtitle = db.Column(db.String(200))
     btn_text = db.Column(db.String(50))
     btn_link = db.Column(db.String(200))
+    video_url = db.Column(db.String(500))
     order = db.Column(db.Integer, default=0)
 
     def __str__(self):

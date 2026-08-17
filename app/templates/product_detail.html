@@ -2,6 +2,8 @@
 
 {% block title %}{{ item.title }} | Kdz. Ereğli - Ekosan Isı{% endblock %}
 {% block description %}{{ item.subtitle or (item.title ~ ' hakkında özellikler, uygulama seçenekleri ve Kdz. Ereğli bölgesi için ücretsiz keşif bilgileri.') }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block social_image %}{% if item.image_path %}{{ canonical_root }}{{ url_for('static', filename='uploads/' + item.image_path) }}{% else %}{{ default_social_image }}{% endif %}{% endblock %}
 
 {% block head_extra %}
     <script type="application/ld+json">{{ product_schema | tojson }}</script>

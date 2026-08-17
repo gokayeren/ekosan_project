@@ -13,7 +13,7 @@ from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from flask_admin.menu import MenuLink
 from config import Config
-from wtforms import BooleanField, HiddenField, PasswordField, SelectField, TextAreaField
+from wtforms import BooleanField, HiddenField, PasswordField, SelectField, StringField, TextAreaField
 from wtforms.validators import Optional, Regexp
 import json
 from markupsafe import Markup
@@ -476,7 +476,7 @@ class FormSubmissionView(ProtectedModelView):
     }
 
 class SliderItemInline(InlineFormAdmin):
-    form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'order')
+    form_columns = ('id', 'image_path', 'title', 'subtitle', 'btn_text', 'btn_link', 'video_url', 'order')
     form_label = 'Slayt Görseli'
 
     form_args = {
@@ -487,6 +487,7 @@ class SliderItemInline(InlineFormAdmin):
 
     form_extra_fields = {
         'image_path': ImageUploadField('Resim Dosyası', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'video_url': StringField('YouTube Video Linki (isteğe bağlı)'),
         'DELETE': BooleanField('Sil')
     }
 
@@ -878,8 +879,9 @@ def create_app(config_class=Config):
     app.add_template_filter(format_turkey_datetime, 'turkey_datetime')
     app.add_template_filter(slugify, 'slugify')
 
-    from app.utils import normalize_whatsapp_number
+    from app.utils import normalize_whatsapp_number, youtube_embed_url
     app.add_template_filter(normalize_whatsapp_number, 'whatsapp_number')
+    app.add_template_filter(youtube_embed_url, 'youtube_embed_url')
 
     @app.context_processor
     def inject_global_data():

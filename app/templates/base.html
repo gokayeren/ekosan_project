@@ -15,17 +15,18 @@
     <meta name="googlebot" content="{{ 'index, follow, max-image-preview:large' if page_indexable else 'noindex, follow' }}">
 
     <meta property="og:locale" content="tr_TR">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:site_name" content="{{ site_settings.site_title if site_settings and site_settings.site_title else 'Ekosan Isı' }}">
     <meta property="og:title" content="{{ self.title() | striptags | trim }}">
     <meta property="og:description" content="{{ self.description() | striptags | trim }}">
     <meta property="og:url" content="{{ canonical_root }}{{ canonical_path }}">
-    {% if site_settings and site_settings.logo_path %}
-    <meta property="og:image" content="{{ canonical_root }}{{ url_for('static', filename='uploads/' + site_settings.logo_path) }}">
-    {% endif %}
+    {% set default_social_image = canonical_root ~ url_for('static', filename='uploads/' + site_settings.logo_path) if site_settings and site_settings.logo_path else '' %}
+    {% set social_image %}{% block social_image %}{{ default_social_image }}{% endblock %}{% endset %}
+    {% if social_image|trim %}<meta property="og:image" content="{{ social_image|trim }}">{% endif %}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ self.title() | striptags | trim }}">
     <meta name="twitter:description" content="{{ self.description() | striptags | trim }}">
+    {% if social_image|trim %}<meta name="twitter:image" content="{{ social_image|trim }}">{% endif %}
     <link rel="alternate" type="text/plain" href="{{ canonical_root }}/llms.txt" title="Ekosan Isı AI bilgileri">
 
     {% if request.endpoint == 'main.index' %}

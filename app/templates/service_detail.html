@@ -2,6 +2,8 @@
 
 {% block title %}{{ service.meta_title or (service.title ~ ' | Kdz. Ereğli - Ekosan Isı') }}{% endblock %}
 {% block description %}{{ service.meta_description or service.short_description or (service.title ~ ' için Kdz. Ereğli, Alaplı, Akçakoca ve Zonguldak bölgesinde keşif, projelendirme ve uygulama hizmetleri.') }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block social_image %}{% set image = service.detail_image_path or service.image_path %}{% if image %}{{ canonical_root }}{{ url_for('static', filename='uploads/' + image) }}{% else %}{{ default_social_image }}{% endif %}{% endblock %}
 {% block head_extra %}
     <script type="application/ld+json">{{ service_schema | tojson }}</script>
     {% set service_hero_image = service.detail_image_path or service.image_path %}
@@ -206,8 +208,12 @@
                                         class="w-full h-full object-contain p-3 sm:p-5 group-hover/card:scale-105 transition-transform duration-500">
                                 </div>
                                 <div class="p-4 sm:p-6 text-center mt-auto border-t border-slate-50">
-                                    <h4 class="font-bold text-slate-900 text-lg mb-2">
+                                    <h4 class="font-bold text-slate-900 text-lg mb-2 min-h-[3.5rem] flex items-center justify-center">
+                                        {% if item.title %}
                                         <a href="{{ url_for('main.product_detail', item_id=item.id, slug=item.title|slugify) }}" class="hover:text-blue-600 transition-colors">{{ item.title }}</a>
+                                        {% else %}
+                                        <span>{{ service.title }} Ürünü</span>
+                                        {% endif %}
                                     </h4>
                                     {% if item.description %}
                                     <p class="text-slate-500 text-xs leading-relaxed line-clamp-3">
@@ -216,7 +222,7 @@
                                     {% endif %}
                                     {% if item.btn_text and item.btn_link %}
                                         <a href="{{ item.btn_link }}" class="btn btn-sm btn-outline mt-4 w-full">{{ item.btn_text }}</a>
-                                    {% else %}
+                                    {% elif item.title %}
                                         <a href="{{ url_for('main.product_detail', item_id=item.id, slug=item.title|slugify) }}" class="btn btn-sm btn-outline mt-4 w-full">Ürünü İncele</a>
                                     {% endif %}
                                 </div>
@@ -247,24 +253,36 @@
                     <div class="swiper-wrapper pb-10">
                         {% for item in service.slider_group_3.items %}
                         {% if item.image_path %}
-                        <div class="swiper-slide h-auto">
-                            <div class="rounded-xl overflow-hidden shadow-md relative aspect-video group/ref cursor-pointer">
+                        <div class="swiper-slide h-auto flex">
+                            {% set youtube_embed = item.video_url|youtube_embed_url %}
+                            <article class="reference-card w-full rounded-2xl overflow-hidden shadow-md hover:shadow-xl relative aspect-video group/ref bg-slate-900 transition-shadow duration-300">
                                 <img src="{{ url_for('main.optimized_media', filename=item.image_path, w=768) }}"
                                      srcset="{{ url_for('main.optimized_media', filename=item.image_path, w=480) }} 480w, {{ url_for('main.optimized_media', filename=item.image_path, w=768) }} 768w"
                                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                                      alt="{{ item.title or service.title }}"
                                      loading="lazy"
                                      decoding="async"
-                                     class="w-full h-full object-cover transition-transform duration-700 group-hover/ref:scale-110">
+                                     width="768" height="432"
+                                     class="w-full h-full object-cover transition-transform duration-700 group-hover/ref:scale-105">
                                 
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/5 flex flex-col justify-end p-5 md:p-6">
                                     <span class="text-orange-400 text-xs font-bold uppercase tracking-wider mb-1">Referans</span>
-                                    <h4 class="text-white font-bold text-lg leading-tight">{{ item.title }}</h4>
-                                    {% if item.description %}
-                                        <p class="text-gray-300 text-xs mt-2 line-clamp-2">{{ item.description }}</p>
+                                    <h4 class="text-white font-bold text-base md:text-lg leading-snug min-h-[2.75rem] flex items-end">{{ item.title }}</h4>
+                                    {% if item.subtitle %}
+                                        <p class="text-gray-300 text-xs mt-2 line-clamp-2">{{ item.subtitle }}</p>
                                     {% endif %}
                                 </div>
-                            </div>
+                                {% if youtube_embed %}
+                                <button type="button"
+                                        class="reference-video-trigger absolute inset-0 z-10 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-400/70"
+                                        data-video-url="{{ youtube_embed }}"
+                                        aria-label="{{ item.title or service.title }} videosunu oynat">
+                                    <span class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/90 text-slate-900 shadow-xl flex items-center justify-center group-hover/ref:scale-110 transition-transform">
+                                        <i class="fa fa-play text-lg ml-1" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                                {% endif %}
+                            </article>
                         </div>
                         {% endif %}
                         {% endfor %}
@@ -306,6 +324,20 @@
 
     </div>
 </section>
+
+<div id="reference-video-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/90 p-4" role="dialog" aria-modal="true" aria-labelledby="reference-video-title">
+    <div class="relative w-full max-w-5xl">
+        <div class="mb-3 flex items-center justify-between text-white">
+            <h3 id="reference-video-title" class="font-bold">Referans Videosu</h3>
+            <button type="button" id="reference-video-close" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20" aria-label="Videoyu kapat">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="aspect-video overflow-hidden rounded-2xl bg-black shadow-2xl">
+            <iframe id="reference-video-frame" class="w-full h-full" src="about:blank" title="Ekosan referans videosu" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -362,6 +394,38 @@ document.addEventListener("DOMContentLoaded", function() {
                 },
             },
         });
+    });
+
+    var videoModal = document.getElementById('reference-video-modal');
+    var videoFrame = document.getElementById('reference-video-frame');
+    var videoClose = document.getElementById('reference-video-close');
+    var lastVideoTrigger = null;
+
+    function closeReferenceVideo() {
+        videoFrame.src = 'about:blank';
+        videoModal.classList.add('hidden');
+        videoModal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+        if (lastVideoTrigger) lastVideoTrigger.focus();
+    }
+
+    document.querySelectorAll('.reference-video-trigger').forEach(function(trigger) {
+        trigger.addEventListener('click', function() {
+            lastVideoTrigger = trigger;
+            videoFrame.src = trigger.dataset.videoUrl;
+            videoModal.classList.remove('hidden');
+            videoModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            videoClose.focus();
+        });
+    });
+
+    videoClose.addEventListener('click', closeReferenceVideo);
+    videoModal.addEventListener('click', function(event) {
+        if (event.target === videoModal) closeReferenceVideo();
+    });
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && !videoModal.classList.contains('hidden')) closeReferenceVideo();
     });
 });
 </script>

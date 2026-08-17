@@ -330,6 +330,15 @@ def service_detail(slug):
         'url': f'{canonical_root}/hizmetler/{service.slug}',
         'provider': {'@id': f'{canonical_root}/#business'},
         'areaServed': ['Karadeniz Ereğli', 'Alaplı', 'Akçakoca', 'Zonguldak']
+    }, {
+        '@type': 'BreadcrumbList',
+        'itemListElement': [{
+            '@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa',
+            'item': f'{canonical_root}/'
+        }, {
+            '@type': 'ListItem', 'position': 2, 'name': service.title,
+            'item': f'{canonical_root}/hizmetler/{service.slug}'
+        }]
     }]
 
     active_faqs = []
@@ -391,16 +400,30 @@ def product_detail(item_id, slug):
     product_url = f'{canonical_root}/urunler/{item.id}/{expected_slug}'
     product_schema = {
         '@context': 'https://schema.org',
-        '@type': 'Product',
-        '@id': f'{product_url}#product',
-        'name': item.title,
-        'description': item.subtitle or f'{service.title} ürün çözümü',
-        'url': product_url,
-        'category': service.title,
-        'isRelatedTo': {'@id': f'{canonical_root}/hizmetler/{service.slug}#service'}
+        '@graph': [{
+            '@type': 'Product',
+            '@id': f'{product_url}#product',
+            'name': item.title,
+            'description': item.subtitle or f'{service.title} ürün çözümü',
+            'url': product_url,
+            'category': service.title,
+            'isRelatedTo': {'@id': f'{canonical_root}/hizmetler/{service.slug}#service'}
+        }, {
+            '@type': 'BreadcrumbList',
+            'itemListElement': [{
+                '@type': 'ListItem', 'position': 1, 'name': 'Ana Sayfa',
+                'item': f'{canonical_root}/'
+            }, {
+                '@type': 'ListItem', 'position': 2, 'name': service.title,
+                'item': f'{canonical_root}/hizmetler/{service.slug}'
+            }, {
+                '@type': 'ListItem', 'position': 3, 'name': item.title,
+                'item': product_url
+            }]
+        }]
     }
     if item.image_path:
-        product_schema['image'] = f'{canonical_root}/static/uploads/{item.image_path}'
+        product_schema['@graph'][0]['image'] = f'{canonical_root}/static/uploads/{item.image_path}'
 
     return render_template(
         'product_detail.html',

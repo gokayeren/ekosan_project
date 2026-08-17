@@ -141,7 +141,7 @@
                     <tr class="bg-[#020617] border-b border-slate-800 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
                         {% for c, name in list_columns %}
                             <th class="px-6 py-4 whitespace-nowrap {% if c == 'id' or c == 'order' %}text-center w-20{% endif %}">
-                                {{ name }}
+                                {{ 'E-posta Durumu' if c == 'notification_status' else name }}
                                 {% if admin_view.column_sortable_list %}
                                     {% if c in admin_view.column_sortable_list %}
                                     <a href="{{ sort_url(c) }}" title="Sırala" class="ml-1 text-slate-600 hover:text-blue-400 transition-colors">
@@ -216,6 +216,20 @@
                                     <div class="flex items-center gap-2 text-slate-400 font-mono text-xs whitespace-nowrap">
                                         {{ get_value(row, c) }}
                                     </div>
+
+                                {% elif c == 'notification_status' %}
+                                    {% set status = get_value(row, c) %}
+                                    {% if status == 'sent' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-900/20 text-emerald-500 border border-emerald-900/30 tracking-wide">Gönderildi</span>
+                                    {% elif status == 'formsubmit_submitted' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-sky-900/20 text-sky-400 border border-sky-900/30 tracking-wide">FormSubmit'e İletildi</span>
+                                    {% elif status == 'failed' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-red-900/20 text-red-400 border border-red-900/30 tracking-wide" title="{{ row.notification_error or 'Gönderim başarısız' }}">Başarısız</span>
+                                    {% elif status == 'not_configured' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-900/20 text-amber-400 border border-amber-900/30 tracking-wide">Ayar Eksik</span>
+                                    {% else %}
+                                        <span class="text-slate-500 text-xs">Bekliyor</span>
+                                    {% endif %}
 
                                 {% elif c == 'ip_address' %}
                                     <span class="bg-[#111827] border border-slate-700 rounded px-2 py-1 text-[11px] font-mono text-blue-400 whitespace-nowrap">

@@ -5,6 +5,7 @@ import smtplib
 import hashlib
 import uuid
 from pathlib import Path
+from datetime import datetime
 from email.message import EmailMessage
 from flask import render_template, request, redirect, url_for, flash, current_app, abort, send_file
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -12,13 +13,64 @@ from app import db
 from app.main import main
 from app.models import (
     HomeConfig, Corporate, References, Contact, Getoffer,
-    Service, Form, FormSubmission
+    Service, Form, FormSubmission, SiteSetting
 )
 
 def get_shared_data():
     home_config = HomeConfig.query.first() or HomeConfig()
     services = Service.query.filter_by(is_active=True).order_by(Service.order.asc()).all()
     return home_config, services
+
+
+def send_submission_notification(target_email, subject, body, reply_to=None, form_data=None):
+    """Send a form notification through the configured provider."""
+    settings = SiteSetting.query.first()
+    provider = settings.form_notification_provider if settings else 'formsubmit'
+
+    if provider != 'smtp':
+        payload = {
+            '_subject': subject,
+            '_captcha': 'false',
+            '_template': 'box',
+        }
+        if reply_to:
+            payload['_replyto'] = reply_to
+        payload.update(form_data or {'Mesaj': body})
+        response = requests.post(
+            f"https://formsubmit.co/ajax/{target_email}",
+            data=payload,
+            headers={'User-Agent': 'Ekosan-Flask-App', 'Accept': 'application/json'},
+            timeout=10,
+        )
+        if response.status_code not in (200, 201):
+            raise RuntimeError(f'FormSubmit isteği başarısız ({response.status_code}).')
+        return 'formsubmit_submitted'
+
+    smtp_host = settings.smtp_host
+    smtp_user = settings.smtp_user
+    smtp_pass = settings.smtp_password
+    smtp_port = settings.smtp_port or 587
+    smtp_from = settings.smtp_from or smtp_user
+    smtp_use_ssl = bool(settings.smtp_use_ssl)
+
+    if not all((smtp_host, smtp_user, smtp_pass, smtp_from)):
+        raise RuntimeError('SMTP ayarları panelden tamamlanmalı.')
+
+    message = EmailMessage()
+    message['Subject'] = subject
+    message['From'] = smtp_from
+    message['To'] = target_email
+    if reply_to:
+        message['Reply-To'] = reply_to
+    message.set_content(body)
+
+    smtp_class = smtplib.SMTP_SSL if smtp_use_ssl else smtplib.SMTP
+    with smtp_class(smtp_host, smtp_port, timeout=15) as smtp:
+        if not smtp_use_ssl:
+            smtp.starttls()
+        smtp.login(smtp_user, smtp_pass)
+        smtp.send_message(message)
+    return 'sent'
 
 
 @main.route("/media/<path:filename>")
@@ -186,7 +238,8 @@ def submit_contact_form():
         submission = FormSubmission(
             form_id=form_id,
             submission_data=json_data,
-            ip_address=request.remote_addr
+            ip_address=request.remote_addr,
+            notification_status='pending' if form_obj.recipient_email else 'not_configured'
         )
 
         db.session.add(submission)
@@ -204,6 +257,15 @@ def submit_contact_form():
                     if 'mail' in key_lower or 'e-posta' in key_lower or 'email' in key_lower:
                         reply_to = value
                         break
+
+                notification_status = send_submission_notification(target_email, subject, body, reply_to, data)
+                submission.notification_status = notification_status
+                submission.notified_at = datetime.utcnow() if notification_status == 'sent' else None
+                submission.notification_error = None
+                db.session.commit()
+                current_app.logger.info(f"Form notification submitted via {notification_status}: {target_email}")
+                flash(form_obj.success_message or "Mesajınız başarıyla kaydedildi.", 'success')
+                return redirect(request.referrer or url_for('main.contact'))
 
                 smtp_host = os.environ.get('SMTP_HOST')
                 smtp_user = os.environ.get('SMTP_USER')
@@ -238,6 +300,11 @@ def submit_contact_form():
                     else:
                         current_app.logger.error(f"Mail gönderme hatası ({response.status_code}): {response.text}")
             except Exception as mail_error:
+                db.session.rollback()
+                submission.notification_status = 'failed'
+                submission.notification_error = str(mail_error)[:1000]
+                db.session.add(submission)
+                db.session.commit()
                 current_app.logger.error(f"Mail sunucusu hatası: {mail_error}")
         
         success_msg = form_obj.success_message or "Mesajınız başarıyla iletildi."

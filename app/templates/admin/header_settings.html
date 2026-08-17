@@ -106,6 +106,57 @@
         <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-sky-900/20 border border-sky-500/20 flex items-center justify-center text-sky-400">
+                        <i class="fa fa-paper-plane"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-200 text-sm">Form Bildirimleri</h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wide">Başvuruların e-posta iletimi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-12 gap-6">
+                <div class="col-span-12">
+                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Gönderim Yöntemi</label>
+                    {{ form.form_notification_provider(id="form-notification-provider", class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-sky-500") }}
+                </div>
+
+                <div id="formsubmit-help" class="col-span-12 rounded-lg border border-sky-500/20 bg-sky-900/10 px-4 py-3 text-xs leading-relaxed text-slate-400">
+                    FormSubmit ücretsizdir ve ek sunucu ayarı istemez. İlk form gönderiminde, seçili bildirim e-postasına gelen <strong class="text-sky-300">onay bağlantısını bir kez açın</strong>; sonrasında bildirimler otomatik gelir.
+                </div>
+
+                <div id="smtp-settings" class="col-span-12 grid grid-cols-12 gap-5" hidden>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">SMTP Sunucusu</label>
+                        {{ form.smtp_host(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300", placeholder="smtp.ornek.com") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Port</label>
+                        {{ form.smtp_port(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300", placeholder="587") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Kullanıcı Adı</label>
+                        {{ form.smtp_user(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300", placeholder="bilgi@firma.com") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Parola</label>
+                        {{ form.smtp_password(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300", placeholder="Değiştirmek istemiyorsanız boş bırakın", autocomplete="new-password") }}
+                    </div>
+                    <div class="col-span-12 md:col-span-8">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Gönderen E-posta</label>
+                        {{ form.smtp_from(class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300", placeholder="bilgi@firma.com") }}
+                    </div>
+                    <label class="col-span-12 md:col-span-4 flex items-center gap-3 px-3 py-2.5 rounded border border-slate-700 bg-[#020617] cursor-pointer">
+                        {{ form.smtp_use_ssl(class="toggle toggle-sm toggle-info") }}
+                        <span class="text-sm text-slate-300">SSL kullan (genellikle 465)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#0f172a] rounded-lg border border-slate-800 overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded bg-amber-900/20 border border-amber-500/20 flex items-center justify-center text-amber-400">
                         <i class="fa fa-chart-line"></i>
                     </div>
@@ -243,4 +294,18 @@
         </div>
 
     </form>
+    <script>
+        (function () {
+            const provider = document.getElementById('form-notification-provider');
+            const smtp = document.getElementById('smtp-settings');
+            const formsubmit = document.getElementById('formsubmit-help');
+            const sync = () => {
+                const isSmtp = provider.value === 'smtp';
+                smtp.hidden = !isSmtp;
+                formsubmit.hidden = isSmtp;
+            };
+            provider.addEventListener('change', sync);
+            sync();
+        }());
+    </script>
 {% endblock %}

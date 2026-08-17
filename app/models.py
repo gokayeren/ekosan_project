@@ -44,6 +44,13 @@ class SiteSetting(db.Model):
     google_tag_manager_id = db.Column(db.String(32), nullable=True)
     google_analytics_id = db.Column(db.String(32), nullable=True)
     google_ads_id = db.Column(db.String(32), nullable=True)
+    form_notification_provider = db.Column(db.String(20), nullable=False, default='formsubmit')
+    smtp_host = db.Column(db.String(255), nullable=True)
+    smtp_port = db.Column(db.Integer, nullable=True, default=587)
+    smtp_user = db.Column(db.String(255), nullable=True)
+    smtp_password = db.Column(db.String(255), nullable=True)
+    smtp_from = db.Column(db.String(255), nullable=True)
+    smtp_use_ssl = db.Column(db.Boolean, nullable=False, default=False)
     
     def __str__(self):
         return "Genel Site Ayarları"
@@ -155,6 +162,9 @@ class FormSubmission(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     submission_data = db.Column(db.Text, nullable=False) 
     ip_address = db.Column(db.String(50), nullable=True)
+    notification_status = db.Column(db.String(20), nullable=True)
+    notification_error = db.Column(db.Text, nullable=True)
+    notified_at = db.Column(db.DateTime, nullable=True)
     form = db.relationship('Form')
 
     def __str__(self):

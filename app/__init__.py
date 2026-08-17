@@ -11,11 +11,12 @@ from flask_admin.form.upload import ImageUploadField
 from flask_admin.model.form import InlineFormAdmin
 from flask_admin.menu import MenuLink
 from config import Config
-from wtforms import BooleanField, HiddenField, SelectField, TextAreaField
+from wtforms import BooleanField, HiddenField, PasswordField, SelectField, TextAreaField
 from wtforms.validators import Optional, Regexp
 import json
 from markupsafe import Markup
 import markdown
+from sqlalchemy import inspect as sa_inspect
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -68,13 +69,16 @@ class SettingsView(ProtectedModelView):
 
     form_extra_fields = {
         'logo_path': ImageUploadField('Site Logosu', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
-        'favicon_path': ImageUploadField('Favicon', base_path=UPLOAD_PATH, url_relative_path='uploads/')
+        'favicon_path': ImageUploadField('Favicon', base_path=UPLOAD_PATH, url_relative_path='uploads/'),
+        'smtp_password': PasswordField('SMTP Parolası')
     }
 
     form_columns = (
         'site_title', 'logo_path', 'favicon_path', 'phone_number',
         'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url',
-        'google_tag_manager_id', 'google_analytics_id', 'google_ads_id'
+        'google_tag_manager_id', 'google_analytics_id', 'google_ads_id',
+        'form_notification_provider', 'smtp_host', 'smtp_port', 'smtp_user',
+        'smtp_password', 'smtp_from', 'smtp_use_ssl'
     )
 
     form_args = {
@@ -101,13 +105,28 @@ class SettingsView(ProtectedModelView):
     column_labels = {
         'google_tag_manager_id': 'Google Tag Manager Kimliği',
         'google_analytics_id': 'Google Analytics 4 Kimliği',
-        'google_ads_id': 'Google Ads Kimliği'
+        'google_ads_id': 'Google Ads Kimliği',
+        'form_notification_provider': 'Form Bildirim Sağlayıcısı',
+        'smtp_host': 'SMTP Sunucusu', 'smtp_port': 'SMTP Portu',
+        'smtp_user': 'SMTP Kullanıcı Adı', 'smtp_password': 'SMTP Parolası',
+        'smtp_from': 'Gönderen E-posta', 'smtp_use_ssl': 'SSL Kullan'
+    }
+
+    form_choices = {
+        'form_notification_provider': [
+            ('formsubmit', 'FormSubmit (ücretsiz, ayar gerektirmez)'),
+            ('smtp', 'SMTP (kendi e-posta sağlayıcınız)')
+        ]
     }
 
     def on_model_change(self, form, model, is_created):
         for field_name in ('google_tag_manager_id', 'google_analytics_id', 'google_ads_id'):
             value = getattr(model, field_name, None)
             setattr(model, field_name, value.strip().upper() if value else None)
+        if not is_created and not form.smtp_password.data:
+            password_history = sa_inspect(model).attrs.smtp_password.history
+            if password_history.deleted:
+                model.smtp_password = password_history.deleted[0]
         return super().on_model_change(form, model, is_created)
 
     @expose('/')
@@ -343,7 +362,7 @@ class FormSubmissionView(ProtectedModelView):
     can_edit = False
     can_delete = True
     list_template = 'admin/custom_list.html'
-    column_list = ('form', 'created_at', 'submission_data', 'ip_address')
+    column_list = ('form', 'created_at', 'submission_data', 'notification_status', 'ip_address')
     column_default_sort = ('created_at', True)
     column_labels = {'form': 'Form Adı', 'created_at': 'Tarih', 'submission_data': 'Başvuru Detayları', 'ip_address': 'IP Adresi'}
     batch_actions = None

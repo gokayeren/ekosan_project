@@ -44,6 +44,7 @@ class SiteSetting(db.Model):
     google_tag_manager_id = db.Column(db.String(32), nullable=True)
     google_analytics_id = db.Column(db.String(32), nullable=True)
     google_ads_id = db.Column(db.String(32), nullable=True)
+    meta_pixel_id = db.Column(db.String(32), nullable=True)
     seo_canonical_url = db.Column(db.String(255), nullable=False, default='https://ekosanmuhendislik.com')
     seo_default_description = db.Column(
         db.String(320),

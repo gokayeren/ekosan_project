@@ -89,7 +89,7 @@ class SettingsView(ProtectedModelView):
     form_columns = (
         'site_title', 'logo_path', 'favicon_path', 'phone_number',
         'email_address', 'address', 'facebook_url', 'instagram_url', 'youtube_url',
-        'google_tag_manager_id', 'google_analytics_id', 'google_ads_id',
+        'google_tag_manager_id', 'google_analytics_id', 'google_ads_id', 'meta_pixel_id',
         'seo_canonical_url', 'seo_default_description', 'seo_index_service_pages',
         'product_detail_enabled',
         'form_notification_provider', 'smtp_host', 'smtp_port', 'smtp_user',
@@ -114,6 +114,12 @@ class SettingsView(ProtectedModelView):
                 Optional(),
                 Regexp(r'^AW-[0-9]+$', message='Google Ads kimliği AW-123456789 biçiminde olmalıdır.')
             ]
+        },
+        'meta_pixel_id': {
+            'validators': [
+                Optional(),
+                Regexp(r'^[0-9]{5,32}$', message='Meta Pixel kimliği yalnızca rakamlardan oluşmalıdır.')
+            ]
         }
     }
 
@@ -121,6 +127,7 @@ class SettingsView(ProtectedModelView):
         'google_tag_manager_id': 'Google Tag Manager Kimliği',
         'google_analytics_id': 'Google Analytics 4 Kimliği',
         'google_ads_id': 'Google Ads Kimliği',
+        'meta_pixel_id': 'Meta Pixel Kimliği',
         'seo_canonical_url': 'Ana (Canonical) Site Adresi',
         'seo_default_description': 'Varsayılan SEO Açıklaması',
         'seo_index_service_pages': 'Hizmet ve Ürün Sayfalarını İndeksle',
@@ -142,6 +149,7 @@ class SettingsView(ProtectedModelView):
         for field_name in ('google_tag_manager_id', 'google_analytics_id', 'google_ads_id'):
             value = getattr(model, field_name, None)
             setattr(model, field_name, value.strip().upper() if value else None)
+        model.meta_pixel_id = (model.meta_pixel_id or '').strip() or None
         canonical_url = (model.seo_canonical_url or '').strip()
         if canonical_url and not canonical_url.startswith(('http://', 'https://')):
             canonical_url = f'https://{canonical_url}'

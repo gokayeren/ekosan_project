@@ -87,6 +87,18 @@ class ServicePageRegressionTests(unittest.TestCase):
         response = self.client.get(f'/urunler/{item_id}/test-urunu')
         self.assertEqual(response.status_code, 404)
 
+    def test_meta_pixel_is_rendered_from_settings(self):
+        with self.app.app_context():
+            settings = SiteSetting.query.first()
+            settings.meta_pixel_id = '2231781037611761'
+            db.session.commit()
+
+        response = self.client.get('/hizmetler/akilli-ev')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'https://connect.facebook.net/en_US/fbevents.js', response.data)
+        self.assertIn(b"fbq('init', \"2231781037611761\")", response.data)
+        self.assertIn(b'facebook.com/tr?id=2231781037611761&amp;ev=PageView', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()

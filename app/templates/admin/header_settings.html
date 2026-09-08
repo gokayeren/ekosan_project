@@ -288,6 +288,22 @@
                         <p class="text-xs text-red-400 mt-2">{{ error }}</p>
                     {% endfor %}
                 </div>
+
+                <div class="col-span-12">
+                    <div class="border-t border-slate-800 pt-6">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">Meta Pixel</label>
+                        {{ form.meta_pixel_id(
+                            class="w-full bg-[#020617] border border-slate-700 rounded px-3 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600 transition-colors",
+                            placeholder="2231781037611761",
+                            inputmode="numeric",
+                            autocomplete="off"
+                        ) }}
+                        <p class="text-xs text-slate-500 mt-2">Yalnızca Pixel kimliğini girin; PageView kodu ve noscript alanı otomatik eklenir.</p>
+                        {% for error in form.meta_pixel_id.errors %}
+                            <p class="text-xs text-red-400 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
 

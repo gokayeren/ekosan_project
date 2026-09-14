@@ -1,6 +1,16 @@
 {% extends 'admin/master.html' %}
+{% block head_css %}
+<style>
+  .ai-support-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .ai-support-conversations { min-width: 0; width: 100%; }
+  @media (min-width: 1280px) {
+    .ai-support-layout { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+    .ai-support-conversations { position: sticky; top: 4.75rem; max-height: calc(100vh - 6.25rem); overflow-y: auto; }
+  }
+</style>
+{% endblock %}
 {% block body %}
-<div class="grid grid-cols-1 xl:grid-cols-[1.15fr_.85fr] gap-6">
+<div class="ai-support-layout">
   <section class="space-y-5">
     <div>
       <h2 class="text-xl font-bold text-slate-100">AI Support</h2>
@@ -49,10 +59,10 @@
       </div>
     </form>
   </section>
-  <aside>
+  <aside class="ai-support-conversations custom-scroll">
     <div class="flex items-center justify-between mb-4"><div><h3 class="text-sm font-semibold text-white">Görüşmeler</h3><p class="text-xs text-slate-500">Son 100 destek oturumu</p></div><span class="badge badge-outline">{{ conversations|length }}</span></div>
     <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800">
-      {% for item in conversations %}<div class="flex items-center gap-2 p-3 hover:bg-slate-800/60 transition"><a href="{{ url_for('.conversation', conversation_id=item.id) }}" class="flex-1 min-w-0 p-1"><div class="flex justify-between gap-3"><div class="min-w-0"><div class="text-sm font-medium text-slate-200">{{ item.visitor_name or 'Anonim ziyaretçi' }} <span class="text-xs text-slate-600">#{{ item.id }}</span></div><div class="text-xs text-slate-500 mt-1 truncate">{{ item.messages[-1].content if item.messages else 'Henüz mesaj yok' }}</div></div><div class="text-right shrink-0"><span class="text-[10px] px-2 py-1 rounded-full {{ 'bg-amber-500/10 text-amber-300' if item.human_takeover else 'bg-blue-500/10 text-blue-300' }}">{{ 'Uzmanda' if item.human_takeover else ('Kapalı' if item.status == 'closed' else 'AI') }}</span><div class="text-[10px] text-slate-600 mt-2">{{ item.updated_at|turkey_datetime }}</div></div></div></a><form method="post" action="{{ url_for('.delete_conversation', conversation_id=item.id) }}" onsubmit="return confirm('Bu görüşme ve tüm mesajları kalıcı olarak silinsin mi?')"><button type="submit" title="Görüşmeyi sil" class="btn btn-square btn-sm btn-ghost text-slate-600 hover:text-red-400 hover:bg-red-500/10"><i class="fa fa-trash-can"></i></button></form></div>{% else %}<div class="p-8 text-center text-sm text-slate-500">Henüz bir görüşme yok.</div>{% endfor %}
+      {% for item in conversations %}<div class="flex items-center gap-2 p-3 hover:bg-slate-800/60 transition overflow-hidden"><a href="{{ url_for('.conversation', conversation_id=item.id) }}" class="flex-1 min-w-0 p-1 overflow-hidden"><div class="flex justify-between gap-3 min-w-0"><div class="min-w-0 overflow-hidden"><div class="text-sm font-medium text-slate-200 truncate">{{ item.visitor_name or 'Anonim ziyaretçi' }} <span class="text-xs text-slate-600">#{{ item.id }}</span></div><div class="text-xs text-slate-500 mt-1 truncate">{{ item.messages[-1].content if item.messages else 'Henüz mesaj yok' }}</div></div><div class="text-right shrink-0"><span class="text-[10px] px-2 py-1 rounded-full {{ 'bg-amber-500/10 text-amber-300' if item.human_takeover else 'bg-blue-500/10 text-blue-300' }}">{{ 'Uzmanda' if item.human_takeover else ('Kapalı' if item.status == 'closed' else 'AI') }}</span><div class="text-[10px] text-slate-600 mt-2">{{ item.updated_at|turkey_datetime }}</div></div></div></a><form class="shrink-0" method="post" action="{{ url_for('.delete_conversation', conversation_id=item.id) }}" onsubmit="return confirm('Bu görüşme ve tüm mesajları kalıcı olarak silinsin mi?')"><button type="submit" title="Görüşmeyi sil" class="btn btn-square btn-sm btn-ghost text-slate-600 hover:text-red-400 hover:bg-red-500/10"><i class="fa fa-trash-can"></i></button></form></div>{% else %}<div class="p-8 text-center text-sm text-slate-500">Henüz bir görüşme yok.</div>{% endfor %}
     </div>
   </aside>
 </div>

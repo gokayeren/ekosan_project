@@ -500,7 +500,7 @@ def create_support_conversation():
     db.session.add(conversation)
     db.session.flush()
     db.session.add(SupportMessage(
-        conversation_id=conversation.id, sender='system',
+        conversation_id=conversation.id, sender='ai',
         content=settings.welcome_message or 'Merhaba! Size nasıl yardımcı olabilirim?'
     ))
     db.session.commit()
@@ -517,7 +517,7 @@ def support_messages(token):
             SupportMessage.id > after_id
         ).order_by(SupportMessage.id.asc()).all()
         return {'status': conversation.status, 'human_takeover': conversation.human_takeover, 'messages': [
-            {'id': row.id, 'sender': row.sender, 'content': row.content, 'created_at': row.created_at.isoformat()}
+            {'id': row.id, 'sender': row.sender, 'content': row.content, 'created_at': row.created_at.isoformat(), 'seen_at': row.seen_at.isoformat() if row.seen_at else None}
             for row in messages
         ]}
 
@@ -544,10 +544,11 @@ def support_messages(token):
     except Exception as exc:
         current_app.logger.exception('AI support response failed: %s', exc)
         reply = 'Şu anda otomatik yanıt oluşturamıyorum. Mesajınız ekibimize ulaştı; dilerseniz destek talebi de bırakabilirsiniz.'
+    visitor_message.seen_at = datetime.utcnow()
     ai_message = SupportMessage(conversation_id=conversation.id, sender='ai', content=reply)
     db.session.add(ai_message)
     db.session.commit()
-    return {'message': {'id': ai_message.id, 'sender': 'ai', 'content': reply}}
+    return {'message': {'id': ai_message.id, 'sender': 'ai', 'content': reply, 'created_at': ai_message.created_at.isoformat()}, 'seen_message_id': visitor_message.id}
 
 
 @main.route('/form-submit', methods=['POST'])

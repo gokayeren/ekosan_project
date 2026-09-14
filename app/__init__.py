@@ -120,6 +120,12 @@ class AISupportView(BaseView):
     @expose('/conversation/<int:conversation_id>', methods=['GET', 'POST'])
     def conversation(self, conversation_id):
         conversation = SupportConversation.query.get_or_404(conversation_id)
+        unseen_messages = [message for message in conversation.messages if message.sender == 'visitor' and not message.seen_at]
+        if unseen_messages:
+            now = datetime.utcnow()
+            for message in unseen_messages:
+                message.seen_at = now
+            db.session.commit()
         if request.method == 'POST':
             action = request.form.get('action')
             if action == 'takeover':

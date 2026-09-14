@@ -236,6 +236,7 @@ class SupportMessage(db.Model):
     sender = db.Column(db.String(20), nullable=False)  # visitor, ai, admin, system
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    seen_at = db.Column(db.DateTime, nullable=True)
 
     def __str__(self):
         return f'{self.sender}: {self.content[:40]}'

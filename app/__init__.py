@@ -89,6 +89,10 @@ class AISupportView(BaseView):
             settings = AISupportSetting()
             db.session.add(settings)
             db.session.commit()
+        elif db.session.is_modified(settings, include_collections=False):
+            # Older deployments could create multiple partial rows. Persist any
+            # fields recovered by current() so the admin form stays populated.
+            db.session.commit()
 
         if request.method == 'POST':
             try:
@@ -190,7 +194,18 @@ class AISupportView(BaseView):
                     timeout=20,
                 )
             if response.ok:
-                return {'ok': True, 'message': f'Bağlantı başarılı. {provider.title()} yanıt verdi.'}
+                # The test button also persists the visible AI fields. This keeps
+                # entered instructions from disappearing after a successful test.
+                settings.provider = provider
+                settings.model_name = model
+                settings.api_key = api_key
+                for field_name in ('system_prompt', 'knowledge_urls', 'company_information', 'customer_context'):
+                    submitted = (request.form.get(field_name) or '').strip()
+                    if submitted:
+                        setattr(settings, field_name, submitted)
+                settings.updated_at = datetime.utcnow()
+                db.session.commit()
+                return {'ok': True, 'message': f'Bağlantı başarılı. Ekrandaki AI bilgileri de kaydedildi.'}
             try:
                 payload = response.json()
                 provider_message = payload.get('error', {}).get('message') or payload.get('message') or ''

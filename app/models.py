@@ -215,7 +215,7 @@ class AISupportSetting(db.Model):
 
     @classmethod
     def current(cls):
-        """Prefer the populated settings row without mutating older records."""
+        """Return the most complete row and recover values split across duplicate rows."""
         rows = cls.query.order_by(cls.id.asc()).all()
         if not rows:
             return None
@@ -226,7 +226,16 @@ class AISupportSetting(db.Model):
         def score(row):
             populated = sum(bool((getattr(row, field, None) or '').strip()) for field in content_fields)
             return (populated, bool(row.support_form_id), bool(row.is_enabled), row.updated_at or datetime.min, row.id)
-        return max(rows, key=score)
+        current = max(rows, key=score)
+        newest_first = sorted(rows, key=lambda row: (row.updated_at or datetime.min, row.id), reverse=True)
+        for field in content_fields:
+            if not (getattr(current, field, None) or '').strip():
+                recovered = next((getattr(row, field, None) for row in newest_first if (getattr(row, field, None) or '').strip()), None)
+                if recovered:
+                    setattr(current, field, recovered)
+        if not current.support_form_id:
+            current.support_form_id = next((row.support_form_id for row in newest_first if row.support_form_id), None)
+        return current
 
 
 class SupportConversation(db.Model):

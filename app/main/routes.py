@@ -52,7 +52,7 @@ def _support_ai_reply(settings, conversation):
     ]
 
     if settings.provider == 'gemini':
-        model = settings.model_name or 'gemini-2.0-flash'
+        model = settings.model_name if settings.model_name and not settings.model_name.startswith('gemini-2.0') else 'gemini-3.8-flash'
         contents = [{'role': 'user' if row['role'] == 'user' else 'model', 'parts': [{'text': row['content']}]} for row in history]
         response = requests.post(
             f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',

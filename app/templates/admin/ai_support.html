@@ -14,8 +14,8 @@
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
         <div><h3 class="text-sm font-semibold text-white">AI sağlayıcısı</h3><p class="text-xs text-slate-500">Anahtar yalnızca sunucuda kullanılır, ziyaretçiye gönderilmez.</p></div>
-        <label class="block text-xs text-slate-400">Sağlayıcı<select name="provider" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="openai" {% if settings.provider == 'openai' %}selected{% endif %}>ChatGPT / OpenAI</option><option value="gemini" {% if settings.provider == 'gemini' %}selected{% endif %}>Google Gemini</option></select><span class="block mt-2 text-[10px] text-slate-600">Uygun hızlı destek modeli otomatik seçilir.</span></label>
-        <label class="block text-xs text-slate-400">API anahtarı<input type="password" name="api_key" autocomplete="new-password" placeholder="{{ 'Kayıtlı anahtarı değiştirmek için yenisini yazın' if settings.api_key else 'API anahtarını girin' }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 font-mono"></label>
+        <label class="block text-xs text-slate-400">Sağlayıcı<select id="ai-provider" name="provider" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="openai" {% if settings.provider == 'openai' %}selected{% endif %}>ChatGPT / OpenAI</option><option value="gemini" {% if settings.provider == 'gemini' %}selected{% endif %}>Google Gemini</option></select><span class="block mt-2 text-[10px] text-slate-600">Uygun hızlı destek modeli otomatik seçilir.</span></label>
+        <div><label class="block text-xs text-slate-400">API anahtarı<input id="ai-api-key" type="password" name="api_key" autocomplete="new-password" placeholder="{{ 'Kayıtlı anahtarı değiştirmek için yenisini yazın' if settings.api_key else 'API anahtarını girin' }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 font-mono"></label><div class="mt-3 flex flex-wrap items-center gap-3"><button type="button" id="test-ai-connection" class="btn btn-sm btn-outline border-slate-700 text-slate-200"><i class="fa fa-plug-circle-check"></i> Bağlantıyı test et</button><span id="ai-test-result" class="hidden text-xs"></span></div></div>
         <label class="block text-xs text-slate-400">Agent talimatı<textarea name="system_prompt" rows="4" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.system_prompt or '' }}</textarea></label>
         <label class="block text-xs text-slate-400">Sabit kaynak linkleri <span class="text-slate-600">(her satıra bir link)</span><textarea name="knowledge_urls" rows="4" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-blue-300 font-mono">{{ settings.knowledge_urls or '' }}</textarea></label>
         <div class="grid md:grid-cols-2 gap-4"><label class="text-xs text-slate-400">Site / şirket bilgileri<textarea name="company_information" rows="6" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.company_information or '' }}</textarea></label><label class="text-xs text-slate-400">Müşteri hakkında sabit bağlam<textarea name="customer_context" rows="6" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.customer_context or '' }}</textarea></label></div>
@@ -46,7 +46,7 @@
   <aside>
     <div class="flex items-center justify-between mb-4"><div><h3 class="text-sm font-semibold text-white">Görüşmeler</h3><p class="text-xs text-slate-500">Son 100 destek oturumu</p></div><span class="badge badge-outline">{{ conversations|length }}</span></div>
     <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800">
-      {% for item in conversations %}<a href="{{ url_for('.conversation', conversation_id=item.id) }}" class="block p-4 hover:bg-slate-800/60 transition"><div class="flex justify-between gap-3"><div><div class="text-sm font-medium text-slate-200">{{ item.visitor_name or 'Anonim ziyaretçi' }} <span class="text-xs text-slate-600">#{{ item.id }}</span></div><div class="text-xs text-slate-500 mt-1 truncate max-w-xs">{{ item.messages[-1].content if item.messages else 'Henüz mesaj yok' }}</div></div><div class="text-right"><span class="text-[10px] px-2 py-1 rounded-full {{ 'bg-amber-500/10 text-amber-300' if item.human_takeover else 'bg-blue-500/10 text-blue-300' }}">{{ 'Uzmanda' if item.human_takeover else 'AI' }}</span><div class="text-[10px] text-slate-600 mt-2">{{ item.updated_at|turkey_datetime }}</div></div></div></a>{% else %}<div class="p-8 text-center text-sm text-slate-500">Henüz bir görüşme yok.</div>{% endfor %}
+      {% for item in conversations %}<div class="flex items-center gap-2 p-3 hover:bg-slate-800/60 transition"><a href="{{ url_for('.conversation', conversation_id=item.id) }}" class="flex-1 min-w-0 p-1"><div class="flex justify-between gap-3"><div class="min-w-0"><div class="text-sm font-medium text-slate-200">{{ item.visitor_name or 'Anonim ziyaretçi' }} <span class="text-xs text-slate-600">#{{ item.id }}</span></div><div class="text-xs text-slate-500 mt-1 truncate">{{ item.messages[-1].content if item.messages else 'Henüz mesaj yok' }}</div></div><div class="text-right shrink-0"><span class="text-[10px] px-2 py-1 rounded-full {{ 'bg-amber-500/10 text-amber-300' if item.human_takeover else 'bg-blue-500/10 text-blue-300' }}">{{ 'Uzmanda' if item.human_takeover else ('Kapalı' if item.status == 'closed' else 'AI') }}</span><div class="text-[10px] text-slate-600 mt-2">{{ item.updated_at|turkey_datetime }}</div></div></div></a><form method="post" action="{{ url_for('.delete_conversation', conversation_id=item.id) }}" onsubmit="return confirm('Bu görüşme ve tüm mesajları kalıcı olarak silinsin mi?')"><button type="submit" title="Görüşmeyi sil" class="btn btn-square btn-sm btn-ghost text-slate-600 hover:text-red-400 hover:bg-red-500/10"><i class="fa fa-trash-can"></i></button></form></div>{% else %}<div class="p-8 text-center text-sm text-slate-500">Henüz bir görüşme yok.</div>{% endfor %}
     </div>
   </aside>
 </div>
@@ -79,6 +79,29 @@
   }
   draftFields.forEach(name => form.elements[name]?.addEventListener('input', saveDraft));
   form.addEventListener('submit', saveDraft);
+  const testButton = document.getElementById('test-ai-connection');
+  const testResult = document.getElementById('ai-test-result');
+  testButton?.addEventListener('click', async () => {
+    testButton.disabled = true;
+    testButton.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Test ediliyor';
+    testResult.className = 'text-xs text-slate-400';
+    testResult.textContent = 'Sağlayıcıya bağlanılıyor…';
+    const payload = new FormData();
+    payload.append('provider', form.elements.provider.value);
+    payload.append('api_key', form.elements.api_key.value);
+    try {
+      const response = await fetch("{{ url_for('.test_connection') }}", { method: 'POST', body: payload });
+      const data = await response.json();
+      testResult.className = `text-xs ${data.ok ? 'text-emerald-400' : 'text-red-400'}`;
+      testResult.textContent = `${data.ok ? '✓' : '!' } ${data.message}`;
+    } catch (_) {
+      testResult.className = 'text-xs text-red-400';
+      testResult.textContent = 'Test isteği gönderilemedi. Sunucu bağlantısını kontrol edin.';
+    } finally {
+      testButton.disabled = false;
+      testButton.innerHTML = '<i class="fa fa-plug-circle-check"></i> Bağlantıyı test et';
+    }
+  });
 })();
 </script>
 {% endblock %}

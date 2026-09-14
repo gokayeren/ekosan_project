@@ -60,6 +60,11 @@
         input:not([type="checkbox"]):not([type="radio"]), textarea, select { border-radius: .65rem !important; }
         .menu a, .menu summary { min-height: 40px; }
         .menu a:focus-visible, .menu summary:focus-visible, .btn:focus-visible { outline: 2px solid #60a5fa !important; outline-offset: 2px; }
+        .drawer-side { overflow-x: hidden !important; }
+        .drawer-side > div { width: 16rem; max-width: 86vw; min-width: 0; overflow: hidden; }
+        .drawer-side .menu { width: 100%; min-width: 0; overflow-x: hidden; overflow-y: auto; }
+        .drawer-side .menu li, .drawer-side .menu details, .drawer-side .menu ul { min-width: 0; max-width: 100%; }
+        .drawer-side .menu a, .drawer-side .menu summary { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
     </style>
 
     {% block head_css %}{% endblock %}
@@ -104,7 +109,7 @@
         </main>
     </div> 
     
-    <div class="drawer-side z-40 lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden">
+    <div class="drawer-side z-40 h-screen lg:sticky lg:top-0 overflow-x-hidden">
         <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label> 
         <div class="h-full flex flex-col bg-[#0f172a] border-r border-slate-800 text-slate-400">
             <div class="h-14 shrink-0 flex items-center px-5 border-b border-slate-800 bg-[#0f172a]">

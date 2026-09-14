@@ -97,7 +97,7 @@ class AISupportView(BaseView):
                 settings.widget_title = (request.form.get('widget_title') or '').strip() or 'Size nasıl yardımcı olabiliriz?'
                 settings.welcome_message = (request.form.get('welcome_message') or '').strip() or 'Merhaba! Destek kanalınızı seçebilirsiniz.'
                 settings.provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
-                settings.model_name = 'gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini'
+                settings.model_name = 'gemini-3.8-flash' if settings.provider == 'gemini' else 'gpt-4o-mini'
                 settings.api_key = (request.form.get('api_key') or '').strip() or existing_key
                 def preserve_text(field_name):
                     submitted = (request.form.get(field_name) or '').strip()
@@ -164,6 +164,60 @@ class AISupportView(BaseView):
             db.session.commit()
             return redirect(url_for('.conversation', conversation_id=conversation.id))
         return self.render('admin/ai_support_conversation.html', conversation=conversation)
+
+    @expose('/test-connection', methods=['POST'])
+    def test_connection(self):
+        settings = AISupportSetting.current()
+        provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
+        api_key = (request.form.get('api_key') or '').strip() or (settings.api_key if settings else None)
+        if not api_key:
+            return {'ok': False, 'message': 'Önce bir API anahtarı girin.'}, 400
+        try:
+            if provider == 'gemini':
+                model = 'gemini-3.8-flash'
+                response = requests.post(
+                    f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+                    params={'key': api_key},
+                    json={'contents': [{'role': 'user', 'parts': [{'text': 'Yalnızca TAMAM yaz.'}]}], 'generationConfig': {'maxOutputTokens': 8}},
+                    timeout=20,
+                )
+            else:
+                model = 'gpt-4o-mini'
+                response = requests.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+                    json={'model': model, 'messages': [{'role': 'user', 'content': 'Yalnızca TAMAM yaz.'}], 'max_tokens': 8},
+                    timeout=20,
+                )
+            if response.ok:
+                return {'ok': True, 'message': f'Bağlantı başarılı. {provider.title()} yanıt verdi.'}
+            try:
+                payload = response.json()
+                provider_message = payload.get('error', {}).get('message') or payload.get('message') or ''
+            except Exception:
+                provider_message = ''
+            friendly = {
+                400: 'İstek veya model sağlayıcı tarafından kabul edilmedi.',
+                401: 'API anahtarı geçersiz veya yetkisiz.',
+                403: 'Bu anahtarın API erişim izni yok.',
+                404: 'Seçilen sağlayıcı modeli hesabınızda bulunamadı.',
+                429: 'API kotası veya hız limiti dolmuş.',
+            }.get(response.status_code, 'Sağlayıcı geçici bir hata döndürdü.')
+            detail = provider_message[:240].replace(api_key, '[gizli]') if provider_message else ''
+            return {'ok': False, 'message': f'{friendly} HTTP {response.status_code}' + (f' — {detail}' if detail else '')}, 400
+        except requests.Timeout:
+            return {'ok': False, 'message': 'Sağlayıcı 20 saniye içinde yanıt vermedi.'}, 504
+        except requests.RequestException as exc:
+            current_app.logger.exception('AI provider connection test failed')
+            return {'ok': False, 'message': f'Sağlayıcıya bağlanılamadı: {str(exc)[:160]}'}, 502
+
+    @expose('/conversation/<int:conversation_id>/delete', methods=['POST'])
+    def delete_conversation(self, conversation_id):
+        conversation = SupportConversation.query.get_or_404(conversation_id)
+        db.session.delete(conversation)
+        db.session.commit()
+        flash(f'Görüşme #{conversation_id} silindi.', 'success')
+        return redirect(url_for('.index'))
 
 class SettingsView(ProtectedModelView):
     can_delete = False

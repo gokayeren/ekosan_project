@@ -1,12 +1,12 @@
 import os
 import os.path as op
-from datetime import timezone
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from flask import Flask, redirect, url_for, request, render_template, flash, current_app
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_admin import Admin, AdminIndexView, expose
+from flask_admin import Admin, AdminIndexView, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.form.upload import ImageUploadField
@@ -69,8 +69,69 @@ from app.models import (
     SiteSetting, MenuItem, HomeConfig, Corporate, References, 
     SliderGroup, SliderItem, Service, Footer, 
     Contact, Getoffer, Form, FormField, FormSubmission,
-    FaqGroup, FaqItem, AdminUser, PopupCampaign
+    FaqGroup, FaqItem, AdminUser, PopupCampaign,
+    AISupportSetting, SupportConversation, SupportMessage
 )
+
+
+class AISupportView(BaseView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
+    @expose('/', methods=['GET', 'POST'])
+    def index(self):
+        settings = AISupportSetting.query.first()
+        if not settings:
+            settings = AISupportSetting()
+            db.session.add(settings)
+            db.session.commit()
+
+        if request.method == 'POST':
+            existing_key = settings.api_key
+            settings.is_enabled = request.form.get('is_enabled') == 'on'
+            settings.widget_title = (request.form.get('widget_title') or '').strip() or 'Size nasıl yardımcı olabiliriz?'
+            settings.welcome_message = (request.form.get('welcome_message') or '').strip() or 'Merhaba! Destek kanalınızı seçebilirsiniz.'
+            settings.provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
+            settings.model_name = (request.form.get('model_name') or '').strip() or ('gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini')
+            settings.api_key = (request.form.get('api_key') or '').strip() or existing_key
+            settings.system_prompt = (request.form.get('system_prompt') or '').strip() or None
+            settings.knowledge_urls = (request.form.get('knowledge_urls') or '').strip() or None
+            settings.company_information = (request.form.get('company_information') or '').strip() or None
+            settings.customer_context = (request.form.get('customer_context') or '').strip() or None
+            settings.support_form_id = request.form.get('support_form_id', type=int)
+            db.session.commit()
+            flash('AI Support ayarları kaydedildi.', 'success')
+            return redirect(url_for('.index'))
+
+        conversations = SupportConversation.query.order_by(SupportConversation.updated_at.desc()).limit(100).all()
+        return self.render('admin/ai_support.html', settings=settings, conversations=conversations, forms=Form.query.order_by(Form.title).all())
+
+    @expose('/conversation/<int:conversation_id>', methods=['GET', 'POST'])
+    def conversation(self, conversation_id):
+        conversation = SupportConversation.query.get_or_404(conversation_id)
+        if request.method == 'POST':
+            action = request.form.get('action')
+            if action == 'takeover':
+                conversation.human_takeover = True
+                conversation.status = 'open'
+                db.session.add(SupportMessage(conversation_id=conversation.id, sender='system', content='Bir destek uzmanı görüşmeye katıldı.'))
+            elif action == 'release':
+                conversation.human_takeover = False
+                db.session.add(SupportMessage(conversation_id=conversation.id, sender='system', content='Görüşme yeniden AI asistana aktarıldı.'))
+            elif action == 'close':
+                conversation.status = 'closed'
+            elif action == 'reply':
+                content = (request.form.get('content') or '').strip()
+                if content:
+                    conversation.human_takeover = True
+                    db.session.add(SupportMessage(conversation_id=conversation.id, sender='admin', content=content[:4000]))
+            conversation.updated_at = datetime.utcnow()
+            db.session.commit()
+            return redirect(url_for('.conversation', conversation_id=conversation.id))
+        return self.render('admin/ai_support_conversation.html', conversation=conversation)
 
 class SettingsView(ProtectedModelView):
     can_delete = False
@@ -863,6 +924,7 @@ def create_app(config_class=Config):
             click.echo(f"Bir hata oluştu: {e}")
 
     admin.add_view(SettingsView(SiteSetting, db.session, name="Genel Ayarlar", endpoint='settings'))
+    admin.add_view(AISupportView(name="AI Support", endpoint='ai_support', category="Destek Merkezi"))
     admin.add_view(FooterView(Footer, db.session, name="Footer Ayarları"))
     admin.add_view(MenuView(MenuItem, db.session, name="Navigasyon"))
     admin.add_view(HomeConfigView(HomeConfig, db.session, name="Anasayfa İçerik"))
@@ -902,11 +964,13 @@ def create_app(config_class=Config):
             footer = Footer.query.first()
             active_popups = PopupCampaign.query.order_by(PopupCampaign.order.asc(), PopupCampaign.id.desc()).all()
             active_popups = [p for p in active_popups if p.is_visible_now(request.path)]
+            ai_support_settings = AISupportSetting.query.first()
         except:
             settings = None
             menu = []
             footer = None
             active_popups = []
+            ai_support_settings = None
 
         def get_slider(key):
             try:
@@ -937,7 +1001,8 @@ def create_app(config_class=Config):
             get_slider=get_slider,
             get_form=get_form,
             get_faq=get_faq,
-            active_popups=active_popups
+            active_popups=active_popups,
+            ai_support_settings=ai_support_settings
         )
 
     with app.app_context():
@@ -967,6 +1032,10 @@ def create_app(config_class=Config):
 
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting(site_title="Ekosan Web Sitesi"))
+                db.session.commit()
+
+            if not AISupportSetting.query.first():
+                db.session.add(AISupportSetting())
                 db.session.commit()
 
             if not Footer.query.first():

@@ -181,6 +181,65 @@ class FormSubmission(db.Model):
     def __str__(self):
         return f"{self.form.title} - {self.created_at.strftime('%d.%m.%Y')}"
 
+
+class AISupportSetting(db.Model):
+    __tablename__ = 'ai_support_settings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    is_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    widget_title = db.Column(db.String(100), nullable=False, default='Size nasıl yardımcı olabiliriz?')
+    welcome_message = db.Column(db.Text, nullable=False, default='Merhaba! Destek kanalınızı seçebilirsiniz.')
+    provider = db.Column(db.String(20), nullable=False, default='openai')
+    model_name = db.Column(db.String(100), nullable=True, default='gpt-4o-mini')
+    api_key = db.Column(db.Text, nullable=True)
+    system_prompt = db.Column(db.Text, nullable=True)
+    knowledge_urls = db.Column(db.Text, nullable=True)
+    company_information = db.Column(db.Text, nullable=True)
+    customer_context = db.Column(db.Text, nullable=True)
+    support_form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
+    support_form = db.relationship('Form', foreign_keys=[support_form_id])
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __str__(self):
+        return 'AI Support Ayarları'
+
+
+class SupportConversation(db.Model):
+    __tablename__ = 'support_conversations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    public_token = db.Column(db.String(36), unique=True, nullable=False)
+    channel = db.Column(db.String(20), nullable=False, default='ai')
+    status = db.Column(db.String(20), nullable=False, default='open')
+    visitor_name = db.Column(db.String(120), nullable=True)
+    visitor_email = db.Column(db.String(160), nullable=True)
+    visitor_phone = db.Column(db.String(50), nullable=True)
+    page_url = db.Column(db.String(500), nullable=True)
+    ip_address = db.Column(db.String(50), nullable=True)
+    human_takeover = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    messages = db.relationship(
+        'SupportMessage', backref='conversation', lazy=True,
+        cascade='all, delete-orphan', order_by='SupportMessage.created_at'
+    )
+
+    def __str__(self):
+        return f'Görüşme #{self.id}'
+
+
+class SupportMessage(db.Model):
+    __tablename__ = 'support_messages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('support_conversations.id'), nullable=False)
+    sender = db.Column(db.String(20), nullable=False)  # visitor, ai, admin, system
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __str__(self):
+        return f'{self.sender}: {self.content[:40]}'
+
 class FaqGroup(db.Model):
     __tablename__ = 'faq_groups'
     id = db.Column(db.Integer, primary_key=True)

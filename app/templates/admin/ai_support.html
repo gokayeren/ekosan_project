@@ -1,0 +1,33 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+<div class="grid grid-cols-1 xl:grid-cols-[1.15fr_.85fr] gap-6">
+  <section class="space-y-5">
+    <div>
+      <h2 class="text-xl font-bold text-slate-100">AI Support</h2>
+      <p class="text-xs text-slate-500 mt-1">Destek balonu, AI davranışı ve bilgi kaynaklarını yönetin.</p>
+    </div>
+    <form method="post" class="space-y-5">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div class="flex items-center justify-between"><div><h3 class="text-sm font-semibold text-white">Destek balonu</h3><p class="text-xs text-slate-500">Ziyaretçiler WhatsApp, AI veya ticket seçebilir.</p></div><input type="checkbox" name="is_enabled" class="toggle toggle-primary" {% if settings.is_enabled %}checked{% endif %}></div>
+        <div class="grid md:grid-cols-2 gap-4"><label class="text-xs text-slate-400">Başlık<input name="widget_title" value="{{ settings.widget_title }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"></label><label class="text-xs text-slate-400">Ticket formu<select name="support_form_id" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="">Form seçin</option>{% for form in forms %}<option value="{{ form.id }}" {% if settings.support_form_id == form.id %}selected{% endif %}>{{ form.title }}</option>{% endfor %}</select></label></div>
+        <label class="block text-xs text-slate-400">Karşılama mesajı<textarea name="welcome_message" rows="2" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.welcome_message }}</textarea></label>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div><h3 class="text-sm font-semibold text-white">AI sağlayıcısı</h3><p class="text-xs text-slate-500">Anahtar yalnızca sunucuda kullanılır, ziyaretçiye gönderilmez.</p></div>
+        <div class="grid md:grid-cols-2 gap-4"><label class="text-xs text-slate-400">Sağlayıcı<select name="provider" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="openai" {% if settings.provider == 'openai' %}selected{% endif %}>ChatGPT / OpenAI</option><option value="gemini" {% if settings.provider == 'gemini' %}selected{% endif %}>Google Gemini</option></select></label><label class="text-xs text-slate-400">Model<input name="model_name" value="{{ settings.model_name or '' }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 font-mono"></label></div>
+        <label class="block text-xs text-slate-400">API anahtarı<input type="password" name="api_key" autocomplete="new-password" placeholder="{{ 'Kayıtlı anahtarı değiştirmek için yenisini yazın' if settings.api_key else 'API anahtarını girin' }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 font-mono"></label>
+        <label class="block text-xs text-slate-400">Agent talimatı<textarea name="system_prompt" rows="4" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.system_prompt or '' }}</textarea></label>
+        <label class="block text-xs text-slate-400">Sabit kaynak linkleri <span class="text-slate-600">(her satıra bir link)</span><textarea name="knowledge_urls" rows="4" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-blue-300 font-mono">{{ settings.knowledge_urls or '' }}</textarea></label>
+        <div class="grid md:grid-cols-2 gap-4"><label class="text-xs text-slate-400">Site / şirket bilgileri<textarea name="company_information" rows="6" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.company_information or '' }}</textarea></label><label class="text-xs text-slate-400">Müşteri hakkında sabit bağlam<textarea name="customer_context" rows="6" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.customer_context or '' }}</textarea></label></div>
+        <button class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0"><i class="fa fa-save"></i> Ayarları kaydet</button>
+      </div>
+    </form>
+  </section>
+  <aside>
+    <div class="flex items-center justify-between mb-4"><div><h3 class="text-sm font-semibold text-white">Görüşmeler</h3><p class="text-xs text-slate-500">Son 100 destek oturumu</p></div><span class="badge badge-outline">{{ conversations|length }}</span></div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800">
+      {% for item in conversations %}<a href="{{ url_for('.conversation', conversation_id=item.id) }}" class="block p-4 hover:bg-slate-800/60 transition"><div class="flex justify-between gap-3"><div><div class="text-sm font-medium text-slate-200">{{ item.visitor_name or 'Anonim ziyaretçi' }} <span class="text-xs text-slate-600">#{{ item.id }}</span></div><div class="text-xs text-slate-500 mt-1 truncate max-w-xs">{{ item.messages[-1].content if item.messages else 'Henüz mesaj yok' }}</div></div><div class="text-right"><span class="text-[10px] px-2 py-1 rounded-full {{ 'bg-amber-500/10 text-amber-300' if item.human_takeover else 'bg-blue-500/10 text-blue-300' }}">{{ 'Uzmanda' if item.human_takeover else 'AI' }}</span><div class="text-[10px] text-slate-600 mt-2">{{ item.updated_at|turkey_datetime }}</div></div></div></a>{% else %}<div class="p-8 text-center text-sm text-slate-500">Henüz bir görüşme yok.</div>{% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

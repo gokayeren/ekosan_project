@@ -16,8 +16,49 @@ from app import db
 from app.main import main
 from app.models import (
     HomeConfig, Corporate, References, Contact, Getoffer,
-    Service, SliderItem, Form, FormSubmission, SiteSetting
+    Service, SliderItem, Form, FormSubmission, SiteSetting,
+    AISupportSetting, SupportConversation, SupportMessage
 )
+
+
+def _support_ai_reply(settings, conversation):
+    """Generate a provider response without ever exposing the API key to the browser."""
+    if not settings.api_key:
+        raise RuntimeError('AI sağlayıcı anahtarı tanımlı değil.')
+
+    knowledge = '\n'.join([
+        settings.system_prompt or 'Kısa, doğru ve yardımsever bir müşteri destek uzmanı gibi yanıtla.',
+        f'Şirket/site bilgileri:\n{settings.company_information or "Tanımlanmadı"}',
+        f'Müşteri bağlamı:\n{settings.customer_context or "Tanımlanmadı"}',
+        f'Onaylı kaynak bağlantıları:\n{settings.knowledge_urls or "Tanımlanmadı"}',
+        'Kaynaklarda bulunmayan bilgi için tahmin yürütme; insan desteği veya destek talebi öner.',
+    ])
+    history = [
+        {'role': 'assistant' if item.sender in ('ai', 'admin') else 'user', 'content': item.content}
+        for item in conversation.messages[-16:]
+        if item.sender in ('visitor', 'ai', 'admin')
+    ]
+
+    if settings.provider == 'gemini':
+        model = settings.model_name or 'gemini-2.0-flash'
+        contents = [{'role': 'user' if row['role'] == 'user' else 'model', 'parts': [{'text': row['content']}]} for row in history]
+        response = requests.post(
+            f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+            params={'key': settings.api_key},
+            json={'systemInstruction': {'parts': [{'text': knowledge}]}, 'contents': contents},
+            timeout=25,
+        )
+        response.raise_for_status()
+        return response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+
+    response = requests.post(
+        'https://api.openai.com/v1/chat/completions',
+        headers={'Authorization': f'Bearer {settings.api_key}', 'Content-Type': 'application/json'},
+        json={'model': settings.model_name or 'gpt-4o-mini', 'messages': [{'role': 'system', 'content': knowledge}] + history, 'temperature': .25},
+        timeout=25,
+    )
+    response.raise_for_status()
+    return response.json()['choices'][0]['message']['content'].strip()
 
 def get_shared_data():
     home_config = HomeConfig.query.first() or HomeConfig()
@@ -441,6 +482,73 @@ def product_detail(item_id, slug):
         home_config=home_config,
         services=services
     )
+
+@main.route('/support/conversations', methods=['POST'])
+def create_support_conversation():
+    settings = AISupportSetting.query.first()
+    if not settings or not settings.is_enabled:
+        return {'error': 'AI destek şu anda çevrimdışı.'}, 503
+    payload = request.get_json(silent=True) or {}
+    conversation = SupportConversation(
+        public_token=str(uuid.uuid4()), channel='ai', status='open',
+        visitor_name=(payload.get('name') or '')[:120] or None,
+        visitor_email=(payload.get('email') or '')[:160] or None,
+        visitor_phone=(payload.get('phone') or '')[:50] or None,
+        page_url=(payload.get('page_url') or '')[:500] or None,
+        ip_address=request.remote_addr,
+    )
+    db.session.add(conversation)
+    db.session.flush()
+    db.session.add(SupportMessage(
+        conversation_id=conversation.id, sender='system',
+        content=settings.welcome_message or 'Merhaba! Size nasıl yardımcı olabilirim?'
+    ))
+    db.session.commit()
+    return {'token': conversation.public_token, 'conversation_id': conversation.id}, 201
+
+
+@main.route('/support/conversations/<token>/messages', methods=['GET', 'POST'])
+def support_messages(token):
+    conversation = SupportConversation.query.filter_by(public_token=token).first_or_404()
+    if request.method == 'GET':
+        after_id = request.args.get('after', 0, type=int)
+        messages = SupportMessage.query.filter(
+            SupportMessage.conversation_id == conversation.id,
+            SupportMessage.id > after_id
+        ).order_by(SupportMessage.id.asc()).all()
+        return {'status': conversation.status, 'human_takeover': conversation.human_takeover, 'messages': [
+            {'id': row.id, 'sender': row.sender, 'content': row.content, 'created_at': row.created_at.isoformat()}
+            for row in messages
+        ]}
+
+    if conversation.status == 'closed':
+        return {'error': 'Bu görüşme kapatılmış.'}, 409
+    payload = request.get_json(silent=True) or {}
+    content = (payload.get('content') or '').strip()
+    if not content or len(content) > 4000:
+        return {'error': 'Mesaj 1-4000 karakter arasında olmalıdır.'}, 400
+
+    visitor_message = SupportMessage(conversation_id=conversation.id, sender='visitor', content=content)
+    db.session.add(visitor_message)
+    conversation.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    if conversation.human_takeover:
+        return {'message': {'id': visitor_message.id, 'sender': 'visitor', 'content': content}, 'waiting_for_admin': True}
+
+    settings = AISupportSetting.query.first()
+    if not settings or not settings.is_enabled:
+        return {'message': {'id': visitor_message.id, 'sender': 'visitor', 'content': content}, 'waiting_for_admin': True}
+    try:
+        reply = _support_ai_reply(settings, conversation)
+    except Exception as exc:
+        current_app.logger.exception('AI support response failed: %s', exc)
+        reply = 'Şu anda otomatik yanıt oluşturamıyorum. Mesajınız ekibimize ulaştı; dilerseniz destek talebi de bırakabilirsiniz.'
+    ai_message = SupportMessage(conversation_id=conversation.id, sender='ai', content=reply)
+    db.session.add(ai_message)
+    db.session.commit()
+    return {'message': {'id': ai_message.id, 'sender': 'ai', 'content': reply}}
+
 
 @main.route('/form-submit', methods=['POST'])
 def submit_contact_form():

@@ -646,12 +646,32 @@
         </div>
     </footer>
 
-    {% if footer_settings and footer_settings.mobile_tel %}
-    <a href="https://wa.me/{{ footer_settings.mobile_tel|whatsapp_number }}" target="_blank" rel="noopener noreferrer"
-       id="whatsappBtn"
-       class="fixed bottom-6 right-6 z-[90] w-12 h-12 bg-[#25D366] text-white rounded-full shadow-lg shadow-gray-900/30 flex items-center justify-center hover:bg-[#20ba5a] hover:-translate-y-1 transition-all duration-500 translate-y-36 opacity-0">
-        <i class="fab fa-whatsapp text-2xl"></i>
-    </a>
+    {% if ai_support_settings or (footer_settings and footer_settings.mobile_tel) %}
+    {% set support_form = ai_support_settings.support_form if ai_support_settings and ai_support_settings.support_form else none %}
+    <style>
+      #supportPanel { bottom: 4rem; right: 0; }
+      #supportMessages { height: 18rem; }
+      #supportMessages > div { max-width: 85%; }
+      #supportTicket form { max-height: 30rem; }
+      @media (prefers-reduced-motion: reduce) { #supportWidget * { transition-duration: 0.01ms !important; } }
+    </style>
+    <div id="supportWidget" class="fixed bottom-6 right-6 font-sans" style="z-index:95">
+        <div id="supportPanel" role="dialog" aria-label="Destek merkezi" class="hidden absolute bottom-16 right-0 bg-white rounded-2xl shadow-2xl shadow-slate-900/25 border border-slate-200 overflow-hidden origin-bottom-right" style="width:min(390px,calc(100vw - 2rem));max-height:min(650px,calc(100vh - 7rem))">
+            <div class="bg-gradient-to-br from-[#232e48] to-[#087fb7] text-white px-5 py-5 flex items-start justify-between">
+                <div><div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center mb-3"><i class="fa fa-wrench"></i></div><h2 class="font-bold text-lg leading-tight">{{ ai_support_settings.widget_title if ai_support_settings else 'Size nasıl yardımcı olabiliriz?' }}</h2><p class="text-xs text-white/70 mt-1">{{ ai_support_settings.welcome_message if ai_support_settings else 'Size uygun destek kanalını seçin.' }}</p></div>
+                <button type="button" data-support-close class="w-8 h-8 rounded-full hover:bg-white/10" aria-label="Kapat"><i class="fa fa-times"></i></button>
+            </div>
+            <div id="supportHome" class="p-4 space-y-3 bg-slate-50">
+                {% if ai_support_settings and ai_support_settings.is_enabled %}<button type="button" data-support-screen="ai" class="w-full text-left bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-4 flex items-center gap-4 transition group"><span class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa fa-wrench"></i></span><span class="flex-1"><strong class="block text-sm text-slate-800">AI destek asistanı</strong><small class="text-slate-500">Sorunu şimdi birlikte çözelim</small></span><i class="fa fa-chevron-right text-slate-300 group-hover:text-blue-500"></i></button>{% endif %}
+                {% if footer_settings and footer_settings.mobile_tel %}<a href="https://wa.me/{{ footer_settings.mobile_tel|whatsapp_number }}" target="_blank" rel="noopener noreferrer" class="w-full bg-white border border-slate-200 hover:border-emerald-400 rounded-xl p-4 flex items-center gap-4 transition group"><span class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fab fa-whatsapp text-xl"></i></span><span class="flex-1"><strong class="block text-sm text-slate-800">WhatsApp</strong><small class="text-slate-500">Ekibimizle WhatsApp’tan görüşün</small></span><i class="fa fa-arrow-right text-slate-300 group-hover:text-emerald-500"></i></a>{% endif %}
+                {% if support_form %}<button type="button" data-support-screen="ticket" class="w-full text-left bg-white border border-slate-200 hover:border-orange-400 rounded-xl p-4 flex items-center gap-4 transition group"><span class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center"><i class="fa fa-envelope"></i></span><span class="flex-1"><strong class="block text-sm text-slate-800">Destek talebi oluştur</strong><small class="text-slate-500">Formu doldurun, ekibimiz dönüş yapsın</small></span><i class="fa fa-chevron-right text-slate-300 group-hover:text-orange-500"></i></button>{% endif %}
+                <p class="text-[10px] text-center text-slate-400 pt-1"><i class="fa fa-check-circle mr-1"></i> Görüşmeleriniz güvenle saklanır.</p>
+            </div>
+            {% if ai_support_settings and ai_support_settings.is_enabled %}<div id="supportAi" class="hidden bg-slate-50"><div class="px-4 py-3 border-b bg-white flex items-center gap-3"><button type="button" data-support-back class="text-slate-400 hover:text-blue-600"><i class="fa fa-chevron-left"></i></button><div><strong class="block text-sm text-slate-800">AI destek asistanı</strong><small class="text-emerald-600"><span class="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1"></span>Çevrimiçi</small></div></div><div id="supportMessages" class="h-72 overflow-y-auto p-4 space-y-3"><div class="max-w-[85%] bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm text-slate-700">{{ ai_support_settings.welcome_message }}</div></div><form id="supportChatForm" class="p-3 bg-white border-t flex gap-2"><input id="supportChatInput" maxlength="4000" required autocomplete="off" placeholder="Mesajınızı yazın…" class="flex-1 bg-slate-100 rounded-xl px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-200"><button class="w-11 rounded-xl bg-blue-600 text-white hover:bg-blue-700" aria-label="Gönder"><i class="fa fa-arrow-right"></i></button></form></div>{% endif %}
+            {% if support_form %}<div id="supportTicket" class="hidden bg-white"><div class="px-4 py-3 border-b flex items-center gap-3"><button type="button" data-support-back class="text-slate-400 hover:text-orange-600"><i class="fa fa-arrow-left"></i></button><div><strong class="block text-sm text-slate-800">{{ support_form.title }}</strong><small class="text-slate-500">Ekibimiz en kısa sürede dönüş yapacak</small></div></div><form action="{{ url_for('main.submit_contact_form') }}" method="post" class="p-4 max-h-[480px] overflow-y-auto space-y-3"><input type="hidden" name="form_id" value="{{ support_form.id }}">{% for field in support_form.fields|sort(attribute='order') %}{% if field.field_type == 'textarea' %}<textarea name="{{ field.name }}" rows="3" placeholder="{{ field.placeholder or field.label }}{{ ' *' if field.is_required else '' }}" {{ 'required' if field.is_required else '' }} class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-400"></textarea>{% elif field.field_type == 'select' %}<select name="{{ field.name }}" {{ 'required' if field.is_required else '' }} class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm"><option value="">{{ field.label }}{{ ' *' if field.is_required else '' }}</option>{% for option in (field.options or '').split(',') %}{% if option|trim %}<option value="{{ option|trim }}">{{ option|trim }}</option>{% endif %}{% endfor %}</select>{% else %}<input type="{{ field.field_type }}" name="{{ field.name }}" placeholder="{{ field.placeholder or field.label }}{{ ' *' if field.is_required else '' }}" {{ 'required' if field.is_required else '' }} class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-400">{% endif %}{% endfor %}<label class="flex gap-2 text-[11px] text-slate-500"><input type="checkbox" name="kvkk" required class="mt-0.5"> KVKK aydınlatma metnini okudum ve kabul ediyorum.</label><button class="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl py-3 text-sm font-bold">{{ support_form.submit_btn_text or 'Talebi gönder' }}</button></form></div>{% endif %}
+        </div>
+        <button type="button" id="supportToggle" aria-expanded="false" class="w-14 h-14 bg-gradient-to-br from-[#087fb7] to-[#232e48] text-white rounded-2xl shadow-xl shadow-slate-900/30 flex items-center justify-center hover:-translate-y-1 transition-all"><i class="fa fa-envelope text-xl"></i><span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full"></span></button>
+    </div>
     {% endif %}
 
     <button id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
@@ -700,7 +720,6 @@
             // Header ve Buton Scroll Kontrolü
             const header = document.getElementById('main-header');
             const backToTopBtn = document.getElementById('backToTop');
-            const whatsappBtn = document.getElementById('whatsappBtn');
 
             window.addEventListener('scroll', () => {
                 const scrollY = window.scrollY;
@@ -727,8 +746,30 @@
                 };
 
                 toggleButton(backToTopBtn);
-                toggleButton(whatsappBtn);
             });
+
+            const supportToggle = document.getElementById('supportToggle');
+            const supportPanel = document.getElementById('supportPanel');
+            if (supportToggle && supportPanel) {
+                const home = document.getElementById('supportHome');
+                const screens = [document.getElementById('supportAi'), document.getElementById('supportTicket')].filter(Boolean);
+                const showHome = () => { screens.forEach(s => s.classList.add('hidden')); home.classList.remove('hidden'); };
+                supportToggle.addEventListener('click', () => { const opening = supportPanel.classList.contains('hidden'); supportPanel.classList.toggle('hidden'); supportToggle.setAttribute('aria-expanded', String(opening)); if (!opening) showHome(); });
+                document.querySelectorAll('[data-support-close]').forEach(b => b.addEventListener('click', () => supportPanel.classList.add('hidden')));
+                document.querySelectorAll('[data-support-back]').forEach(b => b.addEventListener('click', showHome));
+                document.querySelectorAll('[data-support-screen]').forEach(b => b.addEventListener('click', () => { home.classList.add('hidden'); screens.forEach(s => s.classList.toggle('hidden', s.id !== 'support' + b.dataset.supportScreen[0].toUpperCase() + b.dataset.supportScreen.slice(1))); }));
+
+                const chatForm = document.getElementById('supportChatForm');
+                const chatInput = document.getElementById('supportChatInput');
+                const messages = document.getElementById('supportMessages');
+                let supportToken = sessionStorage.getItem('ekosanSupportToken');
+                let lastMessageId = 0;
+                const addMessage = (sender, content) => { const row = document.createElement('div'); row.className = sender === 'visitor' ? 'ml-auto max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 text-sm' : (sender === 'system' ? 'text-center text-[11px] text-slate-400 px-3' : 'max-w-[85%] bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm text-slate-700'); row.textContent = content; messages.appendChild(row); messages.scrollTop = messages.scrollHeight; };
+                const ensureConversation = async () => { if (supportToken) return supportToken; const response = await fetch('/support/conversations', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({page_url:location.href})}); if (!response.ok) throw new Error('Destek bağlantısı kurulamadı'); const data = await response.json(); supportToken = data.token; sessionStorage.setItem('ekosanSupportToken', supportToken); return supportToken; };
+                const poll = async () => { if (!supportToken || !messages) return; try { const response = await fetch(`/support/conversations/${supportToken}/messages?after=${lastMessageId}`); if (!response.ok) return; const data = await response.json(); data.messages.forEach(m => { lastMessageId = Math.max(lastMessageId, m.id); if (m.sender === 'admin' || m.sender === 'system') addMessage(m.sender, m.content); }); } catch (_) {} };
+                if (chatForm) chatForm.addEventListener('submit', async (event) => { event.preventDefault(); const content = chatInput.value.trim(); if (!content) return; addMessage('visitor', content); chatInput.value = ''; chatInput.disabled = true; try { const token = await ensureConversation(); const response = await fetch(`/support/conversations/${token}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})}); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Mesaj gönderilemedi'); if (data.message && data.message.sender === 'ai') { lastMessageId = Math.max(lastMessageId, data.message.id || 0); addMessage('ai', data.message.content); } } catch (error) { addMessage('system', error.message); } finally { chatInput.disabled = false; chatInput.focus(); } });
+                setInterval(poll, 5000);
+            }
 
             // Slider Başlatma
             var partnerSwiper = new Swiper(".partnerSwiper", {

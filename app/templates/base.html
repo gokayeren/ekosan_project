@@ -848,8 +848,9 @@
                 };
                 const markSeen = (messageId) => { const label = messages.querySelector(`[data-message-id="${messageId}"] .support-message__seen`); if (label) label.textContent = '✓✓ Görüldü'; };
                 const readJsonResponse = async (response) => { const raw = await response.text(); try { return raw ? JSON.parse(raw) : {}; } catch (_) { const error = new Error(response.ok ? 'Sunucu yanıtı okunamadı.' : `Sunucu hatası (${response.status}). Mesajınız ekranda korundu.`); error.retryAfter = 0; throw error; } };
+                const forgetConversation = () => { supportToken = null; sessionStorage.removeItem('ekosanSupportToken'); lastMessageId = 0; hydrated = false; };
                 const ensureConversation = async () => { if (supportToken) return supportToken; const response = await fetch('/support/conversations', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({page_url:location.href})}); const data = await readJsonResponse(response); if (!response.ok) { const error = new Error(data.error || 'Destek bağlantısı kurulamadı'); error.retryAfter = data.retry_after || 0; throw error; } supportToken = data.token; sessionStorage.setItem('ekosanSupportToken', supportToken); return supportToken; };
-                const poll = async () => { if (!supportToken || !messages) return; try { const response = await fetch(`/support/conversations/${supportToken}/messages?after=${lastMessageId}`); if (!response.ok) return; const data = await response.json(); if (!hydrated && lastMessageId === 0 && data.messages.length) { messages.innerHTML = ''; hydrated = true; } data.messages.forEach(m => { lastMessageId = Math.max(lastMessageId, m.id); addMessage(m.sender, m.content, m.created_at, m.seen_at, m.id); }); if (data.status === 'closed' && chatInput) { if (Number(data.retry_after) > 0) { chatInput.disabled = true; chatInput.placeholder = 'Bu görüşme sona erdi'; const button = chatForm?.querySelector('button'); if (button) button.disabled = true; lockAgentUntil(Number(data.retry_after)); window.setTimeout(showHome, 1800); } else { localStorage.removeItem('ekosanSupportLockedUntil'); if (agentChoice) { agentChoice.disabled = false; const description = agentChoice.querySelector('small'); if (description) description.textContent = 'Kaldığınız yerden devam edin'; } wakeComposer(); } } } catch (_) {} };
+                const poll = async () => { if (!supportToken || !messages) return; try { const response = await fetch(`/support/conversations/${supportToken}/messages?after=${lastMessageId}`); if (response.status === 404) { forgetConversation(); wakeComposer(); return; } if (!response.ok) return; const data = await readJsonResponse(response); if (!hydrated && lastMessageId === 0 && data.messages.length) { messages.innerHTML = ''; hydrated = true; } data.messages.forEach(m => { lastMessageId = Math.max(lastMessageId, m.id); addMessage(m.sender, m.content, m.created_at, m.seen_at, m.id); }); if (data.status === 'closed' && chatInput) { if (Number(data.retry_after) > 0) { chatInput.disabled = true; chatInput.placeholder = 'Bu görüşme sona erdi'; const button = chatForm?.querySelector('button'); if (button) button.disabled = true; lockAgentUntil(Number(data.retry_after)); window.setTimeout(showHome, 1800); } else { localStorage.removeItem('ekosanSupportLockedUntil'); if (agentChoice) { agentChoice.disabled = false; const description = agentChoice.querySelector('small'); if (description) description.textContent = 'Kaldığınız yerden devam edin'; } wakeComposer(); } } } catch (_) {} };
                 if (chatForm) chatForm.addEventListener('submit', async (event) => {
                     event.preventDefault();
                     const content = chatInput.value.trim();
@@ -859,8 +860,13 @@
                     let retryAfter = 0;
                     chatInput.disabled = true; sendButton.disabled = true;
                     try {
-                        const token = await ensureConversation();
-                        const response = await fetch(`/support/conversations/${token}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})});
+                        let token = await ensureConversation();
+                        let response = await fetch(`/support/conversations/${token}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})});
+                        if (response.status === 404) {
+                            forgetConversation();
+                            token = await ensureConversation();
+                            response = await fetch(`/support/conversations/${token}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})});
+                        }
                         const data = await readJsonResponse(response);
                         if (!response.ok) { const error = new Error(data.error || 'Mesaj gönderilemedi'); error.retryAfter = data.retry_after || 0; throw error; }
                         chatInput.value = '';

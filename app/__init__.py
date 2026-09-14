@@ -90,21 +90,29 @@ class AISupportView(BaseView):
             db.session.commit()
 
         if request.method == 'POST':
-            existing_key = settings.api_key
-            settings.is_enabled = request.form.get('is_enabled') == '1'
-            settings.widget_title = (request.form.get('widget_title') or '').strip() or 'Size nasıl yardımcı olabiliriz?'
-            settings.welcome_message = (request.form.get('welcome_message') or '').strip() or 'Merhaba! Destek kanalınızı seçebilirsiniz.'
-            settings.provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
-            settings.model_name = 'gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini'
-            settings.api_key = (request.form.get('api_key') or '').strip() or existing_key
-            settings.system_prompt = (request.form.get('system_prompt') or '').strip() or None
-            settings.knowledge_urls = (request.form.get('knowledge_urls') or '').strip() or None
-            settings.company_information = (request.form.get('company_information') or '').strip() or None
-            settings.customer_context = (request.form.get('customer_context') or '').strip() or None
-            settings.support_form_id = request.form.get('support_form_id', type=int)
-            db.session.commit()
-            flash('AI Support ayarları kaydedildi.', 'success')
-            return redirect(url_for('.index'))
+            try:
+                existing_key = settings.api_key
+                settings.is_enabled = request.form.get('is_enabled') == '1'
+                settings.widget_title = (request.form.get('widget_title') or '').strip() or 'Size nasıl yardımcı olabiliriz?'
+                settings.welcome_message = (request.form.get('welcome_message') or '').strip() or 'Merhaba! Destek kanalınızı seçebilirsiniz.'
+                settings.provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
+                settings.model_name = 'gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini'
+                settings.api_key = (request.form.get('api_key') or '').strip() or existing_key
+                settings.system_prompt = (request.form.get('system_prompt') or '').strip() or None
+                settings.knowledge_urls = (request.form.get('knowledge_urls') or '').strip() or None
+                settings.company_information = (request.form.get('company_information') or '').strip() or None
+                settings.customer_context = (request.form.get('customer_context') or '').strip() or None
+                support_form_id = (request.form.get('support_form_id') or '').strip()
+                settings.support_form_id = int(support_form_id) if support_form_id.isdigit() else None
+                settings.updated_at = datetime.utcnow()
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                current_app.logger.exception('AI Support settings could not be saved')
+                flash('Ayarlar kaydedilemedi. Yazdıklarınız taslakta korundu; lütfen tekrar deneyin.', 'danger')
+                return self.render('admin/ai_support.html', settings=settings, conversations=SupportConversation.query.order_by(SupportConversation.updated_at.desc()).limit(100).all(), forms=Form.query.order_by(Form.title).all())
+            flash('AI Support ayarları veritabanına kaydedildi.', 'success')
+            return redirect(url_for('.index', saved='1'))
 
         conversations = SupportConversation.query.order_by(SupportConversation.updated_at.desc()).limit(100).all()
         return self.render('admin/ai_support.html', settings=settings, conversations=conversations, forms=Form.query.order_by(Form.title).all())

@@ -6,7 +6,7 @@
       <h2 class="text-xl font-bold text-slate-100">AI Support</h2>
       <p class="text-xs text-slate-500 mt-1">Destek balonu, AI davranışı ve bilgi kaynaklarını yönetin.</p>
     </div>
-    <form method="post" class="space-y-5">
+    <form method="post" class="space-y-5" id="aiSupportSettingsForm" data-saved="{{ '1' if request.args.get('saved') == '1' else '0' }}">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="text-sm font-semibold text-white">Destek balonu</h3><p class="text-xs text-slate-500">Ziyaretçiler WhatsApp, AI Agent veya ticket seçebilir.</p></div><select name="is_enabled" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200"><option value="1" {% if settings.is_enabled %}selected{% endif %}>AI Agent aktif</option><option value="0" {% if not settings.is_enabled %}selected{% endif %}>AI Agent kapalı</option></select></div>
         <div class="grid md:grid-cols-2 gap-4"><label class="text-xs text-slate-400">Başlık<input name="widget_title" value="{{ settings.widget_title }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"></label><label class="text-xs text-slate-400">Ticket formu<select name="support_form_id" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="">Form seçin</option>{% for form in forms %}<option value="{{ form.id }}" {% if settings.support_form_id == form.id %}selected{% endif %}>{{ form.title }}</option>{% endfor %}</select></label></div>
@@ -30,4 +30,35 @@
     </div>
   </aside>
 </div>
+<script>
+(() => {
+  const form = document.getElementById('aiSupportSettingsForm');
+  if (!form) return;
+  const draftKey = 'ekosan.aiSupport.settingsDraft.v1';
+  const draftFields = ['widget_title', 'welcome_message', 'provider', 'is_enabled', 'support_form_id', 'system_prompt', 'knowledge_urls', 'company_information', 'customer_context'];
+  const readDraft = () => { try { return JSON.parse(localStorage.getItem(draftKey) || '{}'); } catch (_) { return {}; } };
+  const saveDraft = () => {
+    const draft = {};
+    draftFields.forEach(name => { const field = form.elements[name]; if (field) draft[name] = field.value; });
+    draft.savedAt = new Date().toISOString();
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+  };
+  if (form.dataset.saved === '1') {
+    localStorage.removeItem(draftKey);
+  } else {
+    const draft = readDraft();
+    const hasDraft = draftFields.some(name => typeof draft[name] === 'string' && draft[name].trim());
+    const formIsEmpty = ['system_prompt', 'knowledge_urls', 'company_information', 'customer_context'].every(name => !(form.elements[name]?.value || '').trim());
+    if (hasDraft && formIsEmpty) {
+      draftFields.forEach(name => { if (form.elements[name] && typeof draft[name] === 'string') form.elements[name].value = draft[name]; });
+      const notice = document.createElement('div');
+      notice.className = 'mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300';
+      notice.innerHTML = '<i class="fa fa-rotate-left mr-2"></i>Kaydedilmemiş taslağınız otomatik olarak geri yüklendi.';
+      form.before(notice);
+    }
+  }
+  draftFields.forEach(name => form.elements[name]?.addEventListener('input', saveDraft));
+  form.addEventListener('submit', saveDraft);
+})();
+</script>
 {% endblock %}

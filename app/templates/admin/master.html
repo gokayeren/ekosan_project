@@ -54,6 +54,12 @@
         #actions-confirmation-data, #message-data, #no-records-found, .hide { 
             display: none !important; 
         }
+        .btn { border-radius: .65rem !important; font-weight: 600 !important; letter-spacing: -.01em; transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease !important; }
+        .btn:hover { transform: translateY(-1px); }
+        .btn.btn-primary, .btn.bg-blue-600 { box-shadow: 0 8px 22px rgba(37, 99, 235, .18); }
+        input:not([type="checkbox"]):not([type="radio"]), textarea, select { border-radius: .65rem !important; }
+        .menu a, .menu summary { min-height: 40px; }
+        .menu a:focus-visible, .menu summary:focus-visible, .btn:focus-visible { outline: 2px solid #60a5fa !important; outline-offset: 2px; }
     </style>
 
     {% block head_css %}{% endblock %}

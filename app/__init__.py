@@ -91,11 +91,11 @@ class AISupportView(BaseView):
 
         if request.method == 'POST':
             existing_key = settings.api_key
-            settings.is_enabled = request.form.get('is_enabled') == 'on'
+            settings.is_enabled = request.form.get('is_enabled') == '1'
             settings.widget_title = (request.form.get('widget_title') or '').strip() or 'Size nasıl yardımcı olabiliriz?'
             settings.welcome_message = (request.form.get('welcome_message') or '').strip() or 'Merhaba! Destek kanalınızı seçebilirsiniz.'
             settings.provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
-            settings.model_name = (request.form.get('model_name') or '').strip() or ('gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini')
+            settings.model_name = 'gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini'
             settings.api_key = (request.form.get('api_key') or '').strip() or existing_key
             settings.system_prompt = (request.form.get('system_prompt') or '').strip() or None
             settings.knowledge_urls = (request.form.get('knowledge_urls') or '').strip() or None

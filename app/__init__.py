@@ -99,16 +99,19 @@ class AISupportView(BaseView):
                 settings.provider = request.form.get('provider') if request.form.get('provider') in ('openai', 'gemini') else 'openai'
                 settings.model_name = 'gemini-2.0-flash' if settings.provider == 'gemini' else 'gpt-4o-mini'
                 settings.api_key = (request.form.get('api_key') or '').strip() or existing_key
-                settings.system_prompt = (request.form.get('system_prompt') or '').strip() or None
-                settings.knowledge_urls = (request.form.get('knowledge_urls') or '').strip() or None
-                settings.company_information = (request.form.get('company_information') or '').strip() or None
-                settings.customer_context = (request.form.get('customer_context') or '').strip() or None
+                def preserve_text(field_name):
+                    submitted = (request.form.get(field_name) or '').strip()
+                    return submitted or getattr(settings, field_name)
+                settings.system_prompt = preserve_text('system_prompt')
+                settings.knowledge_urls = preserve_text('knowledge_urls')
+                settings.company_information = preserve_text('company_information')
+                settings.customer_context = preserve_text('customer_context')
                 timeout_value = (request.form.get('conversation_timeout_minutes') or '0').strip()
                 settings.conversation_timeout_minutes = max(0, min(1440, int(timeout_value))) if timeout_value.isdigit() else 0
-                settings.closing_message = (request.form.get('closing_message') or '').strip() or None
+                settings.closing_message = preserve_text('closing_message')
                 settings.never_send_links = request.form.get('never_send_links') == '1'
                 settings.strict_site_scope = request.form.get('strict_site_scope') == '1'
-                settings.out_of_scope_message = (request.form.get('out_of_scope_message') or '').strip() or None
+                settings.out_of_scope_message = preserve_text('out_of_scope_message')
                 def bounded_int(field, default, minimum, maximum):
                     value = (request.form.get(field) or '').strip()
                     return max(minimum, min(maximum, int(value))) if value.isdigit() else default
@@ -120,7 +123,6 @@ class AISupportView(BaseView):
                 support_form_id = (request.form.get('support_form_id') or '').strip()
                 settings.support_form_id = int(support_form_id) if support_form_id.isdigit() else None
                 settings.updated_at = datetime.utcnow()
-                AISupportSetting.query.filter(AISupportSetting.id != settings.id).delete(synchronize_session=False)
                 db.session.commit()
             except Exception:
                 db.session.rollback()

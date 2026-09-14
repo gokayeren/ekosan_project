@@ -215,8 +215,18 @@ class AISupportSetting(db.Model):
 
     @classmethod
     def current(cls):
-        """Always resolve the most recently saved singleton row."""
-        return cls.query.order_by(cls.updated_at.desc().nullslast(), cls.id.desc()).first()
+        """Prefer the populated settings row without mutating older records."""
+        rows = cls.query.order_by(cls.id.asc()).all()
+        if not rows:
+            return None
+        content_fields = (
+            'api_key', 'system_prompt', 'knowledge_urls', 'company_information',
+            'customer_context', 'closing_message', 'out_of_scope_message',
+        )
+        def score(row):
+            populated = sum(bool((getattr(row, field, None) or '').strip()) for field in content_fields)
+            return (populated, bool(row.support_form_id), bool(row.is_enabled), row.updated_at or datetime.min, row.id)
+        return max(rows, key=score)
 
 
 class SupportConversation(db.Model):

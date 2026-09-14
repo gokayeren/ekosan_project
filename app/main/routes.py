@@ -53,7 +53,16 @@ def _support_ai_reply(settings, conversation):
 
     if settings.provider == 'gemini':
         model = settings.model_name if settings.model_name and not settings.model_name.startswith('gemini-2.0') else 'gemini-3.8-flash'
-        contents = [{'role': 'user' if row['role'] == 'user' else 'model', 'parts': [{'text': row['content']}]} for row in history]
+        # Gemini rejects some otherwise valid chat histories when they begin with
+        # the assistant welcome message or contain consecutive identical roles.
+        first_user = next((index for index, row in enumerate(history) if row['role'] == 'user'), len(history))
+        contents = []
+        for row in history[first_user:]:
+            role = 'user' if row['role'] == 'user' else 'model'
+            if contents and contents[-1]['role'] == role:
+                contents[-1]['parts'][0]['text'] += f"\n{row['content']}"
+            else:
+                contents.append({'role': role, 'parts': [{'text': row['content']}]})
         response = requests.post(
             f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
             params={'key': settings.api_key},
@@ -61,7 +70,13 @@ def _support_ai_reply(settings, conversation):
             timeout=25,
         )
         response.raise_for_status()
-        reply = response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+        payload = response.json()
+        candidates = payload.get('candidates') or []
+        parts = candidates[0].get('content', {}).get('parts', []) if candidates else []
+        reply = ''.join(part.get('text', '') for part in parts).strip()
+        if not reply:
+            block_reason = payload.get('promptFeedback', {}).get('blockReason')
+            raise RuntimeError(f'Gemini boş yanıt döndürdü{f": {block_reason}" if block_reason else ""}.')
     else:
         response = requests.post(
             'https://api.openai.com/v1/chat/completions',
@@ -644,7 +659,7 @@ def support_messages(token):
         reply = _support_ai_reply(settings, conversation)
     except Exception as exc:
         current_app.logger.exception('AI support response failed: %s', exc)
-        reply = 'Şu anda otomatik yanıt oluşturamıyorum. Mesajınız ekibimize ulaştı; dilerseniz destek talebi de bırakabilirsiniz.'
+        reply = 'Şu anda teknik bir sorun yaşıyoruz. Mesajınız ekibimize ulaştı; en kısa sürede size yardımcı olacağız.'
     visitor_message.seen_at = datetime.utcnow()
     ai_message = SupportMessage(conversation_id=conversation.id, sender='ai', content=reply)
     db.session.add(ai_message)

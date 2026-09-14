@@ -14,6 +14,7 @@ from flask import render_template, request, redirect, url_for, flash, current_ap
 from PIL import Image, ImageOps, UnidentifiedImageError
 from slugify import slugify
 from app import db
+from sqlalchemy import text
 from app.main import main
 from app.models import (
     HomeConfig, Corporate, References, Contact, Getoffer,
@@ -88,6 +89,20 @@ def _close_expired_support_conversation(settings, conversation):
     conversation.updated_at = datetime.utcnow()
     db.session.commit()
     return True
+
+
+def _acquire_support_rate_lock(key):
+    """Serialize rate checks per visitor/conversation on PostgreSQL."""
+    try:
+        if db.engine.dialect.name == 'postgresql':
+            db.session.execute(text('SELECT pg_advisory_xact_lock(hashtext(:key))'), {'key': key})
+    except Exception:
+        current_app.logger.exception('Support rate-limit lock failed')
+
+
+def _rate_limited(message, retry_after):
+    response = {'error': message, 'retry_after': max(1, int(retry_after))}
+    return response, 429, {'Retry-After': str(response['retry_after'])}
 
 def get_shared_data():
     home_config = HomeConfig.query.first() or HomeConfig()
@@ -514,9 +529,27 @@ def product_detail(item_id, slug):
 
 @main.route('/support/conversations', methods=['POST'])
 def create_support_conversation():
-    settings = AISupportSetting.query.first()
+    settings = AISupportSetting.current()
     if not settings or not settings.is_enabled:
         return {'error': 'AI destek şu anda çevrimdışı.'}, 503
+    now = datetime.utcnow()
+    client_ip = request.remote_addr or 'unknown'
+    _acquire_support_rate_lock(f'support-connect:{client_ip}')
+    recent_count = SupportConversation.query.filter(
+        SupportConversation.ip_address == client_ip,
+        SupportConversation.created_at >= now - timedelta(hours=1),
+    ).count()
+    if recent_count >= (settings.max_conversations_per_hour or 3):
+        return _rate_limited('Destek hattımız kısa süre içinde tekrar kullanılabilir.', 3600)
+    latest_closed = SupportConversation.query.filter(
+        SupportConversation.ip_address == client_ip,
+        SupportConversation.status == 'closed',
+    ).order_by(SupportConversation.updated_at.desc()).first()
+    cooldown = settings.reconnect_cooldown_minutes or 30
+    if latest_closed and latest_closed.updated_at:
+        available_at = latest_closed.updated_at + timedelta(minutes=cooldown)
+        if available_at > now:
+            return _rate_limited('Görüşmeniz kısa süre önce tamamlandı. Bir süre sonra yeniden destek alabilirsiniz.', (available_at - now).total_seconds())
     payload = request.get_json(silent=True) or {}
     conversation = SupportConversation(
         public_token=str(uuid.uuid4()), channel='ai', status='open',
@@ -524,7 +557,7 @@ def create_support_conversation():
         visitor_email=(payload.get('email') or '')[:160] or None,
         visitor_phone=(payload.get('phone') or '')[:50] or None,
         page_url=(payload.get('page_url') or '')[:500] or None,
-        ip_address=request.remote_addr,
+        ip_address=client_ip,
     )
     db.session.add(conversation)
     db.session.flush()
@@ -539,7 +572,7 @@ def create_support_conversation():
 @main.route('/support/conversations/<token>/messages', methods=['GET', 'POST'])
 def support_messages(token):
     conversation = SupportConversation.query.filter_by(public_token=token).first_or_404()
-    settings = AISupportSetting.query.first()
+    settings = AISupportSetting.current()
     _close_expired_support_conversation(settings, conversation)
     if request.method == 'GET':
         after_id = request.args.get('after', 0, type=int)
@@ -547,13 +580,41 @@ def support_messages(token):
             SupportMessage.conversation_id == conversation.id,
             SupportMessage.id > after_id
         ).order_by(SupportMessage.id.asc()).all()
-        return {'status': conversation.status, 'human_takeover': conversation.human_takeover, 'messages': [
+        retry_after = 0
+        if conversation.status == 'closed' and settings and conversation.updated_at:
+            available_at = conversation.updated_at + timedelta(minutes=settings.reconnect_cooldown_minutes or 30)
+            retry_after = max(0, int((available_at - datetime.utcnow()).total_seconds()))
+        return {'status': conversation.status, 'human_takeover': conversation.human_takeover, 'retry_after': retry_after, 'messages': [
             {'id': row.id, 'sender': row.sender, 'content': row.content, 'created_at': row.created_at.isoformat(), 'seen_at': row.seen_at.isoformat() if row.seen_at else None}
             for row in messages
         ]}
 
     if conversation.status == 'closed':
         return {'error': 'Bu görüşme kapatılmış.'}, 409
+    now = datetime.utcnow()
+    _acquire_support_rate_lock(f'support-message:{conversation.id}')
+    cooldown_seconds = settings.message_cooldown_seconds if settings else 2
+    last_visitor_message = SupportMessage.query.filter_by(
+        conversation_id=conversation.id, sender='visitor'
+    ).order_by(SupportMessage.created_at.desc()).first()
+    if last_visitor_message and last_visitor_message.created_at:
+        next_allowed = last_visitor_message.created_at + timedelta(seconds=cooldown_seconds or 2)
+        if next_allowed > now:
+            return _rate_limited('Mesajınızı aldık; yeni mesaj için kısa bir an bekleyin.', (next_allowed - now).total_seconds())
+    minute_count = SupportMessage.query.filter(
+        SupportMessage.conversation_id == conversation.id,
+        SupportMessage.sender == 'visitor',
+        SupportMessage.created_at >= now - timedelta(minutes=1),
+    ).count()
+    if minute_count >= (settings.max_messages_per_minute if settings else 8):
+        return _rate_limited('Mesajlarınızı işliyoruz; lütfen kısa bir süre bekleyin.', 60)
+    hour_count = SupportMessage.query.filter(
+        SupportMessage.conversation_id == conversation.id,
+        SupportMessage.sender == 'visitor',
+        SupportMessage.created_at >= now - timedelta(hours=1),
+    ).count()
+    if hour_count >= (settings.max_messages_per_hour if settings else 60):
+        return _rate_limited('Bu görüşme için mesaj sınırına ulaşıldı. Daha sonra tekrar deneyebilirsiniz.', 3600)
     payload = request.get_json(silent=True) or {}
     content = (payload.get('content') or '').strip()
     if not content or len(content) > 4000:

@@ -201,12 +201,22 @@ class AISupportSetting(db.Model):
     never_send_links = db.Column(db.Boolean, nullable=False, default=False)
     strict_site_scope = db.Column(db.Boolean, nullable=False, default=True)
     out_of_scope_message = db.Column(db.Text, nullable=True)
+    reconnect_cooldown_minutes = db.Column(db.Integer, nullable=False, default=30)
+    max_conversations_per_hour = db.Column(db.Integer, nullable=False, default=3)
+    message_cooldown_seconds = db.Column(db.Integer, nullable=False, default=2)
+    max_messages_per_minute = db.Column(db.Integer, nullable=False, default=8)
+    max_messages_per_hour = db.Column(db.Integer, nullable=False, default=60)
     support_form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
     support_form = db.relationship('Form', foreign_keys=[support_form_id])
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __str__(self):
         return 'AI Support Ayarları'
+
+    @classmethod
+    def current(cls):
+        """Always resolve the most recently saved singleton row."""
+        return cls.query.order_by(cls.updated_at.desc().nullslast(), cls.id.desc()).first()
 
 
 class SupportConversation(db.Model):

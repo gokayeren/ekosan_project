@@ -658,6 +658,7 @@
       #supportHome { padding: 1rem; background: #f8fafc; }
       #supportHome > button, #supportHome > a { display: flex; width: 100%; align-items: center; gap: 1rem; padding: 1rem; margin-bottom: .75rem; text-align: left; color: #1e293b; background: #fff; border: 1px solid #dbe3ed; border-radius: 14px; text-decoration: none; }
       #supportHome > button:hover, #supportHome > a:hover { border-color: #38a3d6; box-shadow: 0 8px 24px rgba(15, 23, 42, .08); transform: translateY(-1px); }
+      #supportHome > button:disabled { opacity: .58; cursor: not-allowed; transform: none; box-shadow: none; }
       #supportHome strong { display: block; color: #172033; font-size: .875rem; }
       #supportHome small { display: block; margin-top: .2rem; color: #718096; font-size: .75rem; }
       #supportHome > button > span:first-child, #supportHome > a > span:first-child { display: flex; flex: 0 0 44px; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 12px; background: #eff6ff; color: #087fb7; }
@@ -800,7 +801,24 @@
             if (supportToggle && supportPanel) {
                 const home = document.getElementById('supportHome');
                 const screens = [document.getElementById('supportAi'), document.getElementById('supportTicket')].filter(Boolean);
+                const agentChoice = home.querySelector('[data-support-screen="ai"]');
                 const showHome = () => { screens.forEach(s => s.classList.add('hidden')); home.classList.remove('hidden'); };
+                const lockAgentUntil = (seconds) => {
+                    if (!agentChoice || seconds <= 0) return;
+                    const until = Date.now() + (seconds * 1000);
+                    localStorage.setItem('ekosanSupportLockedUntil', String(until));
+                    agentChoice.disabled = true;
+                    const description = agentChoice.querySelector('small');
+                    const refresh = () => {
+                        const remaining = Math.max(0, Number(localStorage.getItem('ekosanSupportLockedUntil') || 0) - Date.now());
+                        if (remaining <= 0) { agentChoice.disabled = false; description.textContent = 'Sorunu şimdi birlikte çözelim'; localStorage.removeItem('ekosanSupportLockedUntil'); sessionStorage.removeItem('ekosanSupportToken'); supportToken = null; return; }
+                        description.textContent = `Yeni görüşme ${Math.max(1, Math.ceil(remaining / 60000))} dakika sonra`;
+                        window.setTimeout(refresh, Math.min(remaining, 30000));
+                    };
+                    refresh();
+                };
+                const existingLock = Math.max(0, Number(localStorage.getItem('ekosanSupportLockedUntil') || 0) - Date.now());
+                if (existingLock > 0) lockAgentUntil(Math.ceil(existingLock / 1000));
                 supportToggle.addEventListener('click', () => { const opening = supportPanel.classList.contains('hidden'); supportPanel.classList.toggle('hidden'); supportToggle.setAttribute('aria-expanded', String(opening)); if (!opening) showHome(); });
                 document.querySelectorAll('[data-support-close]').forEach(b => b.addEventListener('click', () => supportPanel.classList.add('hidden')));
                 document.querySelectorAll('[data-support-back]').forEach(b => b.addEventListener('click', showHome));
@@ -829,8 +847,32 @@
                 };
                 const markSeen = (messageId) => { const label = messages.querySelector(`[data-message-id="${messageId}"] .support-message__seen`); if (label) label.textContent = '✓✓ Görüldü'; };
                 const ensureConversation = async () => { if (supportToken) return supportToken; const response = await fetch('/support/conversations', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({page_url:location.href})}); if (!response.ok) throw new Error('Destek bağlantısı kurulamadı'); const data = await response.json(); supportToken = data.token; sessionStorage.setItem('ekosanSupportToken', supportToken); return supportToken; };
-                const poll = async () => { if (!supportToken || !messages) return; try { const response = await fetch(`/support/conversations/${supportToken}/messages?after=${lastMessageId}`); if (!response.ok) return; const data = await response.json(); if (!hydrated && lastMessageId === 0 && data.messages.length) { messages.innerHTML = ''; hydrated = true; } data.messages.forEach(m => { lastMessageId = Math.max(lastMessageId, m.id); addMessage(m.sender, m.content, m.created_at, m.seen_at, m.id); }); if (data.status === 'closed' && chatInput) { chatInput.disabled = true; chatInput.placeholder = 'Bu görüşme sona erdi'; const button = chatForm?.querySelector('button'); if (button) button.disabled = true; } } catch (_) {} };
-                if (chatForm) chatForm.addEventListener('submit', async (event) => { event.preventDefault(); const content = chatInput.value.trim(); if (!content) return; const sendButton = chatForm.querySelector('button'); const optimistic = addMessage('visitor', content); chatInput.value = ''; chatInput.disabled = true; sendButton.disabled = true; try { const token = await ensureConversation(); const response = await fetch(`/support/conversations/${token}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})}); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Mesaj gönderilemedi'); if (data.message?.id && data.message.sender === 'visitor') optimistic.dataset.messageId = data.message.id; if (data.seen_message_id) { optimistic.dataset.messageId = data.seen_message_id; markSeen(data.seen_message_id); } if (data.message && data.message.sender === 'ai') { lastMessageId = Math.max(lastMessageId, data.message.id || 0); addMessage('ai', data.message.content, data.message.created_at, null, data.message.id); } } catch (error) { addMessage('system', error.message); } finally { chatInput.disabled = false; sendButton.disabled = false; chatInput.focus(); } });
+                const poll = async () => { if (!supportToken || !messages) return; try { const response = await fetch(`/support/conversations/${supportToken}/messages?after=${lastMessageId}`); if (!response.ok) return; const data = await response.json(); if (!hydrated && lastMessageId === 0 && data.messages.length) { messages.innerHTML = ''; hydrated = true; } data.messages.forEach(m => { lastMessageId = Math.max(lastMessageId, m.id); addMessage(m.sender, m.content, m.created_at, m.seen_at, m.id); }); if (data.status === 'closed' && chatInput) { chatInput.disabled = true; chatInput.placeholder = 'Bu görüşme sona erdi'; const button = chatForm?.querySelector('button'); if (button) button.disabled = true; lockAgentUntil(data.retry_after || 1800); window.setTimeout(showHome, 1800); } } catch (_) {} };
+                if (chatForm) chatForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const content = chatInput.value.trim();
+                    if (!content) return;
+                    const sendButton = chatForm.querySelector('button');
+                    const optimistic = addMessage('visitor', content);
+                    let retryAfter = 0;
+                    chatInput.value = ''; chatInput.disabled = true; sendButton.disabled = true;
+                    try {
+                        const token = await ensureConversation();
+                        const response = await fetch(`/support/conversations/${token}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content})});
+                        const data = await response.json();
+                        if (!response.ok) { const error = new Error(data.error || 'Mesaj gönderilemedi'); error.retryAfter = data.retry_after || 0; throw error; }
+                        if (data.message?.id && data.message.sender === 'visitor') optimistic.dataset.messageId = data.message.id;
+                        if (data.seen_message_id) { optimistic.dataset.messageId = data.seen_message_id; markSeen(data.seen_message_id); }
+                        if (data.message && data.message.sender === 'ai') { lastMessageId = Math.max(lastMessageId, data.message.id || 0); addMessage('ai', data.message.content, data.message.created_at, null, data.message.id); }
+                    } catch (error) {
+                        optimistic.remove();
+                        retryAfter = Math.min(Number(error.retryAfter) || 0, 60);
+                        addMessage('system', error.message);
+                    } finally {
+                        const unlock = () => { chatInput.disabled = false; sendButton.disabled = false; chatInput.focus(); };
+                        if (retryAfter > 0) window.setTimeout(unlock, retryAfter * 1000); else unlock();
+                    }
+                });
                 setInterval(poll, 5000);
             }
 

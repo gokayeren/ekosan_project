@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from flask import Flask, redirect, url_for, request, render_template, flash, current_app
 from flask_login import LoginManager, current_user, login_user, logout_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_admin import Admin, AdminIndexView, BaseView, expose
@@ -83,7 +84,7 @@ class AISupportView(BaseView):
 
     @expose('/', methods=['GET', 'POST'])
     def index(self):
-        settings = AISupportSetting.query.first()
+        settings = AISupportSetting.current()
         if not settings:
             settings = AISupportSetting()
             db.session.add(settings)
@@ -108,9 +109,18 @@ class AISupportView(BaseView):
                 settings.never_send_links = request.form.get('never_send_links') == '1'
                 settings.strict_site_scope = request.form.get('strict_site_scope') == '1'
                 settings.out_of_scope_message = (request.form.get('out_of_scope_message') or '').strip() or None
+                def bounded_int(field, default, minimum, maximum):
+                    value = (request.form.get(field) or '').strip()
+                    return max(minimum, min(maximum, int(value))) if value.isdigit() else default
+                settings.reconnect_cooldown_minutes = bounded_int('reconnect_cooldown_minutes', 30, 1, 1440)
+                settings.max_conversations_per_hour = bounded_int('max_conversations_per_hour', 3, 1, 20)
+                settings.message_cooldown_seconds = bounded_int('message_cooldown_seconds', 2, 1, 30)
+                settings.max_messages_per_minute = bounded_int('max_messages_per_minute', 8, 2, 60)
+                settings.max_messages_per_hour = bounded_int('max_messages_per_hour', 60, 5, 500)
                 support_form_id = (request.form.get('support_form_id') or '').strip()
                 settings.support_form_id = int(support_form_id) if support_form_id.isdigit() else None
                 settings.updated_at = datetime.utcnow()
+                AISupportSetting.query.filter(AISupportSetting.id != settings.id).delete(synchronize_session=False)
                 db.session.commit()
             except Exception:
                 db.session.rollback()
@@ -843,6 +853,7 @@ class CustomFileAdmin(FileAdmin):
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -984,7 +995,7 @@ def create_app(config_class=Config):
             footer = Footer.query.first()
             active_popups = PopupCampaign.query.order_by(PopupCampaign.order.asc(), PopupCampaign.id.desc()).all()
             active_popups = [p for p in active_popups if p.is_visible_now(request.path)]
-            ai_support_settings = AISupportSetting.query.first()
+            ai_support_settings = AISupportSetting.current()
         except:
             settings = None
             menu = []
@@ -1054,7 +1065,7 @@ def create_app(config_class=Config):
                 db.session.add(SiteSetting(site_title="Ekosan Web Sitesi"))
                 db.session.commit()
 
-            if not AISupportSetting.query.first():
+            if not AISupportSetting.current():
                 db.session.add(AISupportSetting())
                 db.session.commit()
 

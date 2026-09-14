@@ -66,7 +66,15 @@ def _support_ai_reply(settings, conversation):
         response = requests.post(
             f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
             params={'key': settings.api_key},
-            json={'systemInstruction': {'parts': [{'text': knowledge}]}, 'contents': contents, 'generationConfig': {'maxOutputTokens': 250, 'temperature': .2}},
+            json={
+                'systemInstruction': {'parts': [{'text': knowledge}]},
+                'contents': contents,
+                'generationConfig': {
+                    'maxOutputTokens': 1024,
+                    'temperature': .2,
+                    'thinkingConfig': {'thinkingLevel': 'low'},
+                },
+            },
             timeout=25,
         )
         response.raise_for_status()
@@ -74,6 +82,9 @@ def _support_ai_reply(settings, conversation):
         candidates = payload.get('candidates') or []
         parts = candidates[0].get('content', {}).get('parts', []) if candidates else []
         reply = ''.join(part.get('text', '') for part in parts).strip()
+        finish_reason = candidates[0].get('finishReason') if candidates else None
+        if finish_reason == 'MAX_TOKENS':
+            raise RuntimeError('Gemini yanıtı token sınırında yarım kaldı.')
         if not reply:
             block_reason = payload.get('promptFeedback', {}).get('blockReason')
             raise RuntimeError(f'Gemini boş yanıt döndürdü{f": {block_reason}" if block_reason else ""}.')

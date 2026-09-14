@@ -81,7 +81,8 @@ def _close_expired_support_conversation(settings, conversation):
     timeout = settings.conversation_timeout_minutes if settings else 0
     if not timeout or conversation.status == 'closed':
         return conversation.status == 'closed'
-    if datetime.utcnow() < conversation.created_at + timedelta(minutes=timeout):
+    session_started_at = conversation.session_started_at or conversation.created_at
+    if datetime.utcnow() < session_started_at + timedelta(minutes=timeout):
         return False
     closing_message = settings.closing_message or 'Görüşmeniz sona erdi. Ekosan’ı tercih ettiğiniz için teşekkür ederiz.'
     db.session.add(SupportMessage(conversation_id=conversation.id, sender='ai', content=closing_message))
@@ -590,7 +591,16 @@ def support_messages(token):
         ]}
 
     if conversation.status == 'closed':
-        return {'error': 'Bu görüşme kapatılmış.'}, 409
+        cooldown = settings.reconnect_cooldown_minutes if settings else 30
+        available_at = (conversation.updated_at or conversation.created_at) + timedelta(minutes=cooldown or 30)
+        remaining = int((available_at - datetime.utcnow()).total_seconds())
+        if remaining > 0:
+            return _rate_limited('Bu görüşme kısa süre önce tamamlandı. Biraz sonra buradan devam edebilirsiniz.', remaining)
+        conversation.status = 'open'
+        conversation.human_takeover = False
+        conversation.session_started_at = datetime.utcnow()
+        conversation.updated_at = datetime.utcnow()
+        db.session.commit()
     now = datetime.utcnow()
     _acquire_support_rate_lock(f'support-message:{conversation.id}')
     cooldown_seconds = settings.message_cooldown_seconds if settings else 2

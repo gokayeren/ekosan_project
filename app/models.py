@@ -243,6 +243,7 @@ class SupportConversation(db.Model):
     ip_address = db.Column(db.String(50), nullable=True)
     human_takeover = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    session_started_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     messages = db.relationship(
         'SupportMessage', backref='conversation', lazy=True,

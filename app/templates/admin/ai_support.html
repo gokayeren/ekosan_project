@@ -19,6 +19,16 @@
         <label class="block text-xs text-slate-400">Agent talimatı<textarea name="system_prompt" rows="4" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.system_prompt or '' }}</textarea></label>
         <label class="block text-xs text-slate-400">Sabit kaynak linkleri <span class="text-slate-600">(her satıra bir link)</span><textarea name="knowledge_urls" rows="4" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-blue-300 font-mono">{{ settings.knowledge_urls or '' }}</textarea></label>
         <div class="grid md:grid-cols-2 gap-4"><label class="text-xs text-slate-400">Site / şirket bilgileri<textarea name="company_information" rows="6" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.company_information or '' }}</textarea></label><label class="text-xs text-slate-400">Müşteri hakkında sabit bağlam<textarea name="customer_context" rows="6" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.customer_context or '' }}</textarea></label></div>
+        <div class="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-4">
+          <div><h4 class="text-sm font-semibold text-amber-200"><i class="fa fa-shield-halved mr-2"></i>Kesin teknik kurallar</h4><p class="text-[11px] text-slate-500 mt-1">Bu kurallar prompttan bağımsız olarak sunucu tarafından zorunlu uygulanır.</p></div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <label class="text-xs text-slate-400">Görüşmeyi otomatik bitir <span class="text-slate-600">(dakika, 0 = kapalı)</span><input type="number" min="0" max="1440" name="conversation_timeout_minutes" value="{{ settings.conversation_timeout_minutes or 0 }}" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"></label>
+            <label class="text-xs text-slate-400">Link politikası<select name="never_send_links" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="0" {% if not settings.never_send_links %}selected{% endif %}>Link gönderebilir</option><option value="1" {% if settings.never_send_links %}selected{% endif %}>Asla link gönderme</option></select></label>
+            <label class="text-xs text-slate-400 md:col-span-2">Konu kapsamı<select name="strict_site_scope" class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"><option value="1" {% if settings.strict_site_scope %}selected{% endif %}>Sadece Ekosan sitesi, ürünleri ve hizmetleri</option><option value="0" {% if not settings.strict_site_scope %}selected{% endif %}>Genel konuşmaya izin ver</option></select></label>
+          </div>
+          <label class="block text-xs text-slate-400">Kapsam dışı sorulara verilecek tek cevap<textarea name="out_of_scope_message" rows="2" placeholder="Bu konuda yardımcı olamıyorum; yalnızca Ekosan ürün ve hizmetleri hakkında destek verebilirim." class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.out_of_scope_message or '' }}</textarea></label>
+          <label class="block text-xs text-slate-400">Görüşmenin son mesajı<textarea name="closing_message" rows="3" placeholder="Örn: Görüşmeniz sona erdi. Ekosan’ı tercih ettiğiniz için teşekkür ederiz." class="mt-2 w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200">{{ settings.closing_message or '' }}</textarea></label>
+        </div>
         <button class="btn btn-sm bg-blue-600 hover:bg-blue-500 text-white border-0"><i class="fa fa-save"></i> Ayarları kaydet</button>
       </div>
     </form>
@@ -35,7 +45,7 @@
   const form = document.getElementById('aiSupportSettingsForm');
   if (!form) return;
   const draftKey = 'ekosan.aiSupport.settingsDraft.v1';
-  const draftFields = ['widget_title', 'welcome_message', 'provider', 'is_enabled', 'support_form_id', 'system_prompt', 'knowledge_urls', 'company_information', 'customer_context'];
+  const draftFields = ['widget_title', 'welcome_message', 'provider', 'is_enabled', 'support_form_id', 'system_prompt', 'knowledge_urls', 'company_information', 'customer_context', 'conversation_timeout_minutes', 'never_send_links', 'strict_site_scope', 'out_of_scope_message', 'closing_message'];
   const readDraft = () => { try { return JSON.parse(localStorage.getItem(draftKey) || '{}'); } catch (_) { return {}; } };
   const saveDraft = () => {
     const draft = {};

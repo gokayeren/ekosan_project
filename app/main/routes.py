@@ -4,8 +4,9 @@ import os
 import smtplib
 import hashlib
 import uuid
+import re
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.message import EmailMessage
 from xml.sax.saxutils import escape as xml_escape
 from urllib.parse import urlsplit
@@ -26,12 +27,22 @@ def _support_ai_reply(settings, conversation):
     if not settings.api_key:
         raise RuntimeError('AI sağlayıcı anahtarı tanımlı değil.')
 
+    scope_rule = ''
+    if settings.strict_site_scope:
+        scope_rule = (
+            'KESİN KONU SINIRI: Yalnızca Ekosan, bu web sitesi, burada verilen şirket bilgileri, '
+            'ürünler, hizmetler, satış ve destek süreci hakkında konuş. Genel bilgi, gündem, siyaset, '
+            'eğlence, kodlama veya başka şirketler hakkında cevap verme. Kapsam dışı istekte yalnızca şu '
+            f'kısa cevabı ver: {settings.out_of_scope_message or "Bu konuda yardımcı olamıyorum; yalnızca Ekosan ürün ve hizmetleri hakkında destek verebilirim."}'
+        )
     knowledge = '\n'.join([
         settings.system_prompt or 'Kısa, doğru ve yardımsever bir müşteri destek uzmanı gibi yanıtla.',
         f'Şirket/site bilgileri:\n{settings.company_information or "Tanımlanmadı"}',
         f'Müşteri bağlamı:\n{settings.customer_context or "Tanımlanmadı"}',
         f'Onaylı kaynak bağlantıları:\n{settings.knowledge_urls or "Tanımlanmadı"}',
         'Kaynaklarda bulunmayan bilgi için tahmin yürütme; insan desteği veya destek talebi öner.',
+        scope_rule,
+        'Yanıtı kısa tut; en fazla 3 kısa cümle kullan ve gereksiz detaya girme.',
     ])
     history = [
         {'role': 'assistant' if item.sender in ('ai', 'admin') else 'user', 'content': item.content}
@@ -45,20 +56,38 @@ def _support_ai_reply(settings, conversation):
         response = requests.post(
             f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
             params={'key': settings.api_key},
-            json={'systemInstruction': {'parts': [{'text': knowledge}]}, 'contents': contents},
+            json={'systemInstruction': {'parts': [{'text': knowledge}]}, 'contents': contents, 'generationConfig': {'maxOutputTokens': 250, 'temperature': .2}},
             timeout=25,
         )
         response.raise_for_status()
-        return response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+        reply = response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+    else:
+        response = requests.post(
+            'https://api.openai.com/v1/chat/completions',
+            headers={'Authorization': f'Bearer {settings.api_key}', 'Content-Type': 'application/json'},
+            json={'model': settings.model_name or 'gpt-4o-mini', 'messages': [{'role': 'system', 'content': knowledge}] + history, 'temperature': .2, 'max_tokens': 250},
+            timeout=25,
+        )
+        response.raise_for_status()
+        reply = response.json()['choices'][0]['message']['content'].strip()
+    if settings.never_send_links:
+        reply = re.sub(r'(?i)\b(?:https?://|www\.)\S+', '', reply)
+        reply = re.sub(r'\s{2,}', ' ', reply).strip()
+    return reply
 
-    response = requests.post(
-        'https://api.openai.com/v1/chat/completions',
-        headers={'Authorization': f'Bearer {settings.api_key}', 'Content-Type': 'application/json'},
-        json={'model': settings.model_name or 'gpt-4o-mini', 'messages': [{'role': 'system', 'content': knowledge}] + history, 'temperature': .25},
-        timeout=25,
-    )
-    response.raise_for_status()
-    return response.json()['choices'][0]['message']['content'].strip()
+
+def _close_expired_support_conversation(settings, conversation):
+    timeout = settings.conversation_timeout_minutes if settings else 0
+    if not timeout or conversation.status == 'closed':
+        return conversation.status == 'closed'
+    if datetime.utcnow() < conversation.created_at + timedelta(minutes=timeout):
+        return False
+    closing_message = settings.closing_message or 'Görüşmeniz sona erdi. Ekosan’ı tercih ettiğiniz için teşekkür ederiz.'
+    db.session.add(SupportMessage(conversation_id=conversation.id, sender='ai', content=closing_message))
+    conversation.status = 'closed'
+    conversation.updated_at = datetime.utcnow()
+    db.session.commit()
+    return True
 
 def get_shared_data():
     home_config = HomeConfig.query.first() or HomeConfig()
@@ -510,6 +539,8 @@ def create_support_conversation():
 @main.route('/support/conversations/<token>/messages', methods=['GET', 'POST'])
 def support_messages(token):
     conversation = SupportConversation.query.filter_by(public_token=token).first_or_404()
+    settings = AISupportSetting.query.first()
+    _close_expired_support_conversation(settings, conversation)
     if request.method == 'GET':
         after_id = request.args.get('after', 0, type=int)
         messages = SupportMessage.query.filter(
@@ -536,7 +567,6 @@ def support_messages(token):
     if conversation.human_takeover:
         return {'message': {'id': visitor_message.id, 'sender': 'visitor', 'content': content}, 'waiting_for_admin': True}
 
-    settings = AISupportSetting.query.first()
     if not settings or not settings.is_enabled:
         return {'message': {'id': visitor_message.id, 'sender': 'visitor', 'content': content}, 'waiting_for_admin': True}
     try:

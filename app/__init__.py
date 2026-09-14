@@ -102,6 +102,12 @@ class AISupportView(BaseView):
                 settings.knowledge_urls = (request.form.get('knowledge_urls') or '').strip() or None
                 settings.company_information = (request.form.get('company_information') or '').strip() or None
                 settings.customer_context = (request.form.get('customer_context') or '').strip() or None
+                timeout_value = (request.form.get('conversation_timeout_minutes') or '0').strip()
+                settings.conversation_timeout_minutes = max(0, min(1440, int(timeout_value))) if timeout_value.isdigit() else 0
+                settings.closing_message = (request.form.get('closing_message') or '').strip() or None
+                settings.never_send_links = request.form.get('never_send_links') == '1'
+                settings.strict_site_scope = request.form.get('strict_site_scope') == '1'
+                settings.out_of_scope_message = (request.form.get('out_of_scope_message') or '').strip() or None
                 support_form_id = (request.form.get('support_form_id') or '').strip()
                 settings.support_form_id = int(support_form_id) if support_form_id.isdigit() else None
                 settings.updated_at = datetime.utcnow()

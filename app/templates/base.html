@@ -833,6 +833,13 @@
                 let hydrated = false;
                 const formatMessageTime = (value) => { if (!value) return new Intl.DateTimeFormat('tr-TR', {hour:'2-digit', minute:'2-digit'}).format(new Date()); const normalized = /Z$|[+-]\d\d:\d\d$/.test(value) ? value : `${value}Z`; return new Intl.DateTimeFormat('tr-TR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}).format(new Date(normalized)); };
                 const addMessage = (sender, content, createdAt, seenAt, messageId) => {
+                    if (messageId) {
+                        const existing = messages.querySelector(`[data-message-id="${messageId}"]`);
+                        if (existing) {
+                            if (sender === 'visitor' && seenAt) markSeen(messageId);
+                            return existing;
+                        }
+                    }
                     const row = document.createElement('div');
                     row.className = `support-message support-message--${sender === 'visitor' ? 'visitor' : (sender === 'system' ? 'system' : 'agent')}`;
                     if (messageId) row.dataset.messageId = messageId;
@@ -870,8 +877,13 @@
                         const data = await readJsonResponse(response);
                         if (!response.ok) { const error = new Error(data.error || 'Mesaj gönderilemedi'); error.retryAfter = data.retry_after || 0; throw error; }
                         chatInput.value = '';
-                        if (data.message?.id && data.message.sender === 'visitor') optimistic.dataset.messageId = data.message.id;
-                        if (data.seen_message_id) { optimistic.dataset.messageId = data.seen_message_id; markSeen(data.seen_message_id); }
+                        const visitorMessageId = data.message?.sender === 'visitor' ? data.message.id : data.seen_message_id;
+                        if (visitorMessageId) {
+                            const persisted = messages.querySelector(`[data-message-id="${visitorMessageId}"]`);
+                            if (persisted && persisted !== optimistic) optimistic.remove();
+                            else optimistic.dataset.messageId = visitorMessageId;
+                            if (data.seen_message_id) markSeen(visitorMessageId);
+                        }
                         if (data.message && data.message.sender === 'ai') { lastMessageId = Math.max(lastMessageId, data.message.id || 0); addMessage('ai', data.message.content, data.message.created_at, null, data.message.id); }
                     } catch (error) {
                         retryAfter = Math.min(Number(error.retryAfter) || 0, 60);
